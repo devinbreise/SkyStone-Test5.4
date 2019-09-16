@@ -388,6 +388,7 @@ public class FtcRobotControllerActivity extends Activity
     if (preferencesHelper.readBoolean(getString(R.string.pref_wifi_automute), false)) {
       initWifiMute(true);
     }
+//    FtcDashboard.start();
   }
 
   protected UpdateUI createUpdateUI() {
@@ -470,6 +471,7 @@ public class FtcRobotControllerActivity extends Activity
     if (preferencesHelper != null) preferencesHelper.getSharedPreferences().unregisterOnSharedPreferenceChangeListener(sharedPreferencesListener);
 
     RobotLog.cancelWriteLogcatToDisk();
+//    FtcDashboard.stop();
   }
 
   protected void bindToService() {
