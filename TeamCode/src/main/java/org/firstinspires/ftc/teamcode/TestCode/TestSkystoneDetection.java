@@ -43,15 +43,9 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 /**
  * This 2019-2020 OpMode illustrates the basics of using the TensorFlow Object Detection API to
  * determine the position of the Skystone game elements.
- *
- * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list.
- *
- * IMPORTANT: In order to use this OpMode, you need to obtain your own Vuforia license key as
- * is explained below.
  */
 @TeleOp(name = "TestSkystoneDetection")
-@Disabled
+
 public class TestSkystoneDetection extends LinearOpMode {
     private static final String TFOD_MODEL_ASSET = "Skystone.tflite";
     private static final String LABEL_FIRST_ELEMENT = "Stone";
