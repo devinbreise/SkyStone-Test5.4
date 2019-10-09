@@ -52,7 +52,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * @see <a href="http://revrobotics.com">REV Robotics Web Page</a>
  */
 @TeleOp(name = "Sensor: distanceSensorTest")
-
+@Disabled
 public class distanceSensorTest extends LinearOpMode {
 
     private DistanceSensor sensorRange;
