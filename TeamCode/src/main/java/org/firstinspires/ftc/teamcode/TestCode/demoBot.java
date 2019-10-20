@@ -1,6 +1,7 @@
 
 package org.firstinspires.ftc.teamcode.TestCode;
 
+        import com.qualcomm.robotcore.eventloop.opmode.Disabled;
         import com.qualcomm.robotcore.eventloop.opmode.OpMode;
         import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
         import com.qualcomm.robotcore.hardware.DcMotor;
@@ -8,6 +9,7 @@ package org.firstinspires.ftc.teamcode.TestCode;
         import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name = "demoBot")
+@Disabled
 public class demoBot extends OpMode {
     public static final double ROTATE_GRABBER_INCREMENT = 0.1;
 

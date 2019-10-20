@@ -22,7 +22,11 @@ public class HiTecServo {
             telemetry.addData("ERROR", "Servo degrees out of range");
             return;
         }
-        theServo.setPosition(0.0066666666667 * degrees);
+        double servoPos = 0.0066666666667 * degrees;
+        if(servoPos < 0.3 || servoPos > 0.7){
+            telemetry.addData("ERROR", "Servo degrees out of range");
+            return;
+        } else theServo.setPosition(servoPos);
 
     }
 }
