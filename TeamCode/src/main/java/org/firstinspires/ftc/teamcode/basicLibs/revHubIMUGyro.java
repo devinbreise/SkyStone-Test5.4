@@ -85,4 +85,10 @@ public class revHubIMUGyro {
         anglesCurrent = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         return anglesCurrent.firstAngle;
     }
+
+    //Ruslana's filthy additions:
+
+
+
+
 }

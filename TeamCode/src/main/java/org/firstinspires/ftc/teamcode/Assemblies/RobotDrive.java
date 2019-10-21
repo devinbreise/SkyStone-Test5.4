@@ -2,6 +2,11 @@ package org.firstinspires.ftc.teamcode.Assemblies;
 
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.basicLibs.revHubIMUGyro;
 
 public class RobotDrive {
@@ -10,11 +15,236 @@ public class RobotDrive {
     //move forward, backward, move left/right(strafe basically, maybe using distance sensor), turn left, right, rotate(certain amount of degrees),
     // move(either forward, left, or right) for a certain amount of time(timeout thingie)
 
+    public static final double STARTING_ANGLE = 0;
+    public static final double FULL_POWER = 1;
+
+    HardwareMap hardwareMap;
+    Telemetry telemetry;
+    DcMotor fLeftMotor;
+    DcMotor bLeftMotor;
+    DcMotor fRightMotor;
+    DcMotor bRightMotor;
+    revHubIMUGyro imu;
+
+    public RobotDrive(HardwareMap theHardwareMap, Telemetry theTelemetry){
+        hardwareMap = theHardwareMap;
+        telemetry = theTelemetry;
+    }
+
+    //Your class (and all classes representing functional parts of the robot) should have a constructor
+    // to set themselves up as well as an "initialize" method that would be called during the robot initialization and
+    // possibly a "start" method that would be called just after start and maybe some "shutdown" methods as well.
+    // In other words, they should look a bit like a standard OpMode class.
+    // We should figure out what our "standard" approach is going to be for acquiring things from the FTC hardwareMap and initialization.
+    // For example, should each class representing a particular assembly on the robot (like the drive)
+    // reach into the hardwareMap and get the needed objects (and thus encapsulate the names of those things
+    // in the configuration file) or should the overall "robot" class do all that work and pass the needed
+    // objects down into the assembly level classes?  Or maybe a hybrid approach where all the "names" in the
+    // config file are in one place but the assembly classes do the initialization work...Getting a bit ahead here!
+
+    public void initMotors(){
+        fLeftMotor = hardwareMap.dcMotor.get("fLeftMotor");
+        fRightMotor = hardwareMap.dcMotor.get("fRightMotor");
+        bLeftMotor = hardwareMap.dcMotor.get("bLeftMotor");
+        bRightMotor = hardwareMap.dcMotor.get("bRightMotor");
+
+        fLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        fRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        bLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        bRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        //Wise words of Coach, the enlightened one, from book 1:
+        //"To make this sort of encoder driven movement both fast and consistent,
+        // its usually neccesary to master smooth acceleration and deceleration to minimize wheel slippage.
+        // You might want to start thinking about what that code would look like."
+    }
+
+    public void initServos(){
+
+
+    }
+
+    public void initSensors(){
+
+
+
+    }
+
+
+    public void start(){
+
+    }
 
 
 
 
+    public double clip(double power) {
 
+        power = Range.clip(power, FULL_POWER, -FULL_POWER);
+        return power;
+    }
+
+    public void stopMotors() {
+        fLeftMotor.setPower(0);
+        bLeftMotor.setPower(0);
+        fRightMotor.setPower(0);
+        bRightMotor.setPower(0);
+    }
+
+    public void driveForward(double power) {
+        power = clip(power);
+        fLeftMotor.setPower(-power);
+        fRightMotor.setPower(power);
+        bLeftMotor.setPower(-power);
+        bRightMotor.setPower(power);
+    }
+
+    public void driveBackward(double power) {
+        power = clip(power);
+        fLeftMotor.setPower(power);
+        fRightMotor.setPower(-power);
+        bLeftMotor.setPower(power);
+        bRightMotor.setPower(-power);
+    }
+
+    public void driveRight(double power) {
+        power = clip(power);
+        fLeftMotor.setPower(power);
+        fRightMotor.setPower(power);
+        bLeftMotor.setPower(power);
+        bRightMotor.setPower(power);
+    }
+
+
+    public void driveLeft(double power) {
+        power = clip(power);
+        fLeftMotor.setPower(-power);
+        fRightMotor.setPower(-power);
+        bLeftMotor.setPower(-power);
+        bRightMotor.setPower(-power);
+    }
+
+    public void driveForward(double power, int target) {
+
+        power = clip(power);
+        int pos = fLeftMotor.getCurrentPosition();
+
+        do {
+            driveForward(power);
+        } while (pos < target);
+
+        stopMotors();
+    }
+
+    public void driveForward(double power, int target, int maxTime) {
+
+        power = clip(power);
+        int pos = fLeftMotor.getCurrentPosition();
+
+        ElapsedTime motorElapsedTime = new ElapsedTime();
+
+        do {
+            driveForward(power);
+
+        } while (pos < target && motorElapsedTime.milliseconds() < maxTime);
+
+        stopMotors();
+    }
+
+    public void imuRotate(double angle, double scalePower) {
+
+        //Wise words of Coach, the enlightened one, from book 1:
+        //imuRotate is also a great start.
+        // I think it might have the issue we discussed when the return value from imu.getHeading suddenly jumps (or flips as sign!)
+        // as it moves through the mathematical "boundaries".
+        // The bit about smooth acceleration applies here as well.
+
+        int rotateDirection;
+        int tolerance = 5;
+
+        double targetAngle = STARTING_ANGLE - angle;
+        double changeInAngle = targetAngle - imu.getHeading();
+
+        if (changeInAngle < 0) {
+            rotateDirection = -1;
+        } else if (changeInAngle > 0) {
+            rotateDirection = 1;
+        } else return;
+
+        double rotatingPower = clip(FULL_POWER * (scalePower / 100));
+
+        do {
+            rotateCCW(rotatingPower * rotateDirection);
+        }
+        while (imu.getHeading() > (imu.getHeading() + tolerance) || imu.getHeading() < (imu.getHeading() - tolerance));
+
+        stopMotors();
+
+        return;
+
+    }
+    public double adjustAngle(double angle){
+
+        //need to adjust the 0 and 360 cutoff transition thing, haven't looked at this code yet but copy-pasted it, maybe it does the job?
+
+        double heading = imu.getHeading();
+        if(heading < -180){
+            heading+=360;
+        } else if(heading > 180){
+            heading-=-360;
+        }
+        heading = heading - STARTING_ANGLE;
+
+
+        return heading;
+
+    }
+
+
+    public void rotateCCW(double rotatingPower) {
+        double power = clip(rotatingPower);
+        fLeftMotor.setPower(-power);
+        fRightMotor.setPower(power);
+        bLeftMotor.setPower(-power);
+        bRightMotor.setPower(power);
+    }
+
+    public void rotateCW(double rotatingPower) {
+        double power = clip(rotatingPower);
+        rotateCCW(power);
+    }
+
+    public boolean checkJoyStickMovement(float leftJoyStickX, float leftJoyStickY, float rightJoyStickX, float rightJoyStickY){
+        float left_x = Math.abs(leftJoyStickX);
+        float left_y = Math.abs(leftJoyStickY);
+        float right_x = Math.abs(rightJoyStickX);
+        float right_y = Math.abs(rightJoyStickY);
+
+
+        return left_x > 0 || left_y > 0 || right_x > 0 || right_y > 0;
+
+    }
+
+    public void driveJoyStick(float leftJoyStickX, float leftJoyStickY, float rightJoyStickX){
+
+        //left joystick is for moving, right stick is for rotation
+
+        float leftX = leftJoyStickX;
+        float leftY = leftJoyStickY;
+        float rightX = rightJoyStickX;
+
+        float frontLeft = leftY - leftX - rightX;
+        float frontRight = -leftY - leftX - rightX;
+        float backRight = -leftY + leftX - rightX;
+        float backLeft = leftY + leftX - rightX;
+
+        fLeftMotor.setPower(frontLeft);
+        fRightMotor.setPower(frontRight);
+        bRightMotor.setPower(backRight);
+        bLeftMotor.setPower(backLeft);
+
+
+    }
 
 
 }
