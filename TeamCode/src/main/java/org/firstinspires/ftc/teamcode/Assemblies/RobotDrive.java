@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.basicLibs.revHubIMUGyro;
 
@@ -20,6 +21,7 @@ public class RobotDrive {
     public static final double FULL_POWER = 1;
     public static final double DEAD_ZONE_THRESHOLD = 0.03;
     public static final double TRIGGER_DIALATION = 0.6;
+    public static final double MIN_ROTATING_POWER = 0.3;
 
     HardwareMap hardwareMap;
     Telemetry telemetry;
@@ -169,55 +171,115 @@ public class RobotDrive {
         telemetry.addData("back right:", bRightMotor.getCurrentPosition());
     }
 
-    public void imuRotate(double angle, double scalePower) {
-
-        //Wise words of Coach, the enlightened one, from book 1:
-        //imuRotate is also a great start.
-        // I think it might have the issue we discussed when the return value from imu.getHeading suddenly jumps (or flips as sign!)
-        // as it moves through the mathematical "boundaries".
-        // The bit about smooth acceleration applies here as well.
-
-        int rotateDirection;
-        int tolerance = 5;
-
-        double targetAngle = STARTING_ANGLE - angle;
-        double changeInAngle = targetAngle - imu.getHeading();
-
-        if (changeInAngle < 0) {
-            rotateDirection = -1;
-        } else if (changeInAngle > 0) {
-            rotateDirection = 1;
-        } else return;
-
-        double rotatingPower = clip(FULL_POWER * (scalePower / 100));
-
-        do {
-            rotateCCW(rotatingPower * rotateDirection);
-        }
-        while (imu.getHeading() > (imu.getHeading() + tolerance) || imu.getHeading() < (imu.getHeading() - tolerance));
-
-        stopMotors();
-
-        return;
-
-    }
     public double adjustAngle(double angle){
 
-        //need to adjust the 0 and 360 cutoff transition thing, haven't looked at this code yet but copy-pasted it, maybe it does the job?
-
-        double heading = imu.getHeading();
-        if(heading < -180){
-            heading+=360;
-        } else if(heading > 180){
-            heading-=-360;
+        //assuming imu runs from [0, 360] and angle is added/substracted, adjust it to expected reading
+        if(angle >= 360){
+            angle-=360;
+        } else if(angle < 0) {
+            angle+=360;
         }
-        heading = heading - STARTING_ANGLE;
+        return angle;
 
-
-        return heading;
 
     }
 
+    public void imuRotateToAngle(double desiredHeading){
+
+        double startHeading = imu.getHeading();
+        int rotateDirection;
+        double rotatePower;
+        double tolerance = 0.1;
+        boolean completedRotating;
+
+        double rawChangeInAngle = desiredHeading - imu.getHeading();
+        double changeInAngle = Math.abs(adjustAngle(rawChangeInAngle));
+
+
+        if(changeInAngle <= 180){
+            rotateDirection = 1;
+        } else {
+            rotateDirection = -1;
+        }
+
+        rotatePower = Range.clip(changeInAngle/135, MIN_ROTATING_POWER, 1);
+
+        if(changeInAngle > tolerance){
+            completedRotating = false;
+        } else {
+            completedRotating = true;
+            telemetry.addData("I'M DONE ROTATING", "");
+        }
+
+        if(!completedRotating){
+
+            rotateCCW(rotatePower*rotateDirection);
+            telemetry.addData("startHeading", startHeading);
+            telemetry.addData("desiredHeading", desiredHeading);
+
+            telemetry.addData("changeInAngle", changeInAngle);
+            telemetry.addData("rotatingPower", rotatePower);
+            telemetry.addData("direction", rotateDirection);
+            telemetry.update();
+
+        } else {
+            stopMotors();
+            return;
+
+
+        }
+    }
+
+    public void imuRotate(double angle){
+        double startHeading = imu.getHeading();
+        int rotateDirection;
+        double tolerance = 0.1;
+        boolean completedRotating;
+
+        double desiredHeading = adjustAngle(startHeading + angle);
+
+        //BUG AT 340 TO 20(PASSING IN -40 THERE)
+        double rawChangeInAngle = desiredHeading - imu.getHeading();
+        double changeInAngle = Math.abs(adjustAngle(rawChangeInAngle));
+
+        //to make sure that the speed of rotation matches the amount of angle we have to our desired heading
+        double rotatePower = Range.clip(changeInAngle/135, MIN_ROTATING_POWER, 1);
+
+
+
+        if(angle > 0){
+            rotateDirection = 1; //CCW
+        } else rotateDirection = -1; //CW
+
+
+
+        if(changeInAngle > tolerance){
+            completedRotating = false;
+        } else {
+            completedRotating = true;
+            telemetry.addData("I'M DONE ROTATING", "");
+        }
+
+        if(!completedRotating){
+
+            rotateCCW(rotatePower*rotateDirection);
+            telemetry.addData("startHeading", startHeading);
+            telemetry.addData("desiredHeading", desiredHeading);
+
+            telemetry.addData("changeInAngle", changeInAngle);
+            telemetry.addData("rotatingPower", rotatePower);
+            telemetry.addData("direction", rotateDirection);
+            telemetry.update();
+
+        } else {
+            stopMotors();
+            return;
+
+        }
+
+
+
+    }
 
     public void rotateCCW(double rotatingPower) {
         double power = clip(rotatingPower);
@@ -255,13 +317,20 @@ public class RobotDrive {
         //This might be a great opportunity for visual feedback from the robot using LEDs
     }
 
+    public float scalePowerJoystick(float joyStickDistance){
+
+        //exponential equation obtained from online curve fit with points(x is joystickDistance, y is power:
+        //(0,0), (0.5, 0.3), (0.7, 0.5), (1,1)
+        return (float)(0.9950472*Math.pow(joyStickDistance, 1.82195));
+    }
+
     public void driveJoyStick(float leftJoyStickX, float leftJoyStickY, float rightJoyStickX){
 
         //left joystick is for moving, right stick is for rotation
 
-        float leftX = leftJoyStickX;
-        float leftY = leftJoyStickY;
-        float rightX = rightJoyStickX;
+        float leftX = scalePowerJoystick(leftJoyStickX);
+        float leftY = scalePowerJoystick(leftJoyStickY);
+        float rightX = scalePowerJoystick(rightJoyStickX);
 
         float frontLeft = leftY - leftX - rightX;
         float frontRight = -leftY - leftX - rightX;
@@ -272,6 +341,10 @@ public class RobotDrive {
         fRightMotor.setPower(frontRight);
         bRightMotor.setPower(backRight);
         bLeftMotor.setPower(backLeft);
+
+
+
+
 
     }
 
