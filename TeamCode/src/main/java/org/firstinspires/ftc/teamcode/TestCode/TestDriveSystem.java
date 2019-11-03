@@ -3,23 +3,37 @@ package org.firstinspires.ftc.teamcode.TestCode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
+import org.firstinspires.ftc.teamcode.Assemblies.Latch;
+
 import org.firstinspires.ftc.teamcode.Assemblies.RobotDrive;
 
 @TeleOp(name = "TestDriveSystem")
 public class TestDriveSystem extends OpMode {
 
-    public static final double DRIVE_POWER = 0.5;
+    public static double MAX_POWER = 0.5;
+    public static double DRIVE_POWER;
     RobotDrive robot;
+    Latch latch;
+    Grabber grabber;
 
     @Override
     public void init() {
         robot = new RobotDrive(hardwareMap, telemetry);
-        robot.initMotors();
+        latch = new Latch(hardwareMap, telemetry);
+        grabber = new Grabber(hardwareMap, telemetry);
+
+        robot.initDriveMotors();
+        latch.initializeLatch();
+
+
 
     }
 
     @Override
     public void loop() {
+
+        DRIVE_POWER = robot.scaleMovement(MAX_POWER, DRIVE_POWER);
 
 
             robot.driveJoyStick(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
@@ -36,6 +50,16 @@ public class TestDriveSystem extends OpMode {
             if(gamepad1.dpad_right){
                 robot.driveRight(DRIVE_POWER);
             }
+            if(gamepad1.a){
+                latch.toggleLatch();
+            }
+            if(gamepad1.y){
+                grabber.openGrabber();
+            }
+            if(gamepad1.b){
+                grabber.closeGrabberToggle();
+            }
+
 
 
             if(gamepad1.left_bumper){
@@ -44,6 +68,12 @@ public class TestDriveSystem extends OpMode {
                 robot.rotateCW(DRIVE_POWER);
             }
         //add triggers for speed boosts
+
+        robot.telemetryDriveEncoders();
+        latch.telemetryLatch();
+//        telemetry.update();
+
+
 
     }
 }

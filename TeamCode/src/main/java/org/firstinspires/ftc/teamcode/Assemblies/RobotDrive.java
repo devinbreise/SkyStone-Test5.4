@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Assemblies;
 
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -17,6 +18,8 @@ public class RobotDrive {
 
     public static final double STARTING_ANGLE = 0;
     public static final double FULL_POWER = 1;
+    public static final double DEAD_ZONE_THRESHOLD = 0.03;
+    public static final double TRIGGER_DIALATION = 0.6;
 
     HardwareMap hardwareMap;
     Telemetry telemetry;
@@ -24,12 +27,16 @@ public class RobotDrive {
     DcMotor bLeftMotor;
     DcMotor fRightMotor;
     DcMotor bRightMotor;
+
+    Servo latchOne;
+    Servo latchTwo;
     revHubIMUGyro imu;
 
     public RobotDrive(HardwareMap theHardwareMap, Telemetry theTelemetry){
         hardwareMap = theHardwareMap;
         telemetry = theTelemetry;
     }
+
 
     //Your class (and all classes representing functional parts of the robot) should have a constructor
     // to set themselves up as well as an "initialize" method that would be called during the robot initialization and
@@ -42,7 +49,7 @@ public class RobotDrive {
     // objects down into the assembly level classes?  Or maybe a hybrid approach where all the "names" in the
     // config file are in one place but the assembly classes do the initialization work...Getting a bit ahead here!
 
-    public void initMotors(){
+    public void initDriveMotors(){
         fLeftMotor = hardwareMap.dcMotor.get("fLeftMotor");
         fRightMotor = hardwareMap.dcMotor.get("fRightMotor");
         bLeftMotor = hardwareMap.dcMotor.get("bLeftMotor");
@@ -74,6 +81,9 @@ public class RobotDrive {
     public void start(){
 
     }
+
+
+
 
 
 
@@ -151,6 +161,14 @@ public class RobotDrive {
         stopMotors();
     }
 
+    public void telemetryDriveEncoders(){
+        telemetry.addData("front left:", fLeftMotor.getCurrentPosition());
+        telemetry.addData("front right:", fRightMotor.getCurrentPosition());
+
+        telemetry.addData("back left:", bLeftMotor.getCurrentPosition());
+        telemetry.addData("back right:", bRightMotor.getCurrentPosition());
+    }
+
     public void imuRotate(double angle, double scalePower) {
 
         //Wise words of Coach, the enlightened one, from book 1:
@@ -221,8 +239,20 @@ public class RobotDrive {
         float right_y = Math.abs(rightJoyStickY);
 
 
-        return left_x > 0 || left_y > 0 || right_x > 0 || right_y > 0;
+        return left_x > DEAD_ZONE_THRESHOLD || left_y > DEAD_ZONE_THRESHOLD || right_x > DEAD_ZONE_THRESHOLD || right_y > DEAD_ZONE_THRESHOLD;
 
+    }
+
+    public double scaleMovement(double maxPower, double triggerPressure){
+        //right trigger or left trigger slow-down method
+
+        //idea is have variable drivePower that all the main drive methods use, let drivePower = 1 initially,
+        // drivePower = scaleMovement(drivePower, gamepad1_right_trigger); at the top, impacts all the other driving methods
+
+        return maxPower - triggerPressure* TRIGGER_DIALATION; //trigger all the way down makes power 40% of max right now
+
+        //wise words of Coach, the enlightened one, from book 2:
+        //This might be a great opportunity for visual feedback from the robot using LEDs
     }
 
     public void driveJoyStick(float leftJoyStickX, float leftJoyStickY, float rightJoyStickX){
@@ -242,7 +272,6 @@ public class RobotDrive {
         fRightMotor.setPower(frontRight);
         bRightMotor.setPower(backRight);
         bLeftMotor.setPower(backLeft);
-
 
     }
 

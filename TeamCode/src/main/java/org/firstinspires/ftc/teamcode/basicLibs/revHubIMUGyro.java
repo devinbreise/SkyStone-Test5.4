@@ -57,10 +57,10 @@ public class revHubIMUGyro {
     public float getHeading() {
         anglesCurrent = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         telemetry.addData("IMU Heading", anglesCurrent.firstAngle);
-        // if we were near the cutoff between the positive and negitive angles
-        // and appear to have turned between the positive and negitive sides to the right
+        // if we were near the cutoff between the positive and negative angles
+        // and appear to have turned between the positive and negative sides to the right
         // than see if the last amgle is greater than or equal to 90 and the current angle is less than 0 than do
-        // the math to figure out how much degress the robot has turned between the postive and negitive numbers
+        // the math to figure out how much degrees the robot has turned between the postive and negitive numbers
         if ((anglesLast.firstAngle >= 90) && (anglesCurrent.firstAngle < 0)) {
             currentHeading = currentHeading + (180 - anglesLast.firstAngle) + (anglesCurrent.firstAngle + 180);
             // if we were near the cutoff and between the positive and negitive angles
