@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Assemblies;
 
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -22,6 +23,7 @@ public class RobotDrive {
     public static final double DEAD_ZONE_THRESHOLD = 0.03;
     public static final double TRIGGER_DIALATION = 0.6;
     public static final double MIN_ROTATING_POWER = 0.3;
+    public static final double TEST_POWER = 0.25;
 
     HardwareMap hardwareMap;
     Telemetry telemetry;
@@ -30,11 +32,12 @@ public class RobotDrive {
     DcMotor fRightMotor;
     DcMotor bRightMotor;
 
-    Servo latchOne;
-    Servo latchTwo;
+    //    Servo latchOne;
+//    Servo latchTwo;
     revHubIMUGyro imu;
+    BNO055IMU theImu;
 
-    public RobotDrive(HardwareMap theHardwareMap, Telemetry theTelemetry){
+    public RobotDrive(HardwareMap theHardwareMap, Telemetry theTelemetry) {
         hardwareMap = theHardwareMap;
         telemetry = theTelemetry;
     }
@@ -51,16 +54,16 @@ public class RobotDrive {
     // objects down into the assembly level classes?  Or maybe a hybrid approach where all the "names" in the
     // config file are in one place but the assembly classes do the initialization work...Getting a bit ahead here!
 
-    public void initDriveMotors(){
+    public void initDriveMotors() {
         fLeftMotor = hardwareMap.dcMotor.get("fLeftMotor");
         fRightMotor = hardwareMap.dcMotor.get("fRightMotor");
         bLeftMotor = hardwareMap.dcMotor.get("bLeftMotor");
         bRightMotor = hardwareMap.dcMotor.get("bRightMotor");
 
-        fLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        fRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        bLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        bRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        fLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         //Wise words of Coach, the enlightened one, from book 1:
         //"To make this sort of encoder driven movement both fast and consistent,
@@ -68,26 +71,26 @@ public class RobotDrive {
         // You might want to start thinking about what that code would look like."
     }
 
-    public void initServos(){
+    public void initImu() {
+        revHubIMUGyro imu = new revHubIMUGyro(theImu, telemetry, hardwareMap, "imu");
 
 
     }
 
-    public void initSensors(){
+    public void initServos() {
 
+
+    }
+
+    public void initSensors() {
 
 
     }
 
 
-    public void start(){
+    public void start() {
 
     }
-
-
-
-
-
 
 
     public double clip(double power) {
@@ -105,36 +108,47 @@ public class RobotDrive {
 
     public void driveForward(double power) {
         power = clip(power);
-        fLeftMotor.setPower(-power);
-        fRightMotor.setPower(power);
-        bLeftMotor.setPower(-power);
-        bRightMotor.setPower(power);
+        fLeftMotor.setPower(-power); //neg for F
+        fRightMotor.setPower(power); // pos for F
+        bLeftMotor.setPower(-power);  //neg for F
+        bRightMotor.setPower(power); //pos for F  }
+
     }
 
     public void driveBackward(double power) {
         power = clip(power);
-        fLeftMotor.setPower(power);
-        fRightMotor.setPower(-power);
-        bLeftMotor.setPower(power);
-        bRightMotor.setPower(-power);
+        fLeftMotor.setPower(power); //neg for F
+        fRightMotor.setPower(-power); // pos for F
+        bLeftMotor.setPower(power);  //neg for F
+        bRightMotor.setPower(-power); //pos for F
+
     }
 
     public void driveRight(double power) {
         power = clip(power);
-        fLeftMotor.setPower(power);
-        fRightMotor.setPower(power);
+        fLeftMotor.setPower(-power);
+        fRightMotor.setPower(-power);
         bLeftMotor.setPower(power);
         bRightMotor.setPower(power);
     }
 
-
     public void driveLeft(double power) {
         power = clip(power);
-        fLeftMotor.setPower(-power);
-        fRightMotor.setPower(-power);
+        fLeftMotor.setPower(power);
+        fRightMotor.setPower(power);
         bLeftMotor.setPower(-power);
         bRightMotor.setPower(-power);
+
     }
+
+    public void testDriveSlow() {
+
+        fLeftMotor.setPower(-TEST_POWER);
+        fRightMotor.setPower(TEST_POWER);
+        bLeftMotor.setPower(-TEST_POWER);
+        bRightMotor.setPower(TEST_POWER);
+    }
+
 
     public void driveForward(double power, int target) {
 
@@ -163,7 +177,7 @@ public class RobotDrive {
         stopMotors();
     }
 
-    public void telemetryDriveEncoders(){
+    public void telemetryDriveEncoders() {
         telemetry.addData("front left:", fLeftMotor.getCurrentPosition());
         telemetry.addData("front right:", fRightMotor.getCurrentPosition());
 
@@ -171,20 +185,20 @@ public class RobotDrive {
         telemetry.addData("back right:", bRightMotor.getCurrentPosition());
     }
 
-    public double adjustAngle(double angle){
+    public double adjustAngle(double angle) {
 
         //assuming imu runs from [0, 360] and angle is added/substracted, adjust it to expected reading
-        if(angle >= 360){
-            angle-=360;
-        } else if(angle < 0) {
-            angle+=360;
+        if (angle >= 360) {
+            angle -= 360;
+        } else if (angle < 0) {
+            angle += 360;
         }
         return angle;
 
 
     }
 
-    public void imuRotateToAngle(double desiredHeading){
+    public void imuRotateToAngle(double desiredHeading) {
 
         double startHeading = imu.getHeading();
         int rotateDirection;
@@ -196,24 +210,24 @@ public class RobotDrive {
         double changeInAngle = Math.abs(adjustAngle(rawChangeInAngle));
 
 
-        if(changeInAngle <= 180){
+        if (changeInAngle <= 180) {
             rotateDirection = 1;
         } else {
             rotateDirection = -1;
         }
 
-        rotatePower = Range.clip(changeInAngle/135, MIN_ROTATING_POWER, 1);
+        rotatePower = Range.clip(changeInAngle / 135, MIN_ROTATING_POWER, 1);
 
-        if(changeInAngle > tolerance){
+        if (changeInAngle > tolerance) {
             completedRotating = false;
         } else {
             completedRotating = true;
             telemetry.addData("I'M DONE ROTATING", "");
         }
 
-        if(!completedRotating){
+        if (!completedRotating) {
 
-            rotateCCW(rotatePower*rotateDirection);
+            rotateCCW(rotatePower * rotateDirection);
             telemetry.addData("startHeading", startHeading);
             telemetry.addData("desiredHeading", desiredHeading);
 
@@ -230,39 +244,38 @@ public class RobotDrive {
         }
     }
 
-    public void imuRotate(double angle){
+    public void imuRotate(double angle) {
         double startHeading = imu.getHeading();
         int rotateDirection;
         double tolerance = 0.1;
         boolean completedRotating;
 
-        double desiredHeading = adjustAngle(startHeading + angle);
 
-        //BUG AT 340 TO 20(PASSING IN -40 THERE)
-        double rawChangeInAngle = desiredHeading - imu.getHeading();
-        double changeInAngle = Math.abs(adjustAngle(rawChangeInAngle));
+        double rawDesiredHeading = startHeading + angle;
+        double desiredHeading = adjustAngle(rawDesiredHeading);
+
+
+        double changeInAngle = Math.abs(imu.getHeading() - rawDesiredHeading);
 
         //to make sure that the speed of rotation matches the amount of angle we have to our desired heading
-        double rotatePower = Range.clip(changeInAngle/135, MIN_ROTATING_POWER, 1);
+        double rotatePower = Range.clip(changeInAngle / 135, MIN_ROTATING_POWER, 1);
 
 
-
-        if(angle > 0){
+        if (angle > 0) {
             rotateDirection = 1; //CCW
         } else rotateDirection = -1; //CW
 
 
-
-        if(changeInAngle > tolerance){
+        if (changeInAngle > tolerance) {
             completedRotating = false;
         } else {
             completedRotating = true;
             telemetry.addData("I'M DONE ROTATING", "");
         }
 
-        if(!completedRotating){
+        if (!completedRotating) {
 
-            rotateCCW(rotatePower*rotateDirection);
+            rotateCCW(rotatePower * rotateDirection);
             telemetry.addData("startHeading", startHeading);
             telemetry.addData("desiredHeading", desiredHeading);
 
@@ -276,7 +289,6 @@ public class RobotDrive {
             return;
 
         }
-
 
 
     }
@@ -284,17 +296,20 @@ public class RobotDrive {
     public void rotateCCW(double rotatingPower) {
         double power = clip(rotatingPower);
         fLeftMotor.setPower(-power);
-        fRightMotor.setPower(power);
+        fRightMotor.setPower(-power);
         bLeftMotor.setPower(-power);
-        bRightMotor.setPower(power);
+        bRightMotor.setPower(-power);
     }
 
     public void rotateCW(double rotatingPower) {
         double power = clip(rotatingPower);
-        rotateCCW(power);
+        fLeftMotor.setPower(power);
+        fRightMotor.setPower(power);
+        bLeftMotor.setPower(power);
+        bRightMotor.setPower(power);
     }
 
-    public boolean checkJoyStickMovement(float leftJoyStickX, float leftJoyStickY, float rightJoyStickX, float rightJoyStickY){
+    public boolean checkJoyStickMovement(float leftJoyStickX, float leftJoyStickY, float rightJoyStickX, float rightJoyStickY) {
         float left_x = Math.abs(leftJoyStickX);
         float left_y = Math.abs(leftJoyStickY);
         float right_x = Math.abs(rightJoyStickX);
@@ -305,37 +320,55 @@ public class RobotDrive {
 
     }
 
-    public double scaleMovement(double maxPower, double triggerPressure){
+    public double scaleMovement(double maxPower, double triggerPressure) {
         //right trigger or left trigger slow-down method
 
         //idea is have variable drivePower that all the main drive methods use, let drivePower = 1 initially,
         // drivePower = scaleMovement(drivePower, gamepad1_right_trigger); at the top, impacts all the other driving methods
 
-        return maxPower - triggerPressure* TRIGGER_DIALATION; //trigger all the way down makes power 40% of max right now
+        return maxPower - triggerPressure * TRIGGER_DIALATION; //trigger all the way down makes power 40% of max right now
 
         //wise words of Coach, the enlightened one, from book 2:
         //This might be a great opportunity for visual feedback from the robot using LEDs
     }
 
-    public float scalePowerJoystick(float joyStickDistance){
+    public float scalePowerJoystick(float joyStickDistance) {
 
         //exponential equation obtained from online curve fit with points(x is joystickDistance, y is power:
         //(0,0), (0.5, 0.3), (0.7, 0.5), (1,1)
-        return (float)(0.9950472*Math.pow(joyStickDistance, 1.82195));
+        return (float) (0.9950472 * Math.pow(Math.abs(joyStickDistance), 1.82195));
     }
 
-    public void driveJoyStick(float leftJoyStickX, float leftJoyStickY, float rightJoyStickX){
+    public void driveJoyStick(float leftJoyStickX, float leftJoyStickY, float rightJoyStickX) {
 
         //left joystick is for moving, right stick is for rotation
 
-        float leftX = scalePowerJoystick(leftJoyStickX);
-        float leftY = scalePowerJoystick(leftJoyStickY);
-        float rightX = scalePowerJoystick(rightJoyStickX);
+        //RN, for FORWARD motino
+        //front left should be negative
+        //front right should be negative
+        //back left should be negative
+        //back right should be negative
 
-        float frontLeft = leftY - leftX - rightX;
-        float frontRight = -leftY - leftX - rightX;
-        float backRight = -leftY + leftX - rightX;
-        float backLeft = leftY + leftX - rightX;
+//        float leftX = scalePowerJoystick(leftJoyStickX);
+//        float leftY = scalePowerJoystick(leftJoyStickY);
+//        float rightX = rightJoyStickX;
+
+        float leftX = leftJoyStickX;
+        float leftY = leftJoyStickY;
+        float rightX = rightJoyStickX;
+
+
+        float frontLeft = leftY - leftX + rightX;
+        float frontRight = -leftY - leftX + rightX;
+        float backRight = -leftY + leftX + rightX;
+        float backLeft = leftY + leftX + rightX;
+
+//        telemetry.addData("RIGHTX:", rightX);
+//        telemetry.addData("LEFTX:", leftX);
+//        telemetry.addData("LEFTY:", leftX);
+//
+//        telemetry.addData("joystickX:", leftJoyStickX);
+//        telemetry.addData("joystickY:", leftJoyStickY);
 
         fLeftMotor.setPower(frontLeft);
         fRightMotor.setPower(frontRight);
@@ -343,10 +376,14 @@ public class RobotDrive {
         bLeftMotor.setPower(backLeft);
 
 
-
-
-
     }
 
+    public void driveTelemetry() {
+        telemetry.addData("Front Left Motor", fLeftMotor.getPower());
+        telemetry.addData("Front Right Motor", fRightMotor.getPower());
+        telemetry.addData("Back Left Motor", bLeftMotor.getPower());
+        telemetry.addData("Back Right Motor", bRightMotor.getPower());
+        telemetry.update();
+    }
 
 }

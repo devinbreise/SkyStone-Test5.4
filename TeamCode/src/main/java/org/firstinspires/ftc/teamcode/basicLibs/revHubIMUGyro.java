@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.basicLibs;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -19,6 +20,7 @@ public class revHubIMUGyro {
 
 
     private Telemetry telemetry; //This variable repersent the telemetry
+    private HardwareMap hardwareMap;
     private BNO055IMU imu; //This variable is the imu
     private int currentDirection;
     float currentHeading; //This variable is the current heading of the robot
@@ -27,9 +29,9 @@ public class revHubIMUGyro {
 
 
 
-
     public revHubIMUGyro(BNO055IMU theimu, Telemetry theTelemetry){
         telemetry = theTelemetry;
+
         imu = theimu;
         currentDirection = 0;
 
@@ -38,6 +40,26 @@ public class revHubIMUGyro {
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+
+
+
+        imu.initialize(parameters);
+    }
+
+    public revHubIMUGyro(BNO055IMU theimu, Telemetry theTelemetry, HardwareMap theHardwareMap, String deviceName){
+        telemetry = theTelemetry;
+        hardwareMap = theHardwareMap;
+        imu = theimu;
+        currentDirection = 0;
+
+        // set up our IMU
+        //These are the parameters that the imu uses in the code to name and keep track of the data
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+
+
+        imu = hardwareMap.get(BNO055IMU.class, deviceName);
         imu.initialize(parameters);
     }
 

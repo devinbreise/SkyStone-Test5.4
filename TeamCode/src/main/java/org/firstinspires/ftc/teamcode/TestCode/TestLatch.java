@@ -1,65 +1,48 @@
 package org.firstinspires.ftc.teamcode.TestCode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Assemblies.Latch;
+
 @TeleOp(name = "TestLatch")
-@Disabled
+
 
 public class TestLatch extends OpMode {
 
 
     //two servos for closing, one for rotating on top
 
-    private static double GRABBER_ONE_CLOSED_POS = 0.35;
-    private static double GRABBER_TWO_CLOSED_POS = 0.55;
-
-    private static double GRABBER_ONE_OPEN_POS = 0.65;
-    private static double GRABBER_TWO_OPEN_POS = 0.35;
+    Latch latch = new Latch(hardwareMap, telemetry);
 
 
-
-    private Servo grabberOne;
-//    DIGITAL SERVOS CAN ONLY GO FROM 0.3 AND 0.7!!!!!!!!!!!
-
-    private Servo grabberTwo;
-
-
-            public void init() {
-        grabberOne = hardwareMap.get(Servo.class,"grabberOne");
-        grabberTwo = hardwareMap.get(Servo.class,"grabberTwo");
-
-
-        grabberOne.setPosition(GRABBER_ONE_OPEN_POS);
-        grabberTwo.setPosition(GRABBER_TWO_OPEN_POS);
+    public void init() {
+        latch.initializeLatch();
 
     }
 
     public void loop() {
         //close
         if (gamepad2.a) {
-            grabberOne.setPosition(GRABBER_ONE_CLOSED_POS);
-            grabberTwo.setPosition(GRABBER_TWO_CLOSED_POS);
-            telemetry.addData("GrabberOne: ", grabberOne.getPosition());
-            telemetry.addData("GrabberTwo: ", grabberTwo.getPosition());
+            latch.latchUp();
 
-
+        }
+        if(gamepad2.x){
+            latch.latchDown();
         }
 
         //open
         if (gamepad2.b) {
-            grabberOne.setPosition(GRABBER_ONE_OPEN_POS);
-            grabberTwo.setPosition(GRABBER_TWO_OPEN_POS);
-            telemetry.addData("GrabberOne: ", grabberOne.getPosition());
-            telemetry.addData("GrabberTwo: ", grabberTwo.getPosition());
-
+            latch.toggleLatch();
 
         }
 
-
-        telemetry.update();
+//        latch.telemetryLatch();
+//        telemetry.update();
     }
 
 }
