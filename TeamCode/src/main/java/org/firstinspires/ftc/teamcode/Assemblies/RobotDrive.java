@@ -336,26 +336,32 @@ public class RobotDrive {
 
         //exponential equation obtained from online curve fit with points(x is joystickDistance, y is power:
         //(0,0), (0.5, 0.3), (0.7, 0.5), (1,1)
-        return (float) (0.9950472 * Math.pow(Math.abs(joyStickDistance), 1.82195));
+        int sign;
+        if(joyStickDistance > 0){
+            sign = 1;
+        } else sign = -1;
+
+
+        return (float) (0.9950472 * Math.pow(Math.abs(joyStickDistance), 1.82195) * sign) ;
     }
 
     public void driveJoyStick(float leftJoyStickX, float leftJoyStickY, float rightJoyStickX) {
 
         //left joystick is for moving, right stick is for rotation
 
-        //RN, for FORWARD motino
+        //RN, for FORWARD motion
         //front left should be negative
         //front right should be negative
         //back left should be negative
         //back right should be negative
 
-//        float leftX = scalePowerJoystick(leftJoyStickX);
-//        float leftY = scalePowerJoystick(leftJoyStickY);
-//        float rightX = rightJoyStickX;
+        float leftX = scalePowerJoystick(leftJoyStickX);
+        float leftY = scalePowerJoystick(leftJoyStickY);
+        float rightX = scalePowerJoystick(rightJoyStickX);
 
-        float leftX = leftJoyStickX;
-        float leftY = leftJoyStickY;
-        float rightX = rightJoyStickX;
+//        float leftX = leftJoyStickX;
+//        float leftY = leftJoyStickY;
+//        float rightX = rightJoyStickX;
 
 
         float frontLeft = leftY - leftX + rightX;
@@ -363,17 +369,17 @@ public class RobotDrive {
         float backRight = -leftY + leftX + rightX;
         float backLeft = leftY + leftX + rightX;
 
-//        telemetry.addData("RIGHTX:", rightX);
-//        telemetry.addData("LEFTX:", leftX);
-//        telemetry.addData("LEFTY:", leftX);
-//
-//        telemetry.addData("joystickX:", leftJoyStickX);
-//        telemetry.addData("joystickY:", leftJoyStickY);
+        telemetry.addData("RIGHTX:", rightX);
+        telemetry.addData("LEFTX:", leftX);
+        telemetry.addData("LEFTY:", leftX);
 
-        fLeftMotor.setPower(frontLeft);
-        fRightMotor.setPower(frontRight);
-        bRightMotor.setPower(backRight);
-        bLeftMotor.setPower(backLeft);
+        telemetry.addData("joystickX:", leftJoyStickX);
+        telemetry.addData("joystickY:", leftJoyStickY);
+
+//        fLeftMotor.setPower(frontLeft);
+//        fRightMotor.setPower(frontRight);
+//        bRightMotor.setPower(backRight);
+//        bLeftMotor.setPower(backLeft);
 
 
     }
