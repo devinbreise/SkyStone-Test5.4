@@ -3,11 +3,9 @@ package org.firstinspires.ftc.teamcode.Assemblies;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.basicLibs.revHubIMUGyro;
@@ -24,6 +22,8 @@ public class RobotDrive {
     public static final double TRIGGER_DIALATION = 0.6;
     public static final double MIN_ROTATING_POWER = 0.3;
     public static final double TEST_POWER = 0.25;
+
+    private double COUNTS_PER_INCH = 59.4178;  // 89.7158 is the orriginal number
 
     HardwareMap hardwareMap;
     Telemetry telemetry;
@@ -176,6 +176,48 @@ public class RobotDrive {
 
         stopMotors();
     }
+
+    public void moveInchesForward (double speed, double inches) {
+            //resets the motors
+            fLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            fRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+            fLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            fRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+            //sets the number of desired inches on both motors
+            fLeftMotor.setTargetPosition((int) (COUNTS_PER_INCH * inches));
+            fRightMotor.setTargetPosition((int) (COUNTS_PER_INCH * inches));
+
+            //runs to the set number of inches at the desired speed
+            fLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            fRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            //sets the desired speed on both motors
+            fLeftMotor.setPower(speed);
+            fRightMotor.setPower(speed);
+
+            //lets the two moving motors finish the task
+            while (fLeftMotor.isBusy() && fRightMotor.isBusy()) {
+                // TODO: Add some telemetry output here so we can see what's happening on the driver station phone
+            }
+
+            //turns off both motors
+            fLeftMotor.setPower(0);
+            fRightMotor.setPower(0);
+
+            //sets it back to normal
+            fLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            fRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        }
+
+
+
+
+
+
+
+
 
     public void telemetryDriveEncoders() {
         telemetry.addData("front left:", fLeftMotor.getCurrentPosition());
