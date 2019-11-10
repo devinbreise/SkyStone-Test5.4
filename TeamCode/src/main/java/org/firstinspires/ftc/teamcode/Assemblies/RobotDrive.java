@@ -60,10 +60,7 @@ public class RobotDrive {
         bLeftMotor = hardwareMap.dcMotor.get("bLeftMotor");
         bRightMotor = hardwareMap.dcMotor.get("bRightMotor");
 
-        fLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        setAllMotorsWithoutEncoder();
 
         //Wise words of Coach, the enlightened one, from book 1:
         //"To make this sort of encoder driven movement both fast and consistent,
@@ -90,6 +87,41 @@ public class RobotDrive {
 
     public void start() {
 
+    }
+
+    public void setAllMotorsWithoutEncoder() {
+        fLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
+    public void runAllMotorsToPosition() {
+        fLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        fRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        bLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        bRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
+
+    public void setAllTargetPositions(double inches) {
+        fLeftMotor.setTargetPosition((int) (COUNTS_PER_INCH * inches));
+        fRightMotor.setTargetPosition((int) (COUNTS_PER_INCH * inches));
+        bLeftMotor.setTargetPosition((int) (COUNTS_PER_INCH * inches));
+        bRightMotor.setTargetPosition((int) (COUNTS_PER_INCH * inches));
+    }
+
+    public void setZeroAllDriveMotors() {
+        fLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        fRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        bLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        bRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    }
+
+    public void resetAllDriveEncoders() {
+        fLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
 
@@ -142,7 +174,6 @@ public class RobotDrive {
     }
 
     public void testDriveSlow() {
-
         fLeftMotor.setPower(-TEST_POWER);
         fRightMotor.setPower(TEST_POWER);
         bLeftMotor.setPower(-TEST_POWER);
@@ -150,72 +181,288 @@ public class RobotDrive {
     }
 
 
-    public void driveForward(double power, int target) {
+//    public void driveForward(double power, int target) {
+//
+//        power = clip(power);
+//        int pos = fLeftMotor.getCurrentPosition();
+//
+//        do {
+//            driveForward(power);
+//        } while (pos < target);
+//
+//        stopMotors();
+//    }
+//
+//    public void driveForward(double power, int target, int maxTime) {
+//
+//        power = clip(power);
+//        int pos = fLeftMotor.getCurrentPosition();
+//
+//        ElapsedTime motorElapsedTime = new ElapsedTime();
+//
+//        do {
+//            driveForward(power);
+//
+//        } while (pos < target && motorElapsedTime.milliseconds() < maxTime);
+//
+//        stopMotors();
+//    }
 
-        power = clip(power);
-        int pos = fLeftMotor.getCurrentPosition();
+    public void moveInchesForward(double speed, double inches) {
+        //resets the motors
+        resetAllDriveEncoders();
 
-        do {
-            driveForward(power);
-        } while (pos < target);
+        setZeroAllDriveMotors();
 
-        stopMotors();
-    }
+        //sets the number of desired inches on both motors
+        setAllTargetPositions(inches);
 
-    public void driveForward(double power, int target, int maxTime) {
+        //runs to the set number of inches at the desired speed
+        runAllMotorsToPosition();
 
-        power = clip(power);
-        int pos = fLeftMotor.getCurrentPosition();
 
-        ElapsedTime motorElapsedTime = new ElapsedTime();
+        //sets the desired speed on both motors
+//            fLeftMotor.setPower(speed);
+//            fRightMotor.setPower(speed);
+        speed = clip(speed);
+        driveForward(speed);
 
-        do {
-            driveForward(power);
-
-        } while (pos < target && motorElapsedTime.milliseconds() < maxTime);
-
-        stopMotors();
-    }
-
-    public void moveInchesForward (double speed, double inches) {
-            //resets the motors
-            fLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            fRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-            fLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            fRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-            //sets the number of desired inches on both motors
-            fLeftMotor.setTargetPosition((int) (COUNTS_PER_INCH * inches));
-            fRightMotor.setTargetPosition((int) (COUNTS_PER_INCH * inches));
-
-            //runs to the set number of inches at the desired speed
-            fLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            fRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-            //sets the desired speed on both motors
-            fLeftMotor.setPower(speed);
-            fRightMotor.setPower(speed);
-
-            //lets the two moving motors finish the task
-            while (fLeftMotor.isBusy() && fRightMotor.isBusy()) {
-                // TODO: Add some telemetry output here so we can see what's happening on the driver station phone
-            }
-
-            //turns off both motors
-            fLeftMotor.setPower(0);
-            fRightMotor.setPower(0);
-
-            //sets it back to normal
-            fLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            fRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //lets the two moving motors finish the task
+        while (fLeftMotor.isBusy() && fRightMotor.isBusy()) {
+            // TODO: Add some telemetry output here so we can see what's happening on the driver station phone
         }
 
+        //turns off both motors
+        stopMotors();
+
+        //sets it back to normal
+        setAllMotorsWithoutEncoder();
+
+    }
+
+    public void moveInchesForward(double speed, double inches, int maxTime) {
+        //resets the motors
+        resetAllDriveEncoders();
+        setZeroAllDriveMotors();
+        setAllTargetPositions(inches);
+
+        ElapsedTime motorTime = new ElapsedTime();
+
+        //runs to the set number of inches at the desired speed
+        runAllMotorsToPosition();
+
+        //sets the desired speed on both motors
+//            fLeftMotor.setPower(speed);
+//            fRightMotor.setPower(speed);
+        speed = clip(speed);
+        driveForward(speed);
+
+        if (motorTime.milliseconds() > maxTime) {
+            stopMotors();
+        }
+
+        //lets the two moving motors finish the task
+        while (fLeftMotor.isBusy() && fRightMotor.isBusy()) {
+            // TODO: Add some telemetry output here so we can see what's happening on the driver station phone
+        }
+
+        //turns off both motors
+        stopMotors();
+        //sets it back to normal
+        setAllMotorsWithoutEncoder();
+    }
+
+    public void moveInchesBackward(double speed, double inches) {
+        //resets the motors
+        resetAllDriveEncoders();
+
+        setZeroAllDriveMotors();
+
+        //sets the number of desired inches on both motors
+        setAllTargetPositions(inches);
+
+        //runs to the set number of inches at the desired speed
+        runAllMotorsToPosition();
 
 
+        //sets the desired speed on both motors
+//            fLeftMotor.setPower(speed);
+//            fRightMotor.setPower(speed);
+        speed = clip(speed);
+        driveBackward(speed);
+
+        //lets the two moving motors finish the task
+        while (fLeftMotor.isBusy() && fRightMotor.isBusy()) {
+            // TODO: Add some telemetry output here so we can see what's happening on the driver station phone
+        }
+
+        //turns off both motors
+        stopMotors();
+
+        //sets it back to normal
+        setAllMotorsWithoutEncoder();
+
+    }
+
+    public void moveInchesBackward(double speed, double inches, int maxTime) {
+        //resets the motors
+        resetAllDriveEncoders();
+        setZeroAllDriveMotors();
+        setAllTargetPositions(inches);
+
+        ElapsedTime motorTime = new ElapsedTime();
+
+        //runs to the set number of inches at the desired speed
+        runAllMotorsToPosition();
+
+        //sets the desired speed on both motors
+//            fLeftMotor.setPower(speed);
+//            fRightMotor.setPower(speed);
+        speed = clip(speed);
+        driveBackward(speed);
+
+        if (motorTime.milliseconds() > maxTime) {
+            stopMotors();
+        }
+
+        //lets the two moving motors finish the task
+        while (fLeftMotor.isBusy() && fRightMotor.isBusy()) {
+            // TODO: Add some telemetry output here so we can see what's happening on the driver station phone
+        }
+
+        //turns off both motors
+        stopMotors();
+        //sets it back to normal
+        setAllMotorsWithoutEncoder();
+    }
+
+    public void moveInchesLeft(double speed, double inches) {
+        //resets the motors
+        resetAllDriveEncoders();
+
+        setZeroAllDriveMotors();
+
+        //sets the number of desired inches on both motors
+        setAllTargetPositions(inches);
+
+        //runs to the set number of inches at the desired speed
+        runAllMotorsToPosition();
 
 
+        //sets the desired speed on both motors
+//            fLeftMotor.setPower(speed);
+//            fRightMotor.setPower(speed);
+        speed = clip(speed);
+        driveLeft(speed);
 
+        //lets the two moving motors finish the task
+        while (fLeftMotor.isBusy() && fRightMotor.isBusy()) {
+            // TODO: Add some telemetry output here so we can see what's happening on the driver station phone
+        }
+
+        //turns off both motors
+        stopMotors();
+
+        //sets it back to normal
+        setAllMotorsWithoutEncoder();
+
+    }
+
+    public void moveInchesLeft(double speed, double inches, int maxTime) {
+        //resets the motors
+        resetAllDriveEncoders();
+        setZeroAllDriveMotors();
+        setAllTargetPositions(inches);
+
+        ElapsedTime motorTime = new ElapsedTime();
+
+        //runs to the set number of inches at the desired speed
+        runAllMotorsToPosition();
+
+        //sets the desired speed on both motors
+//            fLeftMotor.setPower(speed);
+//            fRightMotor.setPower(speed);
+        speed = clip(speed);
+        driveLeft(speed);
+
+        if (motorTime.milliseconds() > maxTime) {
+            stopMotors();
+        }
+
+        //lets the two moving motors finish the task
+        while (fLeftMotor.isBusy() && fRightMotor.isBusy()) {
+            // TODO: Add some telemetry output here so we can see what's happening on the driver station phone
+        }
+
+        //turns off both motors
+        stopMotors();
+        //sets it back to normal
+        setAllMotorsWithoutEncoder();
+    }
+
+    public void moveInchesRight(double speed, double inches) {
+        //resets the motors
+        resetAllDriveEncoders();
+
+        setZeroAllDriveMotors();
+
+        //sets the number of desired inches on both motors
+        setAllTargetPositions(inches);
+
+        //runs to the set number of inches at the desired speed
+        runAllMotorsToPosition();
+
+
+        //sets the desired speed on both motors
+//            fLeftMotor.setPower(speed);
+//            fRightMotor.setPower(speed);
+        speed = clip(speed);
+        driveRight(speed);
+
+        //lets the two moving motors finish the task
+        while (fLeftMotor.isBusy() && fRightMotor.isBusy()) {
+            // TODO: Add some telemetry output here so we can see what's happening on the driver station phone
+        }
+
+        //turns off both motors
+        stopMotors();
+
+        //sets it back to normal
+        setAllMotorsWithoutEncoder();
+
+    }
+
+    public void moveInchesRight(double speed, double inches, int maxTime) {
+        //resets the motors
+        resetAllDriveEncoders();
+        setZeroAllDriveMotors();
+        setAllTargetPositions(inches);
+
+        ElapsedTime motorTime = new ElapsedTime();
+
+        //runs to the set number of inches at the desired speed
+        runAllMotorsToPosition();
+
+        //sets the desired speed on both motors
+//            fLeftMotor.setPower(speed);
+//            fRightMotor.setPower(speed);
+        speed = clip(speed);
+        driveRight(speed);
+
+        if (motorTime.milliseconds() > maxTime) {
+            stopMotors();
+        }
+
+        //lets the two moving motors finish the task
+        while (fLeftMotor.isBusy() && fRightMotor.isBusy()) {
+            // TODO: Add some telemetry output here so we can see what's happening on the driver station phone
+        }
+
+        //turns off both motors
+        stopMotors();
+        //sets it back to normal
+        setAllMotorsWithoutEncoder();
+    }
 
 
 
@@ -379,12 +626,12 @@ public class RobotDrive {
         //exponential equation obtained from online curve fit with points(x is joystickDistance, y is power:
         //(0,0), (0.5, 0.3), (0.7, 0.5), (1,1)
         int sign;
-        if(joyStickDistance > 0){
+        if (joyStickDistance > 0) {
             sign = 1;
         } else sign = -1;
 
 
-        return (float) (0.9950472 * Math.pow(Math.abs(joyStickDistance), 1.82195) * sign) ;
+        return (float) (0.9950472 * Math.pow(Math.abs(joyStickDistance), 1.82195) * sign);
     }
 
     public void driveJoyStick(float leftJoyStickX, float leftJoyStickY, float rightJoyStickX) {

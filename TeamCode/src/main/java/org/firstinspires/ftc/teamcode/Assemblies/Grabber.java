@@ -31,7 +31,6 @@ public class Grabber {
     public Grabber(HardwareMap theHardwareMap, Telemetry theTelemetry) {
         telemetry = theTelemetry;
         hardwareMap = theHardwareMap;
-
     }
 
     public enum GrabberState{
