@@ -59,9 +59,9 @@ public class TestDriveSystem extends OpMode {
             if(gamepad1.dpad_right){
                 robot.driveRight(DRIVE_POWER);
             }
-            if(gamepad1.a){
-                robot.testDriveSlow();
-            }
+            //if(gamepad1.a){ // this is overlapping with the lift test controls below...
+            //    robot.testDriveSlow();
+            //}
 
 
 //            if(gamepad1.a){
@@ -88,23 +88,20 @@ public class TestDriveSystem extends OpMode {
 //        telemetry.update();
 
         if (gamepad1.y) {
-        lift.liftUp();
-
+            lift.liftUp();
         } else if (gamepad1.a) {
-
             lift.liftDown();
         } else lift.shutDownLift();
 
         if (gamepad1.x) {
             lift.increaseLiftPower();
         }
-
         if (gamepad1.b) {
             lift.decreaseLiftPower();
         }
 
-        robot.driveTelemetry();
         lift.liftTelemetry();
+        robot.driveTelemetry();
         telemetry.update();
 
 

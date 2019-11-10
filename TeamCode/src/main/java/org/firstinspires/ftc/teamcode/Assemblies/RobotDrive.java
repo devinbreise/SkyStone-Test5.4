@@ -431,7 +431,6 @@ public class RobotDrive {
         telemetry.addData("Front Right Motor", fRightMotor.getPower());
         telemetry.addData("Back Left Motor", bLeftMotor.getPower());
         telemetry.addData("Back Right Motor", bRightMotor.getPower());
-        telemetry.update();
     }
 
 }
