@@ -219,29 +219,23 @@ public class RobotDrive {
 
     public void moveInchesForward(double speed, double inches) {
         //resets the motors
-        resetAllDriveEncoders();
+        fLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        setZeroAllDriveMotors();
 
+        fLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //sets the number of desired inches on both motors
-        setAllTargetPositions(inches);
 
-        //runs to the set number of inches at the desired speed
-        fLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-
-        //sets the desired speed on both motors
-//            fLeftMotor.setPower(speed);
-//            fRightMotor.setPower(speed);
+        int encoderCounts = (int) (COUNTS_PER_INCH * inches);
         speed = clip(speed);
 
-//                do {
-//            driveForward(speed);
-//        } while (pos < target);
+                do {
+            driveForward(speed);
+        } while (fLeftMotor.getCurrentPosition() < encoderCounts);
+        //runs to the set number of inches at the desired speed
 
-        //lets the two moving motors finish the task
+
         while (fLeftMotor.isBusy() && fRightMotor.isBusy()) {
-            // TODO: Add some telemetry output here so we can see what's happening on the driver station phone
+            telemetryDriveEncoders();
         }
 
         //turns off both motors

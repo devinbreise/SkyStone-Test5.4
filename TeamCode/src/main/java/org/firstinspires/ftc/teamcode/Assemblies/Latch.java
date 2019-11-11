@@ -10,10 +10,10 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class Latch {
 
 
-    public static final double LATCH_ONE_DOWN = 0.7;
-    public static final double LATCH_TWO_DOWN = 0.7;
-    public static final double LATCH_TWO_UP = 0.5;
-    public static final double LATCH_ONE_UP = 0.5;
+    public static final double LATCH_ONE_DOWN = 0.8;
+    public static final double LATCH_TWO_DOWN = 0.15;
+    public static final double LATCH_TWO_UP = 0.85;
+    public static final double LATCH_ONE_UP = 0.2;
     public boolean latchIsUp;
 
 
@@ -29,7 +29,7 @@ public class Latch {
 
     }
 
-    public void initializeLatch() {
+    public void initLatch() {
         latchOne = hardwareMap.servo.get("latchOne");
         latchTwo = hardwareMap.servo.get("latchTwo");
         latchOne.setPosition(LATCH_ONE_UP);
@@ -42,7 +42,12 @@ public class Latch {
     public void toggleLatch(){
         if(latchIsUp){
             latchDown();
-        } else latchUp();
+            latchIsUp = false;
+        } else {
+            latchUp();
+            latchIsUp = true;
+        }
+
     }
 
     public void latchUp() {
@@ -63,6 +68,7 @@ public class Latch {
     public void telemetryLatch(){
         telemetry.addData("latchOne: ", latchOne.getPosition());
         telemetry.addData("latchTwo: ", latchTwo.getPosition());
+        telemetry.addData("latchup?", latchIsUp);
 
     }
 

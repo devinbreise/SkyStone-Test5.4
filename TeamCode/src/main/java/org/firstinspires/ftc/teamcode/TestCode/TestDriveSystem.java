@@ -21,6 +21,7 @@ public class TestDriveSystem extends OpMode {
     public static double DRIVE_POWER;
     RobotDrive robot;
     Lift lift;
+    Latch latch;
 //    Latch latch;
 //    Grabber grabber;
 
@@ -28,12 +29,15 @@ public class TestDriveSystem extends OpMode {
     public void init() {
         robot = new RobotDrive(hardwareMap, telemetry);
         lift = new Lift(hardwareMap, telemetry);
+        latch = new Latch(hardwareMap, telemetry);
+
 //        latch = new Latch(hardwareMap, telemetry);
 //        grabber = new Grabber(hardwareMap, telemetry);
 
         robot.initDriveMotors();
+
         lift.initLift();
-//        latch.initializeLatch();
+        latch.initLatch();
 
         // lift system code - should be in its own assembly class...
 
@@ -64,9 +68,19 @@ public class TestDriveSystem extends OpMode {
             //}
 
 
-//            if(gamepad1.a){
-//                latch.toggleLatch();
-//            }
+        if (gamepad1.a) {
+            latch.latchUp();
+
+        }
+        if(gamepad1.x){
+            latch.latchDown();
+        }
+
+        //open
+        if (gamepad1.b) {
+            latch.toggleLatch();
+
+        }
 //            if(gamepad1.y){
 //                grabber.openGrabber();
 //            }
@@ -93,12 +107,14 @@ public class TestDriveSystem extends OpMode {
 //            lift.liftDown();
 //        } else lift.shutDownLift();
 
+/*
         if (gamepad1.x) {
             lift.increaseLiftPower();
         }
         if (gamepad1.b) {
             lift.decreaseLiftPower();
         }
+*/
 
         lift.liftTelemetry();
         robot.driveTelemetry();
