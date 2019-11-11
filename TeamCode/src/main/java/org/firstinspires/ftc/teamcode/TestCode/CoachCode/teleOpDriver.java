@@ -26,6 +26,7 @@ public class teleOpDriver extends LinearOpMode {
     private DcMotor rightRearMotor;
     private DcMotor laMotor;
     //private coachGyro gyro;
+    BNO055IMU imu;
     private revHubIMUGyro gyro;
     //private xRail xrail;
     private autoDriver driver;
@@ -50,7 +51,7 @@ public class teleOpDriver extends LinearOpMode {
     public void runOpMode() {
 
         // set up our IMU
-        gyro = new revHubIMUGyro(hardwareMap.get(BNO055IMU.class, "imu"), telemetry);
+        gyro = new revHubIMUGyro(hardwareMap, telemetry, imu);
         //xrail = new xRail(telemetry, hardwareMap.get(DcMotor.class, "xRailMotor"));
 
         // Get the objects for the various pieces of hardware

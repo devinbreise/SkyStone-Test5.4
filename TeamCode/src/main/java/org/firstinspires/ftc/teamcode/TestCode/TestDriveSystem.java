@@ -87,11 +87,11 @@ public class TestDriveSystem extends OpMode {
 //        latch.telemetryLatch();
 //        telemetry.update();
 
-        if (gamepad1.y) {
-            lift.liftUp();
-        } else if (gamepad1.a) {
-            lift.liftDown();
-        } else lift.shutDownLift();
+//        if (gamepad1.a) {
+//            lift.liftUp();
+//        } else if (gamepad1.y) {
+//            lift.liftDown();
+//        } else lift.shutDownLift();
 
         if (gamepad1.x) {
             lift.increaseLiftPower();

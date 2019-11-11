@@ -2,12 +2,17 @@ package org.firstinspires.ftc.teamcode.Assemblies;
 
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.basicLibs.revHubIMUGyro;
 
 public class RobotDrive {
@@ -23,6 +28,9 @@ public class RobotDrive {
     public static final double MIN_ROTATING_POWER = 0.3;
     public static final double TEST_POWER = 0.25;
 
+    float currentHeading; //This variable is the current heading of the robot
+    Orientation angle; //This variable keeps track of the current heading
+
     private double COUNTS_PER_INCH = 59.4178;  // 89.7158 is the orriginal number
 
     HardwareMap hardwareMap;
@@ -34,13 +42,19 @@ public class RobotDrive {
 
     //    Servo latchOne;
 //    Servo latchTwo;
-    revHubIMUGyro imu;
     BNO055IMU theImu;
+    revHubIMUGyro imu;
+
 
     public RobotDrive(HardwareMap theHardwareMap, Telemetry theTelemetry) {
         hardwareMap = theHardwareMap;
         telemetry = theTelemetry;
     }
+
+    public void initImu(){
+        revHubIMUGyro imu = new revHubIMUGyro(hardwareMap, telemetry, theImu);
+    }
+
 
 
     //Your class (and all classes representing functional parts of the robot) should have a constructor
@@ -68,11 +82,6 @@ public class RobotDrive {
         // You might want to start thinking about what that code would look like."
     }
 
-    public void initImu() {
-        revHubIMUGyro imu = new revHubIMUGyro(theImu, telemetry, hardwareMap, "imu");
-
-
-    }
 
     public void initServos() {
 
@@ -218,14 +227,17 @@ public class RobotDrive {
         setAllTargetPositions(inches);
 
         //runs to the set number of inches at the desired speed
-        runAllMotorsToPosition();
+        fLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
 
         //sets the desired speed on both motors
 //            fLeftMotor.setPower(speed);
 //            fRightMotor.setPower(speed);
         speed = clip(speed);
-        driveForward(speed);
+
+//                do {
+//            driveForward(speed);
+//        } while (pos < target);
 
         //lets the two moving motors finish the task
         while (fLeftMotor.isBusy() && fRightMotor.isBusy()) {
@@ -665,10 +677,10 @@ public class RobotDrive {
         telemetry.addData("joystickX:", leftJoyStickX);
         telemetry.addData("joystickY:", leftJoyStickY);
 
-//        fLeftMotor.setPower(frontLeft);
-//        fRightMotor.setPower(frontRight);
-//        bRightMotor.setPower(backRight);
-//        bLeftMotor.setPower(backLeft);
+        fLeftMotor.setPower(frontLeft);
+        fRightMotor.setPower(frontRight);
+        bRightMotor.setPower(backRight);
+        bLeftMotor.setPower(backLeft);
 
 
     }

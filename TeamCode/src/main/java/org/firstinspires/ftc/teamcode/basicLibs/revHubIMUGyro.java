@@ -22,93 +22,115 @@ public class revHubIMUGyro {
     private Telemetry telemetry; //This variable repersent the telemetry
     private HardwareMap hardwareMap;
     private BNO055IMU imu; //This variable is the imu
-    private int currentDirection;
-    float currentHeading; //This variable is the current heading of the robot
-    Orientation anglesCurrent; //This variable keeps track of the current heading
-    Orientation anglesLast; // This variable keeps track of the last current heading
+    Orientation angle; //This variable keeps track of the current heading
+    Orientation anglesLast; //This variable keeps track of the current heading
+    Orientation anglesCurrent;
+    float currentHeading;
 
 
-
-    public revHubIMUGyro(BNO055IMU theimu, Telemetry theTelemetry){
-        telemetry = theTelemetry;
-
-        imu = theimu;
-        currentDirection = 0;
-
+    public revHubIMUGyro( HardwareMap hardwaremap, Telemetry telemetry, BNO055IMU imu){
         // set up our IMU
         //These are the parameters that the imu uses in the code to name and keep track of the data
+        this.imu = imu;
+        this.telemetry = telemetry;
+        this.hardwareMap = hardwaremap;
+
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
 
-
-
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
-    }
 
-    public revHubIMUGyro(BNO055IMU theimu, Telemetry theTelemetry, HardwareMap theHardwareMap, String deviceName){
-        telemetry = theTelemetry;
-        hardwareMap = theHardwareMap;
-        imu = theimu;
-        currentDirection = 0;
-
-        // set up our IMU
-        //These are the parameters that the imu uses in the code to name and keep track of the data
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-
-
-        imu = hardwareMap.get(BNO055IMU.class, deviceName);
-        imu.initialize(parameters);
     }
 
 
+//    public revHubIMUGyro() {
+//        telemetry = theTelemetry;
+//        hardwareMap = theHardwareMap;
+//        imu = theimu;
+//        currentDirection = 0;
+//
+//        // set up our IMU
+//        //These are the parameters that the imu uses in the code to name and keep track of the data
+//        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+//        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+//        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+//
+//
+//        imu = hardwareMap.get(BNO055IMU.class, deviceName);
+//        imu.initialize(parameters);
+//    }
 
 
-    //This resets the imu current heading of the robot
-     public float resetHeading() {
-        currentHeading = 0;
-        anglesLast = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        //The code resets the current heading to 0 and keep wwhat the current angle is as you reset it as angles last to
-        //use in the code in the future
-        return currentHeading;
+    public void resetHeading(){
+        angle = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        angle.firstAngle = 0;
+
+        //ideally, you shouldnt have to reset it when moving into teleop, so you only want to do this to right itself if necessary
+    }
+    public float getAbsoluteHeading() {
+        angle = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        return angle.firstAngle;
     }
 
 
-    public float getHeading() {
-        anglesCurrent = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        telemetry.addData("IMU Heading", anglesCurrent.firstAngle);
-        // if we were near the cutoff between the positive and negative angles
-        // and appear to have turned between the positive and negative sides to the right
-        // than see if the last amgle is greater than or equal to 90 and the current angle is less than 0 than do
-        // the math to figure out how much degrees the robot has turned between the postive and negitive numbers
-        if ((anglesLast.firstAngle >= 90) && (anglesCurrent.firstAngle < 0)) {
-            currentHeading = currentHeading + (180 - anglesLast.firstAngle) + (anglesCurrent.firstAngle + 180);
-            // if we were near the cutoff and between the positive and negitive angles
-            // and appear to have turned between the positive and negitive sides to the left
-            //than see if the last angle is less than -90 and the current angle is greater than 0 than do
-            //the math to figure out how much degress the robot has turned between the postive and negitive numbers
-        } else if ((anglesLast.firstAngle < -90) && (anglesCurrent.firstAngle > 0)) {
-            currentHeading = currentHeading - (180 - anglesCurrent.firstAngle) - (anglesLast.firstAngle + 180);
+    public double getHeading(){
+        double angle = getAbsoluteHeading();
+        if(angle < 0){
+            return angle+360;
+        } else
+            return angle;
 
-        } else { // if the angles has not jumped between the positive and negitive than just so the math to subtract the current
-                 //angle and the last angle to find the number between these values to find the current heading of the IMU
+    }
+
+
+//    //This resets the imu current heading of the robot
+    public float resetHeading(boolean usingOld) {
+        if(usingOld){
+            currentHeading = 0;
+            anglesLast = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            //The code resets the current heading to 0 and keep wwhat the current angle is as you reset it as angles last to
+            //use in the code in the future
+            return currentHeading;
+
+        }
+        else return 0;
+    }
+
+
+    public float getHeading(boolean usingOld) {
+        if(usingOld){        anglesCurrent = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            telemetry.addData("IMU Heading", anglesCurrent.firstAngle);
+            // if we were near the cutoff between the positive and negative angles
+            // and appear to have turned between the positive and negative sides to the right
+            // than see if the last amgle is greater than or equal to 90 and the current angle is less than 0 than do
+            // the math to figure out how much degrees the robot has turned between the postive and negitive numbers
+            if ((anglesLast.firstAngle >= 90) && (anglesCurrent.firstAngle < 0)) {
+                currentHeading = currentHeading + (180 - anglesLast.firstAngle) + (anglesCurrent.firstAngle + 180);
+                // if we were near the cutoff and between the positive and negitive angles
+                // and appear to have turned between the positive and negitive sides to the left
+                //than see if the last angle is less than -90 and the current angle is greater than 0 than do
+                //the math to figure out how much degress the robot has turned between the postive and negitive numbers
+            } else if ((anglesLast.firstAngle < -90) && (anglesCurrent.firstAngle > 0)) {
+                currentHeading = currentHeading - (180 - anglesCurrent.firstAngle) - (anglesLast.firstAngle + 180);
+
+            } else { // if the angles has not jumped between the positive and negitive than just so the math to subtract the current
+                //angle and the last angle to find the number between these values to find the current heading of the IMU
                 // Note: The IMU heading gets larger to the left and smaller to the right.
 
-            currentHeading = currentHeading - (anglesCurrent.firstAngle - anglesLast.firstAngle);
-        }
-        anglesLast = anglesCurrent;
+                currentHeading = currentHeading - (anglesCurrent.firstAngle - anglesLast.firstAngle);
+            }
+            anglesLast = anglesCurrent;
 
-        return currentHeading;
+            return currentHeading;
+        } else return 0;
     }
 
-    public float getAbsoluteHeading() {
-        anglesCurrent = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        return anglesCurrent.firstAngle;
-    }
-
-    //Ruslana's filthy additions:
+//    public float getAbsoluteHeading() {
+//        anglesCurrent = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+//        return anglesCurrent.firstAngle;
+//    }
 
 
 

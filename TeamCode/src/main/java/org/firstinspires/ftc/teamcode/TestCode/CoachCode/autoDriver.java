@@ -27,11 +27,11 @@ public class autoDriver {
     private DistanceSensor right2m;
 
     // hsvValues is an array that will hold the hue, saturation, and value information.
-    private float hsvValuesLeft[] = {0F, 0F, 0F};
-    private float hsvValuesRight[] = {0F, 0F, 0F};
+    private float[] hsvValuesLeft = {0F, 0F, 0F};
+    private float[] hsvValuesRight = {0F, 0F, 0F};
     // values is a reference to the hsvValues array.
-    private final float valuesLeft[] = hsvValuesLeft;
-    private final float valuesRight[] = hsvValuesRight;
+    private final float[] valuesLeft = hsvValuesLeft;
+    private final float[] valuesRight = hsvValuesRight;
     // sometimes it helps to multiply the raw RGB values with a scale factor
     // to amplify/attentuate the measured values.
     private final double COLOR_SCALE_FACTOR = 255;
@@ -102,15 +102,15 @@ public class autoDriver {
                 newLeftTarget = leftMotor.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH);
                 newRightTarget = rightMotor.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH);
                 if (inches < speedChange / MAX_ACCEL_RATE + speed / MAX_DECEL_RATE) { // not enough distance to accelerate and decelerate fully
-                    accelerationEncoderCount = (int) (100);
-                    decelerationEncoderCount = (int) (100);
-                    decelerationPoint = (int) (newLeftTarget - decelerationEncoderCount);
+                    accelerationEncoderCount = 100;
+                    decelerationEncoderCount = 100;
+                    decelerationPoint = newLeftTarget - decelerationEncoderCount;
                     maxSpeed = .3;
 
                 } else { // we can get to cruising speed
                     accelerationEncoderCount = (int) (speedChange / MAX_ACCEL_RATE * COUNTS_PER_INCH);
                     decelerationEncoderCount = (int) (speedChange / MAX_DECEL_RATE * COUNTS_PER_INCH);
-                    decelerationPoint = (int) (newLeftTarget - decelerationEncoderCount);
+                    decelerationPoint = newLeftTarget - decelerationEncoderCount;
                     maxSpeed = speed;
                 }
                 teamUtil.log("leftTarget:" + newLeftTarget);
@@ -216,7 +216,7 @@ public class autoDriver {
 
     // turn # of degrees at specified speed.  negative degrees is left
     void turn(double speed, float degrees) {
-        float currentAngle = gyro.resetHeading();
+        float currentAngle = gyro.resetHeading(true);
         float goalAngle = currentAngle + degrees;
         // turn until we have made it
         if (degrees < 0) { // turning left
@@ -224,7 +224,7 @@ public class autoDriver {
             rightMotor.setPower(speed);
             while ((currentAngle > goalAngle) && (opMode.opModeIsActive())) {
                 telemetry.addData("turning left", currentAngle);
-                currentAngle = gyro.getHeading();
+                currentAngle = gyro.getHeading(true);
                 telemetry.update();
             }
         } else { // turning right
@@ -232,7 +232,7 @@ public class autoDriver {
             rightMotor.setPower(0);
             while ((currentAngle < goalAngle) && (opMode.opModeIsActive())) {
                 telemetry.addData("turning right", currentAngle);
-                currentAngle = gyro.getHeading();
+                currentAngle = gyro.getHeading(true);
                 telemetry.update();
             }
         }
@@ -297,7 +297,7 @@ public class autoDriver {
     void spinTo (float heading) {
         if (opMode.opModeIsActive()) {
             double decelAngle;
-            float currentAngle = gyro.getHeading();
+            float currentAngle = gyro.getHeading(true);
             float goalAngle = heading;
             if (goalAngle < currentAngle) {
                 decelAngle = currentAngle - .75 * (currentAngle - goalAngle);
@@ -321,7 +321,7 @@ public class autoDriver {
                         leftMotor.setPower(-.2);
                         rightMotor.setPower(.4);
                     }
-                    currentAngle = gyro.getHeading();
+                    currentAngle = gyro.getHeading(true);
                     telemetry.update();
                 }
             } else { // spining right
@@ -333,7 +333,7 @@ public class autoDriver {
                         leftMotor.setPower(.4);
                         rightMotor.setPower(-.2);
                     }
-                    currentAngle = gyro.getHeading();
+                    currentAngle = gyro.getHeading(true);
                     telemetry.update();
                 }
                 rightMotor.setPower(0);
@@ -344,7 +344,7 @@ public class autoDriver {
 
     // turn # of degrees at specified speed.  negative degrees is left
     void spin (double speed, float degrees) {
-        float currentAngle = gyro.resetHeading();
+        float currentAngle = gyro.resetHeading(true);
         float goalAngle = currentAngle + degrees;
         if (degrees<0){
             goalAngle=goalAngle+8;
@@ -367,7 +367,7 @@ public class autoDriver {
                     leftMotor.setPower(-.2);
                     rightMotor.setPower(.4);
                 }
-                currentAngle = gyro.getHeading();
+                currentAngle = gyro.getHeading(true);
                 telemetry.update();
             }
         } else { // spining right
@@ -379,7 +379,7 @@ public class autoDriver {
                     leftMotor.setPower(.4);
                     rightMotor.setPower(-.2);
                 }
-                currentAngle = gyro.getHeading();
+                currentAngle = gyro.getHeading(true);
                 telemetry.update();
             }
             rightMotor.setPower(0);
