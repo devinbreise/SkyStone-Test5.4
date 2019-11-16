@@ -9,6 +9,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Latch {
 
+    //NEED TO INTRODUCE STATE MACHINE(MAKE SURE GRABBER ONE WORKS, THEN COPY-PASTE
 
     public static final double LATCH_ONE_DOWN = 0.8;
     public static final double LATCH_TWO_DOWN = 0.15;
@@ -39,8 +40,8 @@ public class Latch {
 
     }
 
-    public void toggleLatch(){
-        if(latchIsUp){
+    public void toggleLatch() {
+        if (latchIsUp) {
             latchDown();
             latchIsUp = false;
         } else {
@@ -65,7 +66,7 @@ public class Latch {
 
     }
 
-    public void telemetryLatch(){
+    public void latchTelemetry() {
         telemetry.addData("latchOne: ", latchOne.getPosition());
         telemetry.addData("latchTwo: ", latchTwo.getPosition());
         telemetry.addData("latchup?", latchIsUp);

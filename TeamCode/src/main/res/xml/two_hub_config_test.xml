@@ -8,12 +8,13 @@
             <!-- <REV_VL53L0X_RANGE_SENSOR name="distance0" port="0" bus="2" /> -->
         </LynxModule>
         <LynxModule name="Expansion Hub 3" port="3">
-            <goBILDA5202SeriesMotor name="bLeftMotor" port="0" />
-            <goBILDA5202SeriesMotor name="fLeftMotor" port="1" />
-            <goBILDA5202SeriesMotor name="bRightMotor" port="2" />
-            <goBILDA5202SeriesMotor name="fRightMotor" port="3" />
+            <goBILDA5202SeriesMotor name="fRightMotor" port="0" />
+            <goBILDA5202SeriesMotor name="bRightMotor" port="1" />
+            <goBILDA5202SeriesMotor name="fLeftMotor" port="2" />
+            <goBILDA5202SeriesMotor name="bLeftMotor" port="3" />
             <Servo name="latchOne" port="0" />
             <Servo name="latchTwo" port="1" />
+
 
             <LynxEmbeddedIMU name="imu 1" port="0" bus="0" />
         </LynxModule>

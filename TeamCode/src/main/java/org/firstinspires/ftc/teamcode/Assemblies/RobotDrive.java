@@ -2,18 +2,14 @@ package org.firstinspires.ftc.teamcode.Assemblies;
 
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.basicLibs.revHubIMUGyro;
+import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 public class RobotDrive {
 
@@ -32,6 +28,8 @@ public class RobotDrive {
     Orientation angle; //This variable keeps track of the current heading
 
     private double COUNTS_PER_INCH = 59.4178;  // 89.7158 is the orriginal number
+    public static final double NEVERREST40_ENCODER_CLICKS = 1120;
+
 
     HardwareMap hardwareMap;
     Telemetry telemetry;
@@ -51,10 +49,9 @@ public class RobotDrive {
         telemetry = theTelemetry;
     }
 
-    public void initImu(){
+    public void initImu() {
         revHubIMUGyro imu = new revHubIMUGyro(hardwareMap, telemetry, theImu);
     }
-
 
 
     //Your class (and all classes representing functional parts of the robot) should have a constructor
@@ -112,13 +109,6 @@ public class RobotDrive {
         bRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
-    public void setAllTargetPositions(double inches) {
-        fLeftMotor.setTargetPosition((int) (COUNTS_PER_INCH * inches));
-        fRightMotor.setTargetPosition((int) (COUNTS_PER_INCH * inches));
-        bLeftMotor.setTargetPosition((int) (COUNTS_PER_INCH * inches));
-        bRightMotor.setTargetPosition((int) (COUNTS_PER_INCH * inches));
-    }
-
     public void setZeroAllDriveMotors() {
         fLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         fRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -149,10 +139,10 @@ public class RobotDrive {
 
     public void driveForward(double power) {
         power = clip(power);
-        fLeftMotor.setPower(-power); //neg for F
-        fRightMotor.setPower(power); // pos for F
-        bLeftMotor.setPower(-power);  //neg for F
-        bRightMotor.setPower(power); //pos for F  }
+        fLeftMotor.setPower(-power); //neg for F og
+        fRightMotor.setPower(power); // pos for F og
+        bLeftMotor.setPower(-power);  //neg for F og
+        bRightMotor.setPower(power); //pos for F og  }
 
     }
 
@@ -219,23 +209,28 @@ public class RobotDrive {
 
     public void moveInchesForward(double speed, double inches) {
         //resets the motors
-        fLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 
-        fLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        fRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //sets the number of desired inches on both motors
 
         int encoderCounts = (int) (COUNTS_PER_INCH * inches);
         speed = clip(speed);
 
-                do {
+        do {
             driveForward(speed);
-        } while (fLeftMotor.getCurrentPosition() < encoderCounts);
+            teamUtil.log("fRightMotor: " + getBackLeftMotorPos());
+            encoderTelemetry();
+
+
+        } while (Math.abs(fRightMotor.getCurrentPosition()) < encoderCounts && teamUtil.theOpMode.opModeIsActive());
         //runs to the set number of inches at the desired speed
 
 
         while (fLeftMotor.isBusy() && fRightMotor.isBusy()) {
-            telemetryDriveEncoders();
+            encoderTelemetry();
         }
 
         //turns off both motors
@@ -244,62 +239,32 @@ public class RobotDrive {
         //sets it back to normal
         setAllMotorsWithoutEncoder();
 
-    }
-
-    public void moveInchesForward(double speed, double inches, int maxTime) {
-        //resets the motors
-        resetAllDriveEncoders();
-        setZeroAllDriveMotors();
-        setAllTargetPositions(inches);
-
-        ElapsedTime motorTime = new ElapsedTime();
-
-        //runs to the set number of inches at the desired speed
-        runAllMotorsToPosition();
-
-        //sets the desired speed on both motors
-//            fLeftMotor.setPower(speed);
-//            fRightMotor.setPower(speed);
-        speed = clip(speed);
-        driveForward(speed);
-
-        if (motorTime.milliseconds() > maxTime) {
-            stopMotors();
-        }
-
-        //lets the two moving motors finish the task
-        while (fLeftMotor.isBusy() && fRightMotor.isBusy()) {
-            // TODO: Add some telemetry output here so we can see what's happening on the driver station phone
-        }
-
-        //turns off both motors
-        stopMotors();
-        //sets it back to normal
-        setAllMotorsWithoutEncoder();
     }
 
     public void moveInchesBackward(double speed, double inches) {
         //resets the motors
-        resetAllDriveEncoders();
+        fRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        setZeroAllDriveMotors();
 
+        fRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //sets the number of desired inches on both motors
-        setAllTargetPositions(inches);
 
-        //runs to the set number of inches at the desired speed
-        runAllMotorsToPosition();
-
-
-        //sets the desired speed on both motors
-//            fLeftMotor.setPower(speed);
-//            fRightMotor.setPower(speed);
+        int encoderCounts = (int) (COUNTS_PER_INCH * inches);
         speed = clip(speed);
-        driveBackward(speed);
 
-        //lets the two moving motors finish the task
+        do {
+            driveBackward(speed);
+            teamUtil.log("fRightMotor: " + getBackLeftMotorPos());
+            encoderTelemetry();
+
+
+        } while (Math.abs(fRightMotor.getCurrentPosition()) < encoderCounts && teamUtil.theOpMode.opModeIsActive());
+        //runs to the set number of inches at the desired speed
+
+
         while (fLeftMotor.isBusy() && fRightMotor.isBusy()) {
-            // TODO: Add some telemetry output here so we can see what's happening on the driver station phone
+            encoderTelemetry();
         }
 
         //turns off both motors
@@ -308,62 +273,32 @@ public class RobotDrive {
         //sets it back to normal
         setAllMotorsWithoutEncoder();
 
-    }
-
-    public void moveInchesBackward(double speed, double inches, int maxTime) {
-        //resets the motors
-        resetAllDriveEncoders();
-        setZeroAllDriveMotors();
-        setAllTargetPositions(inches);
-
-        ElapsedTime motorTime = new ElapsedTime();
-
-        //runs to the set number of inches at the desired speed
-        runAllMotorsToPosition();
-
-        //sets the desired speed on both motors
-//            fLeftMotor.setPower(speed);
-//            fRightMotor.setPower(speed);
-        speed = clip(speed);
-        driveBackward(speed);
-
-        if (motorTime.milliseconds() > maxTime) {
-            stopMotors();
-        }
-
-        //lets the two moving motors finish the task
-        while (fLeftMotor.isBusy() && fRightMotor.isBusy()) {
-            // TODO: Add some telemetry output here so we can see what's happening on the driver station phone
-        }
-
-        //turns off both motors
-        stopMotors();
-        //sets it back to normal
-        setAllMotorsWithoutEncoder();
     }
 
     public void moveInchesLeft(double speed, double inches) {
         //resets the motors
-        resetAllDriveEncoders();
+        fRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        setZeroAllDriveMotors();
 
+        fRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //sets the number of desired inches on both motors
-        setAllTargetPositions(inches);
 
-        //runs to the set number of inches at the desired speed
-        runAllMotorsToPosition();
-
-
-        //sets the desired speed on both motors
-//            fLeftMotor.setPower(speed);
-//            fRightMotor.setPower(speed);
+        int encoderCounts = (int) (COUNTS_PER_INCH * inches);
         speed = clip(speed);
-        driveLeft(speed);
 
-        //lets the two moving motors finish the task
+        do {
+            driveLeft(speed);
+            teamUtil.log("fRightMotor: " + getBackLeftMotorPos());
+            encoderTelemetry();
+
+
+        } while (Math.abs(fRightMotor.getCurrentPosition()) < encoderCounts && teamUtil.theOpMode.opModeIsActive());
+        //runs to the set number of inches at the desired speed
+
+
         while (fLeftMotor.isBusy() && fRightMotor.isBusy()) {
-            // TODO: Add some telemetry output here so we can see what's happening on the driver station phone
+            encoderTelemetry();
         }
 
         //turns off both motors
@@ -372,62 +307,32 @@ public class RobotDrive {
         //sets it back to normal
         setAllMotorsWithoutEncoder();
 
-    }
-
-    public void moveInchesLeft(double speed, double inches, int maxTime) {
-        //resets the motors
-        resetAllDriveEncoders();
-        setZeroAllDriveMotors();
-        setAllTargetPositions(inches);
-
-        ElapsedTime motorTime = new ElapsedTime();
-
-        //runs to the set number of inches at the desired speed
-        runAllMotorsToPosition();
-
-        //sets the desired speed on both motors
-//            fLeftMotor.setPower(speed);
-//            fRightMotor.setPower(speed);
-        speed = clip(speed);
-        driveLeft(speed);
-
-        if (motorTime.milliseconds() > maxTime) {
-            stopMotors();
-        }
-
-        //lets the two moving motors finish the task
-        while (fLeftMotor.isBusy() && fRightMotor.isBusy()) {
-            // TODO: Add some telemetry output here so we can see what's happening on the driver station phone
-        }
-
-        //turns off both motors
-        stopMotors();
-        //sets it back to normal
-        setAllMotorsWithoutEncoder();
     }
 
     public void moveInchesRight(double speed, double inches) {
         //resets the motors
-        resetAllDriveEncoders();
+        fRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        setZeroAllDriveMotors();
 
+        fRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //sets the number of desired inches on both motors
-        setAllTargetPositions(inches);
 
-        //runs to the set number of inches at the desired speed
-        runAllMotorsToPosition();
-
-
-        //sets the desired speed on both motors
-//            fLeftMotor.setPower(speed);
-//            fRightMotor.setPower(speed);
+        int encoderCounts = (int) (COUNTS_PER_INCH * inches);
         speed = clip(speed);
-        driveRight(speed);
 
-        //lets the two moving motors finish the task
+        do {
+            driveRight(speed);
+            teamUtil.log("fRightMotor: " + getBackLeftMotorPos());
+            encoderTelemetry();
+
+
+        } while (Math.abs(fRightMotor.getCurrentPosition()) < encoderCounts && teamUtil.theOpMode.opModeIsActive());
+        //runs to the set number of inches at the desired speed
+
+
         while (fLeftMotor.isBusy() && fRightMotor.isBusy()) {
-            // TODO: Add some telemetry output here so we can see what's happening on the driver station phone
+            encoderTelemetry();
         }
 
         //turns off both motors
@@ -438,38 +343,7 @@ public class RobotDrive {
 
     }
 
-    public void moveInchesRight(double speed, double inches, int maxTime) {
-        //resets the motors
-        resetAllDriveEncoders();
-        setZeroAllDriveMotors();
-        setAllTargetPositions(inches);
-
-        ElapsedTime motorTime = new ElapsedTime();
-
-        //runs to the set number of inches at the desired speed
-        runAllMotorsToPosition();
-
-        //sets the desired speed on both motors
-//            fLeftMotor.setPower(speed);
-//            fRightMotor.setPower(speed);
-        speed = clip(speed);
-        driveRight(speed);
-
-        if (motorTime.milliseconds() > maxTime) {
-            stopMotors();
-        }
-
-        //lets the two moving motors finish the task
-        while (fLeftMotor.isBusy() && fRightMotor.isBusy()) {
-            // TODO: Add some telemetry output here so we can see what's happening on the driver station phone
-        }
-
-        //turns off both motors
-        stopMotors();
-        //sets it back to normal
-        setAllMotorsWithoutEncoder();
-    }
-
+    //need to remake encoder methods for that stuff
 
 
     public void telemetryDriveEncoders() {
@@ -684,6 +558,33 @@ public class RobotDrive {
         telemetry.addData("Front Right Motor", fRightMotor.getPower());
         telemetry.addData("Back Left Motor", bLeftMotor.getPower());
         telemetry.addData("Back Right Motor", bRightMotor.getPower());
+
     }
 
+    public void encoderTelemetry() {
+        telemetry.addData("FL ENCODER POS:", fRightMotor.getCurrentPosition());
+
+    }
+
+    public int getBackLeftMotorPos() {
+        return bLeftMotor.getCurrentPosition();
+    }
+
+    public int getBackRightMotorPos() {
+        return bRightMotor.getCurrentPosition();
+    }
+
+    public int getFrontRightMotorPos() {
+        return fRightMotor.getCurrentPosition();
+    }
+
+    public int getFrontLeftMotorPos() {
+        return fLeftMotor.getCurrentPosition();
+    }
+
+
+    //            <goBILDA5202SeriesMotor name="fRightMotor" port="0" /> //backleft
+    //            <goBILDA5202SeriesMotor name="bRightMotor" port="1" />
+    //            <goBILDA5202SeriesMotor name="fLeftMotor" port="2" />
+    //            <goBILDA5202SeriesMotor name="bLeftMotor" port="3" />
 }

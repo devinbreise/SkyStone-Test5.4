@@ -33,7 +33,7 @@ public class Grabber {
         hardwareMap = theHardwareMap;
     }
 
-    public enum GrabberState{
+    public enum GrabberState {
         GRABBER_OPEN,
         GRABBER_CLOSED_WIDE,
         GRABBER_CLOSED_NARROW
@@ -52,7 +52,7 @@ public class Grabber {
         grabberState = GrabberState.GRABBER_OPEN;
     }
 
-    public void telemetryGrabber() {
+    public void grabberTelemetry() {
         telemetry.addData("GrabberOne: ", grabberOne.getPosition());
         telemetry.addData("GrabberTwo: ", grabberTwo.getPosition());
         telemetry.addData("GrabberState: ", grabberState);
@@ -79,12 +79,12 @@ public class Grabber {
 
     }
 
-    public void closeGrabberToggle(){
-        if(grabberState == GrabberState.GRABBER_OPEN){
+    public void closeGrabberToggle() {
+        if (grabberState == GrabberState.GRABBER_OPEN) {
             closeGrabberWide();
-        } else if(grabberState == GrabberState.GRABBER_CLOSED_WIDE){
+        } else if (grabberState == GrabberState.GRABBER_CLOSED_WIDE) {
             closeGrabberNarrow();
-        } else if(grabberState == GrabberState.GRABBER_CLOSED_NARROW){
+        } else if (grabberState == GrabberState.GRABBER_CLOSED_NARROW) {
             closeGrabberWide();
         }
     }

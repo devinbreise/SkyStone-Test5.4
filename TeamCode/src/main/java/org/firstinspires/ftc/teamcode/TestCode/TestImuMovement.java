@@ -28,9 +28,7 @@ public class TestImuMovement extends LinearOpMode {
         robot.initImu();
 
         while (opModeIsActive()) {
-            robot.imuRotate(30);
-            robot.imuRotateToAngle(0);
-
+            imu.getHeading();
         }
 
 

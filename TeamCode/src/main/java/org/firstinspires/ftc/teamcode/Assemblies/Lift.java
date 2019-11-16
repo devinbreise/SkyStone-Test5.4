@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Assemblies;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -8,10 +9,12 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 public class Lift {
 
-    private double liftBasePower = .5;
+
     private DcMotor liftBase;
+    private DigitalChannel liftLimit;
 
     // Keep track of when controls are updated to limit how fast values can change
+    private double liftBasePower = .5;
     private long nextControlUpdate = System.currentTimeMillis();
     private final long CONTROL_INTERVAL = 500;
 
@@ -25,7 +28,11 @@ public class Lift {
     }
 
     public void initLift(){
+
         liftBase = hardwareMap.dcMotor.get("liftBase");
+        liftLimit = hardwareMap.get(DigitalChannel.class, "liftLimit");
+        liftLimit.setMode(DigitalChannel.Mode.INPUT);
+
     }
 
     public void liftUp(){
@@ -33,7 +40,11 @@ public class Lift {
     }
 
     public void liftDown(){
-        liftBase.setPower(-liftBasePower);
+        if(liftLimit.getState() == false){
+            shutDownLift();
+        } else {
+            liftBase.setPower(-liftBasePower);
+        }
     }
 
     public void shutDownLift(){

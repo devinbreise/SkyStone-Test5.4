@@ -42,7 +42,7 @@ public class TestLatch extends OpMode {
 
         }
 
-//        latch.telemetryLatch();
+//        latch.latchTelemetry();
 //        telemetry.update();
     }
 
