@@ -44,13 +44,13 @@ public class demoBot extends OpMode {
     }
 
     public void loop() {
-        double power = 0;
+        double power = 0.5;
         power = gamepad1.left_trigger;
 
         rightMotor.setPower(gamepad1.left_stick_y);
         leftMotor.setPower(gamepad1.right_stick_y);
         flingerOne.setPower(power);
-        flingerTwo.setPower(power);
+        flingerTwo.setPower(power*0.75);
 
         telemetry.update();
 

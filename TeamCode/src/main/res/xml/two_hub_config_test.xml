@@ -3,6 +3,8 @@
     <LynxUsbDevice name="Expansion Hub Portal 1" serialNumber="DQ2F3DNX" parentModuleAddress="2">
         <LynxModule name="Expansion Hub 2" port="2">
             <goBILDA5202SeriesMotor name="liftBase" port="0" />
+            <NeveRest20Gearmotor name="lSpindle" port="3"/>
+            <NeveRest20Gearmotor name="rSpindle" port="2"/>
             <LynxEmbeddedIMU name="imu" port="0" bus="0" />
             <!-- <LynxColorSensor name="colorSensor" port="0" bus="1" />-->
             <!-- <REV_VL53L0X_RANGE_SENSOR name="distance0" port="0" bus="2" /> -->

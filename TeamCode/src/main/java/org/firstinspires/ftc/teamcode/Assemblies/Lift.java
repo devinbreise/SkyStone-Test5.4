@@ -9,14 +9,18 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 public class Lift {
 
-
+    private double liftBasePower = .5;
     private DcMotor liftBase;
+    private DcMotor rSpindle;
+    private DcMotor lSpindle;
+    //NEVEREST20_ENCODER_CLICKS = 537.6
     private DigitalChannel liftLimit;
 
     // Keep track of when controls are updated to limit how fast values can change
-    private double liftBasePower = .5;
     private long nextControlUpdate = System.currentTimeMillis();
     private final long CONTROL_INTERVAL = 500;
+    private final int LEVEL_0 = 340;
+    private final int LEVEL_SPACE = 570;
 
     HardwareMap hardwareMap;
     Telemetry telemetry;
@@ -28,8 +32,9 @@ public class Lift {
     }
 
     public void initLift(){
-
         liftBase = hardwareMap.dcMotor.get("liftBase");
+        rSpindle = hardwareMap.dcMotor.get("rSpindle");
+        lSpindle = hardwareMap.dcMotor.get("lSpindle");
         liftLimit = hardwareMap.get(DigitalChannel.class, "liftLimit");
         liftLimit.setMode(DigitalChannel.Mode.INPUT);
 

@@ -7,6 +7,7 @@ public class teamUtil {
     public static final double YELLOW_JACKET_ENCODER_CLICKS=145.6;
     public static final double NEVERREST40_ENCODER_CLICKS=1120;
     public static LinearOpMode theOpMode;
+    public static final double NEVEREST20_ENCODER_CLICKS=537.6;
 
     /**
      * This method puts the current thread to sleep for the given time in msec.
