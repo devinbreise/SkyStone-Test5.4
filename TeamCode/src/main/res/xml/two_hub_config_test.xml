@@ -16,6 +16,7 @@
             <goBILDA5202SeriesMotor name="bLeftMotor" port="3" />
             <Servo name="latchOne" port="0" />
             <Servo name="latchTwo" port="1" />
+            <RevTouchSensor name="liftDownLimitSwitch" port="1"/>
 
 
             <LynxEmbeddedIMU name="imu 1" port="0" bus="0" />

@@ -25,6 +25,7 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
         @Override
         public void init() {
             robot = new RobotDrive(hardwareMap, telemetry);
+            robot.initDriveMotors();
         }
 
         @Override
@@ -60,6 +61,7 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
             //add triggers for speed boosts
 
             robot.driveTelemetry();
+            robot.telemetryDriveEncoders();
             telemetry.update();
 
         }
