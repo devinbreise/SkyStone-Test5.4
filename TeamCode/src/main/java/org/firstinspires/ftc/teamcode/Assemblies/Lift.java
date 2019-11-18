@@ -15,8 +15,8 @@ public class Lift {
     private DcMotor liftBase;
     private DcMotor rSpindle;
     private DcMotor lSpindle;
-    //NEVEREST20_ENCODER_CLICKS = 537.6
     private RevTouchSensor liftDownLimit;
+    //NEVEREST20_ENCODER_CLICKS = 537.6
 
     // Keep track of when controls are updated to limit how fast values can change
     private long nextControlUpdate = System.currentTimeMillis();

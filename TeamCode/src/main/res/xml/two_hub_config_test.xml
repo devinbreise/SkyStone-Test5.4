@@ -16,6 +16,9 @@
             <goBILDA5202SeriesMotor name="bLeftMotor" port="3" />
             <Servo name="latchOne" port="0" />
             <Servo name="latchTwo" port="1" />
+            <Servo name="grabberOne" port="2" />
+            <Servo name="grabberTwo" port="3" />
+            <Servo name="rotateServo" port="4"/>
             <RevTouchSensor name="liftDownLimitSwitch" port="1"/>
 
 
