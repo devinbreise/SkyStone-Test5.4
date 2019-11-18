@@ -23,15 +23,18 @@ public class revHubIMUGyro {
     private HardwareMap hardwareMap;
     private BNO055IMU imu; //This variable is the imu
     Orientation angle; //This variable keeps track of the current heading
+
+
+
+//OLD VARIABLES FOR OLD CODE--depended on in some files here or there--(CAN BE FOUND WAY BELOW)
     Orientation anglesLast; //This variable keeps track of the current heading
     Orientation anglesCurrent;
     float currentHeading;
 
 
-    public revHubIMUGyro( HardwareMap hardwaremap, Telemetry telemetry, BNO055IMU imu){
+    public revHubIMUGyro( HardwareMap hardwaremap, Telemetry telemetry){
         // set up our IMU
         //These are the parameters that the imu uses in the code to name and keep track of the data
-        this.imu = imu;
         this.telemetry = telemetry;
         this.hardwareMap = hardwaremap;
 
@@ -81,7 +84,6 @@ public class revHubIMUGyro {
             return angle+360;
         } else
             return angle;
-
     }
 
 

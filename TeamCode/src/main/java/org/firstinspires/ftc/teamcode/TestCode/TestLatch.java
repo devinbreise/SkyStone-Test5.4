@@ -41,6 +41,10 @@ public class TestLatch extends OpMode {
             latch.toggleLatch();
 
         }
+        if (gamepad2.y) {
+            latch.latchMiddle();
+
+        }
 
 //        latch.latchTelemetry();
 //        telemetry.update();

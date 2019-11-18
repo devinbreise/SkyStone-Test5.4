@@ -1,12 +1,14 @@
 package org.firstinspires.ftc.teamcode.Assemblies;
 
 
-import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.basicLibs.revHubIMUGyro;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
@@ -27,8 +29,9 @@ public class RobotDrive {
     float currentHeading; //This variable is the current heading of the robot
     Orientation angle; //This variable keeps track of the current heading
 
-    private double COUNTS_PER_INCH = 59.4178;  // 89.7158 is the orriginal number
+    private double COUNTS_PER_INCH = 34.058;  // 89.7158 is the orriginal number
     public static final double NEVERREST40_ENCODER_CLICKS = 1120;
+    public static double INITIAL_HEADING;
 
 
     HardwareMap hardwareMap;
@@ -37,11 +40,12 @@ public class RobotDrive {
     DcMotor bLeftMotor;
     DcMotor fRightMotor;
     DcMotor bRightMotor;
+    DistanceSensor frontLeftDistance;
+    DistanceSensor frontRightDistance;
 
     //    Servo latchOne;
 //    Servo latchTwo;
-    BNO055IMU theImu;
-    revHubIMUGyro imu;
+    revHubIMUGyro revImu ;
 
 
     public RobotDrive(HardwareMap theHardwareMap, Telemetry theTelemetry) {
@@ -50,7 +54,15 @@ public class RobotDrive {
     }
 
     public void initImu() {
-        revHubIMUGyro imu = new revHubIMUGyro(hardwareMap, telemetry, theImu);
+        revImu = new revHubIMUGyro(hardwareMap, telemetry);
+
+    }
+    public void resetHeading(){
+        INITIAL_HEADING = revImu.getHeading();
+    }
+
+    public double getAbsoluteHeading(){
+        return revImu.getAbsoluteHeading();
     }
 
 
@@ -85,8 +97,9 @@ public class RobotDrive {
 
     }
 
-    public void initSensors() {
-
+    public void initDistanceSensors() {
+        frontLeftDistance = hardwareMap.get(DistanceSensor.class, "frontLeftDistance");
+        frontRightDistance = hardwareMap.get(DistanceSensor.class, "frontRightDistance");
 
     }
 
@@ -179,33 +192,44 @@ public class RobotDrive {
         bRightMotor.setPower(TEST_POWER);
     }
 
+    public double getDistanceInches(DistanceSensor distanceSensor){
+        return distanceSensor.getDistance(DistanceUnit.INCH);
+    }
 
-//    public void driveForward(double power, int target) {
-//
-//        power = clip(power);
-//        int pos = fLeftMotor.getCurrentPosition();
-//
-//        do {
-//            driveForward(power);
-//        } while (pos < target);
-//
-//        stopMotors();
-//    }
-//
-//    public void driveForward(double power, int target, int maxTime) {
-//
-//        power = clip(power);
-//        int pos = fLeftMotor.getCurrentPosition();
-//
-//        ElapsedTime motorElapsedTime = new ElapsedTime();
-//
-//        do {
-//            driveForward(power);
-//
-//        } while (pos < target && motorElapsedTime.milliseconds() < maxTime);
-//
-//        stopMotors();
-//    }
+
+    public void distanceTelemetry(){
+        telemetry.addData("frontLeftDistance", getDistanceInches(frontLeftDistance));
+        telemetry.addData("frontRightDistance", getDistanceInches(frontRightDistance));
+
+    }
+
+    public void frontLeftCloseToDistance(double desiredDistance){
+        double currentReading = getDistanceInches(frontLeftDistance);
+
+        if( currentReading < desiredDistance){
+            do{
+                driveBackward(0.5);
+            } while( getDistanceInches(frontLeftDistance) < desiredDistance&& teamUtil.theOpMode.opModeIsActive());
+
+        } else if( currentReading > desiredDistance){
+
+            do{
+                driveForward(0.5);
+            } while( getDistanceInches(frontRightDistance) > desiredDistance&& teamUtil.theOpMode.opModeIsActive());
+
+        }
+    }
+
+    public void driveForward(double power, double timeInMilliseconds){
+        ElapsedTime driveTime = new ElapsedTime();
+        power = clip(power);
+        setZeroAllDriveMotors();
+        do{
+            driveForward(power);
+        } while(driveTime.milliseconds() < timeInMilliseconds && teamUtil.theOpMode.opModeIsActive());
+        stopMotors();
+    }
+
 
     public void moveInchesForward(double speed, double inches) {
         //resets the motors
@@ -213,7 +237,7 @@ public class RobotDrive {
         fRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 
-        fRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        setZeroAllDriveMotors();
         //sets the number of desired inches on both motors
 
         int encoderCounts = (int) (COUNTS_PER_INCH * inches);
@@ -367,15 +391,19 @@ public class RobotDrive {
 
     }
 
+    public double getHeading(){
+        return revImu.getHeading() - INITIAL_HEADING;
+    }
+
     public void imuRotateToAngle(double desiredHeading) {
 
-        double startHeading = imu.getHeading();
+        double startHeading = getHeading();
         int rotateDirection;
         double rotatePower;
         double tolerance = 0.1;
         boolean completedRotating;
 
-        double rawChangeInAngle = desiredHeading - imu.getHeading();
+        double rawChangeInAngle = desiredHeading - getHeading();
         double changeInAngle = Math.abs(adjustAngle(rawChangeInAngle));
 
 
@@ -414,7 +442,7 @@ public class RobotDrive {
     }
 
     public void imuRotate(double angle) {
-        double startHeading = imu.getHeading();
+        double startHeading = getHeading();
         int rotateDirection;
         double tolerance = 0.1;
         boolean completedRotating;
@@ -424,7 +452,7 @@ public class RobotDrive {
         double desiredHeading = adjustAngle(rawDesiredHeading);
 
 
-        double changeInAngle = Math.abs(imu.getHeading() - rawDesiredHeading);
+        double changeInAngle = Math.abs(getHeading() - rawDesiredHeading);
 
         //to make sure that the speed of rotation matches the amount of angle we have to our desired heading
         double rotatePower = Range.clip(changeInAngle / 135, MIN_ROTATING_POWER, 1);

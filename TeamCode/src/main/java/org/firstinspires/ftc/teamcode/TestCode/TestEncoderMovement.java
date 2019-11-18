@@ -33,7 +33,9 @@ public class TestEncoderMovement extends LinearOpMode {
 
 
 
-            robot.moveInchesForward(0.5, 15);
+
+//            robot.moveInchesForward(0.5, 20);
+        robot.driveForward(0.5, 500 );
 //    robot.driveForward(0.5);
 
     teamUtil.log("BACKLEFT " + robot.getBackLeftMotorPos());

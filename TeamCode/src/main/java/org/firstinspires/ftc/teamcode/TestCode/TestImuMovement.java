@@ -9,26 +9,44 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Assemblies.RobotDrive;
 import org.firstinspires.ftc.teamcode.basicLibs.revHubIMUGyro;
+import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 @TeleOp(name = "TestImuMovement")
 public class TestImuMovement extends LinearOpMode {
 
-    HardwareMap hardwareMap;
-    Telemetry telemetry;
 
-    revHubIMUGyro imu;
     RobotDrive robot;
 
 
     @Override
     public void runOpMode() throws InterruptedException {
+
         robot = new RobotDrive(hardwareMap, telemetry);
 
         robot.initDriveMotors();
         robot.initImu();
+        telemetry.addData("heading:", robot.getHeading());
+        telemetry.update();
+
+        waitForStart();
+
+        robot.resetHeading();
 
         while (opModeIsActive()) {
-            imu.getHeading();
+           telemetry.addData("Absoluteheading:", robot.getAbsoluteHeading());
+            telemetry.addData("heading:", robot.getHeading());
+
+           telemetry.addData("INIT", robot.INITIAL_HEADING);
+            telemetry.update();
+
+            sleep(5000);
+
+            robot.imuRotateToAngle(0);
+            teamUtil.log("heading: " + robot.getHeading());
+
+            sleep(5000);
+
+            robot.imuRotateToAngle(90);
         }
 
 
