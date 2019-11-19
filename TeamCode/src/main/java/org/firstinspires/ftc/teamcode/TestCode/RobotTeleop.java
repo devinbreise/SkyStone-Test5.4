@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
 import org.firstinspires.ftc.teamcode.Assemblies.Latch;
 import org.firstinspires.ftc.teamcode.Assemblies.Lift;
 import org.firstinspires.ftc.teamcode.Assemblies.RobotDrive;
+import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 @TeleOp(name = "RobotTeleop")
 public class RobotTeleop extends OpMode {
@@ -29,10 +30,12 @@ public class RobotTeleop extends OpMode {
         grabber = new Grabber(hardwareMap, telemetry);
 
         robot.initDriveMotors();
+        robot.initImu();
 //        lift.initLift();
         latch.initLatch();
 //        grabber.initGrabber();
 
+        teamUtil.initPerf();
 
     }
 
@@ -102,6 +105,7 @@ public class RobotTeleop extends OpMode {
         robot.driveTelemetry();
         telemetry.update();
 
+        teamUtil.trackPerf();
 
     }
 }
