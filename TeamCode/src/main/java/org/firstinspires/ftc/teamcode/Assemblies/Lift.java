@@ -23,9 +23,9 @@ public class Lift {
     private final long CONTROL_INTERVAL = 500;
 
     // Constants for the spindles
-    private final int LEVEL_0 = 340;
+    private final int LEVEL_0 = 430;
     private final int LEVEL_INCREMENT = 570;
-    private final double TENSION_POWER = 0.05;
+    private final double TENSION_POWER = 0.075;
 
 
     HardwareMap hardwareMap;
@@ -56,20 +56,20 @@ public class Lift {
     // These 5 methods are for testing...they are intended to give you button control
     // over the lift (e.g. while a button is held down, call liftUp, when the button is let go
     // call shutDownLift()
-    public void shutDownLift(){
+    public void shutDownLiftBase(){
         liftBase.setPower(0);
     }
-    public void liftUp(){
+    public void liftBaseUp(){
         liftBase.setPower(liftBasePower);
     }
-    public void liftDown(){
+    public void liftBaseDown(){
         if(liftDownLimit.isPressed()){
-            shutDownLift();
+            shutDownLiftBase();
         } else {
             liftBase.setPower(-liftBasePower);
         }
     }
-    public void increaseLiftPower(){
+    public void increaseLiftBasePower(){
         // If enough time has passed since we last updated the power
         if (System.currentTimeMillis() > nextControlUpdate)
         {
@@ -77,7 +77,7 @@ public class Lift {
             nextControlUpdate = System.currentTimeMillis() + CONTROL_INTERVAL;
         }
     }
-    public void decreaseLiftPower(){
+    public void decreaseLiftBasePower(){
         // If enough time has passed since we last updated the power
         if (System.currentTimeMillis() > nextControlUpdate)
         {
@@ -130,3 +130,6 @@ public class Lift {
         telemetry.addData("rSpindle:", rSpindle.getCurrentPosition());
     }
 }
+
+
+

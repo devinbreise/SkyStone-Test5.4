@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
 
 @TeleOp(name = "TestGrabber")
-@Disabled
+
 public class TestGrabber extends OpMode {
 
     Grabber grabber;
@@ -29,9 +29,17 @@ public class TestGrabber extends OpMode {
         if (gamepad2.x) { //close narrow
             grabber.closeGrabberWide();
         }
-        if (gamepad2.y) { //close narrow
-            grabber.closeGrabberNarrow();
+        if(gamepad2.dpad_up){
+            grabber.rotateOutside();
         }
+        if(gamepad2.dpad_down){
+            grabber.rotateSetPosition(grabber.rotateGetPosition()-0.01);
+          grabber.rotateInside();
+        }
+        if(gamepad2.dpad_right){
+            grabber.rotateNarrow();
+        }
+
 
         grabber.grabberTelemetry();
 

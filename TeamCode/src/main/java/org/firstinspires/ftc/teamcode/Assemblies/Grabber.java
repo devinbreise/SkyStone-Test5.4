@@ -5,6 +5,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.basicLibs.HiTecServo;
+import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
+
 
 public class Grabber {
 
@@ -13,24 +15,26 @@ public class Grabber {
 
 
     //far from the robot
-    public final double GRABBER_ONE_STOW_POS = 1;
-    public final double GRABBER_ONE_OPEN_POS = 1;
-    public final double GRABBER_ONE_WIDE_CLOSED_POS = 0.64;
-    public final double GRABBER_ONE_NARROW_CLOSED_POS = 0.45;
+    public final double GRABBER_ONE_STOW_POS = 1; //1
+    public final double GRABBER_ONE_OPEN_POS = 0.5;
+    public final double GRABBER_ONE_WIDE_CLOSED_POS = 0.3;
+    public final double GRABBER_ONE_NARROW_CLOSED_POS = 0.07;
 
     //close to the robot
     public final double GRABBER_TWO_STOW_POS = 0;
-    public final double GRABBER_TWO_OPEN_POS = 0;
-    public final double GRABBER_TWO_WIDE_CLOSED_POS = 0.33;
-    public final double GRABBER_TWO_NARROW_CLOSED_POS = 0.52;
+    public final double GRABBER_TWO_OPEN_POS = 0.5;
+    public final double GRABBER_TWO_WIDE_CLOSED_POS = 0.7;
+    public final double GRABBER_TWO_NARROW_CLOSED_POS = 0.78;
 
-    public final double rotate_outside = 0.0;
-    public final double rotate_narrow = 0.5;
-    public final double rotate_inside = 0.9;
+    public final double rotate_outside = 0.79;
+    public final double rotate_narrow = 0.476;
+    public final double rotate_inside = 0.19;
 
     private Servo grabberOne;
     private Servo grabberTwo;
     private Servo rotateServo;
+
+    private boolean grabberRunning = false;
 
     GrabberState grabberState;
     Telemetry telemetry;
@@ -59,11 +63,24 @@ public class Grabber {
 
         //CURRENT_POS = ROTATE_GRABBER_INITIAL_POS;
         //rotateGrabber.setPosition(CURRENT_POS);
-        grabberOne.setPosition(GRABBER_ONE_STOW_POS);
-        grabberTwo.setPosition(GRABBER_TWO_STOW_POS);
-        rotateServo.setPosition(rotate_inside);
+
 
         grabberState = GrabberState.GRABBER_STOWED;
+    }
+    public void stowGrabber(){
+        if(grabberRunning == false){
+            grabberRunning = true;
+            Thread t1 = new Thread(new Runnable(){
+                @Override
+                public void run(){
+                    rotateServo.setPosition(rotate_inside);
+                    teamUtil.sleep(1500);
+                    grabberOne.setPosition(GRABBER_ONE_STOW_POS);
+                    grabberTwo.setPosition(GRABBER_TWO_STOW_POS);
+
+                }
+            });
+        }
     }
 
     public void grabberTelemetry() {
@@ -110,12 +127,30 @@ public class Grabber {
         grabberState = GrabberState.GRABBER_NARROW_DROP;
     }
 
-    public void rotateGrabber() {
+    public void toggleRotate() {
         if(rotateServo.getPosition() == rotate_outside){
             rotateServo.setPosition(rotate_inside);
         }else {
             rotateServo.setPosition(rotate_outside);
         }
+    }
+
+    public void rotateOutside(){
+        rotateServo.setPosition(rotate_outside);
+    }
+
+    public void rotateInside(){
+        rotateServo.setPosition(rotate_inside);
+    }
+
+    public void rotateNarrow(){
+        rotateServo.setPosition(rotate_narrow);
+    }
+    public double rotateGetPosition(){
+        return rotateServo.getPosition();
+    }
+    public void rotateSetPosition(double position){
+        rotateServo.setPosition(position);
     }
 
 

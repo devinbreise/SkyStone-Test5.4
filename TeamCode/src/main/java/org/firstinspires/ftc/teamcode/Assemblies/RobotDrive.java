@@ -392,7 +392,8 @@ public class RobotDrive {
     }
 
     public double getHeading(){
-        return revImu.getHeading() - INITIAL_HEADING;
+        return
+                revImu.correctHeading(revImu.getHeading() - INITIAL_HEADING);
     }
 
     public void imuRotateToAngle(double desiredHeading) {
@@ -542,6 +543,22 @@ public class RobotDrive {
         return (float) (0.9950472 * Math.pow(Math.abs(joyStickDistance), 1.82195) * sign);
     }
 
+    public void universalJoystick(float leftJoyStickX, float leftJoyStickY, float rightJoyStickX, double robotHeading){
+
+
+        double angleInDegrees = robotHeading * Math.PI/180;
+        float leftX = leftJoyStickX;
+        float leftY = leftJoyStickY;
+        float rightX = rightJoyStickX;
+
+        float rotatedLeftX = (float)(Math.cos(angleInDegrees)*leftX - Math.sin(angleInDegrees)*leftY);
+        float rotatedLeftY = (float)(Math.sin(angleInDegrees)*leftX + Math.cos(angleInDegrees)*leftY);
+
+        //rotate to obtain new coordinates
+
+        driveJoyStick(rotatedLeftX, rotatedLeftY, rightX);
+    }
+
     public void driveJoyStick(float leftJoyStickX, float leftJoyStickY, float rightJoyStickX) {
 
         //left joystick is for moving, right stick is for rotation
@@ -561,10 +578,10 @@ public class RobotDrive {
 //        float rightX = rightJoyStickX;
 
 
-        float frontLeft = leftY - leftX + rightX;
-        float frontRight = -leftY - leftX + rightX;
-        float backRight = -leftY + leftX + rightX;
-        float backLeft = leftY + leftX + rightX;
+        float frontLeft = leftY - leftX - rightX;
+        float frontRight = -leftY - leftX - rightX;
+        float backRight = -leftY + leftX - rightX;
+        float backLeft = leftY + leftX - rightX;
 
         telemetry.addData("RIGHTX:", rightX);
         telemetry.addData("LEFTX:", leftX);

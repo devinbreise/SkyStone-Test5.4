@@ -33,20 +33,31 @@ public class TestImuMovement extends LinearOpMode {
         robot.resetHeading();
 
         while (opModeIsActive()) {
+
+            if(gamepad1.left_bumper){
+                robot.rotateCW(0.1);
+            } else if(gamepad1.right_bumper){
+                robot.rotateCCW(0.1);
+            } else robot.stopMotors();
+
+            if(gamepad1.a){
+                robot.resetHeading();
+            }
+
            telemetry.addData("Absoluteheading:", robot.getAbsoluteHeading());
             telemetry.addData("heading:", robot.getHeading());
 
-           telemetry.addData("INIT", robot.INITIAL_HEADING);
+           telemetry.addData("INIT", RobotDrive.INITIAL_HEADING);
             telemetry.update();
 
-            sleep(5000);
-
-            robot.imuRotateToAngle(0);
-            teamUtil.log("heading: " + robot.getHeading());
-
-            sleep(5000);
-
-            robot.imuRotateToAngle(90);
+//            sleep(5000);
+//
+//            robot.imuRotateToAngle(0);
+//            teamUtil.log("heading: " + robot.getHeading());
+//
+//            sleep(5000);
+//
+//            robot.imuRotateToAngle(90);
         }
 
 

@@ -68,22 +68,25 @@ public class revHubIMUGyro {
 
     public void resetHeading(){
         angle = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        angle.firstAngle = 0;
-
+        currentHeading = 0;
         //ideally, you shouldnt have to reset it when moving into teleop, so you only want to do this to right itself if necessary
     }
+
     public float getAbsoluteHeading() {
         angle = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         return angle.firstAngle;
     }
 
+    public double correctHeading(double angle){
+        if(angle < 0){
+            return angle+360;
+        } else return angle;
+    }
+
 
     public double getHeading(){
         double angle = getAbsoluteHeading();
-        if(angle < 0){
-            return angle+360;
-        } else
-            return angle;
+        return correctHeading(angle);
     }
 
 

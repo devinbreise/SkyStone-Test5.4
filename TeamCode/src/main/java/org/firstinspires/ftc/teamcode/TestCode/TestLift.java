@@ -20,22 +20,23 @@ public class TestLift extends OpMode {
     public void init() {
         lift = new Lift(hardwareMap, telemetry);
         lift.initLift();
+        lift.tensionLiftString();
     }
 
     public void loop() {
 
         // manual limbo
         if (gamepad1.b) {
-            lift.liftUp();
+            lift.liftBaseUp();
         } else if (gamepad1.a) {
-            lift.liftDown();
-        } else lift.shutDownLift();
+            lift.liftBaseDown();
+        } else lift.shutDownLiftBase();
 
         if (gamepad1.dpad_down) {
-            lift.decreaseLiftPower();
+            lift.decreaseLiftBasePower();
         }
         if (gamepad1.dpad_up) {
-            lift.increaseLiftPower();
+            lift.increaseLiftBasePower();
         }
         if (gamepad2.dpad_left) {
             targetLevel--;

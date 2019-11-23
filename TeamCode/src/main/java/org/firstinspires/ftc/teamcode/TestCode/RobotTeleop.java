@@ -18,6 +18,7 @@ public class RobotTeleop extends OpMode {
     RobotDrive robot;
     Lift lift;
     Latch latch;
+    int level = 0;
 
     Grabber grabber;
 
@@ -31,11 +32,13 @@ public class RobotTeleop extends OpMode {
 
         robot.initDriveMotors();
         robot.initImu();
-//        lift.initLift();
+
+        lift.initLift();
         latch.initLatch();
-//        grabber.initGrabber();
+        grabber.initGrabber();
 
         teamUtil.initPerf();
+        robot.resetHeading();
 
     }
 
@@ -43,41 +46,57 @@ public class RobotTeleop extends OpMode {
     public void loop() {
 
         //robot.scaleMovement(MAX_POWER, DRIVE_POWER);
+        telemetry.addData("Heading:", robot.getHeading());
 
-        robot.driveJoyStick(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
+///////////////////////////////////////////////////////////////////////
+        //this code is for the drive
+        robot.universalJoystick(gamepad1.left_stick_x,
+                gamepad1.left_stick_y,
+                gamepad1.right_stick_x,
+                robot.getHeading());
 
-//        if (gamepad1.dpad_up) {
-//            lift.increaseLiftPower();
-//        }
-//        if (gamepad1.dpad_down) {
-//            lift.decreaseLiftPower();
-//        }
+        if(gamepad1.left_stick_button && gamepad1.right_stick_button){
+            robot.resetHeading();
+        }
 
-//        if (gamepad1.dpad_left) {
-//
-//        }
-//        if (gamepad1.dpad_right) {
-//
-//        }
+//////////////////////////////////////////////////////////////////////
+        //this code is for the foundation latch
+        if (gamepad1.right_bumper) {
+            latch.toggleLatch();
 
-        if (gamepad1.a) {
+        }else if (gamepad1.dpad_up) {
             latch.latchUp();
 
         }
-        if(gamepad1.x){
-            latch.latchDown();
+/////////////////////////////////////////////////////////////////////
+        //this code is for the grabber on the lift system
+        if(gamepad1.y){
+            grabber.openGrabber();
+        }else if (gamepad1.a) {
+            grabber.closeGrabberToggle();
         }
 
-        //open
-        if (gamepad1.b) {
-            latch.toggleLatch();
-
+/////////////////////////////////////////////////////////////////////
+        // this code is for the lift base
+        if (gamepad1.dpad_up) {
+            lift.liftBaseUp();
+        } else if (gamepad1.dpad_down) {
+            lift.liftBaseDown();
+        } else lift.shutDownLiftBase();
+////////////////////////////////////////////////////////////////////
+        //this code is for the lift system
+        if(gamepad2.right_bumper){
+            lift.goToLevel(level);
+            level++;
         }
-        if (gamepad1.y) {
-            latch.latchMiddle();
+        if(gamepad2.left_bumper){
+            lift.goToBottom();
 
+            level = 0;
         }
-
+        if(gamepad2.y){
+            lift.tensionLiftString();
+        }
 
 
 //        if (gamepad1.b) {
@@ -104,7 +123,7 @@ public class RobotTeleop extends OpMode {
         latch.latchTelemetry();
         robot.driveTelemetry();
         telemetry.update();
-
+        telemetry.addData("level:", level);
         teamUtil.trackPerf();
 
     }
