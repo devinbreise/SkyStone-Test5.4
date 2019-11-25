@@ -119,8 +119,8 @@ public class SensorREVColorDistance extends LinearOpMode {
         waitForStart();
         sensorColor.enableLed(true);  // Turn the LED on
 
-        // loop and read the RGB and distance data.
-        // Note we use opModeIsActive() as our loop condition because it is an interruptible method.
+        // liftLoop and read the RGB and distance data.
+        // Note we use opModeIsActive() as our liftLoop condition because it is an interruptible method.
         while (opModeIsActive()) {
             // convert the RGB values to HSV values.
             // multiply by the SCALE_FACTOR.

@@ -8,8 +8,8 @@ import org.firstinspires.ftc.teamcode.Assemblies.Latch;
 import org.firstinspires.ftc.teamcode.Assemblies.Lift;
 import org.firstinspires.ftc.teamcode.Assemblies.RobotDrive;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
-@Autonomous(name="AutoFoundationPath")
-public class AutoFoundationPath extends LinearOpMode {
+@Autonomous(name="AutoFoundationPathRed")
+public class AutoFoundationPathRed extends LinearOpMode {
 
     RobotDrive robot;
     Latch latch;

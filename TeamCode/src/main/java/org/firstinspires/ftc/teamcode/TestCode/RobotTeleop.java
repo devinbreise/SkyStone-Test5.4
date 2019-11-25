@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.TestCode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -8,6 +7,7 @@ import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
 import org.firstinspires.ftc.teamcode.Assemblies.Latch;
 import org.firstinspires.ftc.teamcode.Assemblies.Lift;
 import org.firstinspires.ftc.teamcode.Assemblies.RobotDrive;
+import org.firstinspires.ftc.teamcode.basicLibs.TeamGamepad;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 @TeleOp(name = "RobotTeleop")
@@ -19,7 +19,7 @@ public class RobotTeleop extends OpMode {
     Lift lift;
     Latch latch;
     int level = 0;
-
+    TeamGamepad teamGamePad;
     Grabber grabber;
 
     @Override
@@ -27,7 +27,7 @@ public class RobotTeleop extends OpMode {
         robot = new RobotDrive(hardwareMap, telemetry);
         lift = new Lift(hardwareMap, telemetry);
         latch = new Latch(hardwareMap, telemetry);
-
+        teamGamePad = new TeamGamepad(this);
         grabber = new Grabber(hardwareMap, telemetry);
 
         robot.initDriveMotors();
@@ -47,6 +47,9 @@ public class RobotTeleop extends OpMode {
 
         //robot.scaleMovement(MAX_POWER, DRIVE_POWER);
         telemetry.addData("Heading:", robot.getHeading());
+///////////////////////////////////////////////////////////////////////
+        teamGamePad.gamepadLoop();
+        lift.liftLoop(lift);
 
 ///////////////////////////////////////////////////////////////////////
         //this code is for the drive
@@ -62,30 +65,33 @@ public class RobotTeleop extends OpMode {
 //////////////////////////////////////////////////////////////////////
         //this code is for the foundation latch
         if (gamepad1.right_bumper) {
-            latch.toggleLatch();
+            latch.latchDown();
 
         }else if (gamepad1.dpad_up) {
             latch.latchUp();
+        }
 
+        if(gamepad1.dpad_left){
+            latch.latchMiddle();
         }
 /////////////////////////////////////////////////////////////////////
         //this code is for the grabber on the lift system
         if(gamepad1.y){
             grabber.openGrabber();
-        }else if (gamepad1.a) {
+        }else if (teamGamePad.gamepad2bBounced()) {
             grabber.closeGrabberToggle();
         }
 
 /////////////////////////////////////////////////////////////////////
         // this code is for the lift base
-        if (gamepad1.dpad_up) {
-            lift.liftBaseUp();
-        } else if (gamepad1.dpad_down) {
-            lift.liftBaseDown();
-        } else lift.shutDownLiftBase();
+//        if (gamepad1.dpad_up) {
+////            lift.liftBaseUp();
+////        } else if (gamepad1.dpad_down) {
+////            lift.liftBaseDown();
+////        } else lift.shutDownLiftBase();
 ////////////////////////////////////////////////////////////////////
         //this code is for the lift system
-        if(gamepad2.right_bumper){
+        if(teamGamePad.gamepad2RightBumperBounced()){
             lift.goToLevel(level);
             level++;
         }

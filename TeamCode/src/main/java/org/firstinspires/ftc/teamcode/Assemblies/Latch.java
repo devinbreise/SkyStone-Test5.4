@@ -11,12 +11,12 @@ public class Latch {
 
     //NEED TO INTRODUCE STATE MACHINE(MAKE SURE GRABBER ONE WORKS, THEN COPY-PASTE
 
-    public static final double LATCH_ONE_DOWN = 0.72;
-    public static final double LATCH_TWO_DOWN = 0.24;
-    public static final double LATCH_TWO_UP = 0.9;
-    public static final double LATCH_ONE_UP = 0.19;
-    public static final double LATCH_ONE_MIDDLE = 0.66;
-    public static final double LATCH_TWO_MIDDLE = 0.31;
+    public static final double LATCH_ONE_UP = 0.72;
+    public static final double LATCH_TWO_UP = 0.3;
+    public static final double LATCH_TWO_DOWN = 0.74;
+    public static final double LATCH_ONE_DOWN = 0.19;
+    public static final double LATCH_ONE_MIDDLE = 0.315;
+    public static final double LATCH_TWO_MIDDLE = 0.65;
     public boolean latchIsUp;
 
 
@@ -35,8 +35,7 @@ public class Latch {
     public void initLatch() {
         latchOne = hardwareMap.servo.get("latchOne");
         latchTwo = hardwareMap.servo.get("latchTwo");
-        latchOne.setPosition(LATCH_ONE_UP);
-        latchTwo.setPosition(LATCH_TWO_UP);
+        latchMiddle();
         latchIsUp = true;
 
 

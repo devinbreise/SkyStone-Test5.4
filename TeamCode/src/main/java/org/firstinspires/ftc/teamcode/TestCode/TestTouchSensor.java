@@ -70,8 +70,8 @@ public class TestTouchSensor extends LinearOpMode {
         // wait for the start button to be pressed.
         waitForStart();
 
-        // while the op mode is active, loop and read the light levels.
-        // Note we use opModeIsActive() as our loop condition because it is an interruptible method.
+        // while the op mode is active, liftLoop and read the light levels.
+        // Note we use opModeIsActive() as our liftLoop condition because it is an interruptible method.
         while (opModeIsActive()) {
 
             // send the info back to driver station using telemetry function.

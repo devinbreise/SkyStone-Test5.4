@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Assemblies;
 
 
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -10,6 +11,7 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.teamcode.basicLibs.DistanceSensors;
 import org.firstinspires.ftc.teamcode.basicLibs.revHubIMUGyro;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
@@ -29,7 +31,9 @@ public class RobotDrive {
     float currentHeading; //This variable is the current heading of the robot
     Orientation angle; //This variable keeps track of the current heading
 
-    private double COUNTS_PER_INCH = 34.058;  // 89.7158 is the orriginal number
+    private double COUNTS_PER_INCH = 62.24;  // 89.7158 is the orriginal number
+    private double COUNTS_PER_INCH_SIDEWAYS = 67.82;  // 89.7158 is the orriginal number
+
     public static final double NEVERREST40_ENCODER_CLICKS = 1120;
     public static double INITIAL_HEADING;
 
@@ -40,8 +44,11 @@ public class RobotDrive {
     DcMotor bLeftMotor;
     DcMotor fRightMotor;
     DcMotor bRightMotor;
-    DistanceSensor frontLeftDistance;
-    DistanceSensor frontRightDistance;
+    DistanceSensors frontLeftDistance;
+    DistanceSensors frontRightDistance;
+    DistanceSensors leftDistanceSensor;
+    DistanceSensors rightDistanceSensor;
+    DistanceSensors backDistanceSensor;
 
     //    Servo latchOne;
 //    Servo latchTwo;
@@ -98,8 +105,10 @@ public class RobotDrive {
     }
 
     public void initDistanceSensors() {
-        frontLeftDistance = hardwareMap.get(DistanceSensor.class, "frontLeftDistance");
-        frontRightDistance = hardwareMap.get(DistanceSensor.class, "frontRightDistance");
+        frontLeftDistance = new DistanceSensors(telemetry, hardwareMap.get(Rev2mDistanceSensor.class, "frontLeftDistance"));
+        frontRightDistance = new DistanceSensors(telemetry, hardwareMap.get(Rev2mDistanceSensor.class, "frontRightDistance"));
+        leftDistanceSensor = new DistanceSensors(telemetry, hardwareMap.get(Rev2mDistanceSensor.class, "LeftDistance"));
+        leftDistanceSensor = new DistanceSensors(telemetry, hardwareMap.get(Rev2mDistanceSensor.class, "RightDistance"));
 
     }
 
@@ -139,7 +148,7 @@ public class RobotDrive {
 
     public double clip(double power) {
 
-        power = Range.clip(power, FULL_POWER, -FULL_POWER);
+        power = Range.clip(power, -FULL_POWER, FULL_POWER);
         return power;
     }
 
@@ -149,8 +158,7 @@ public class RobotDrive {
         fRightMotor.setPower(0);
         bRightMotor.setPower(0);
     }
-
-    public void driveForward(double power) {
+    public void driveForward (double power) {
         power = clip(power);
         fLeftMotor.setPower(-power); //neg for F og
         fRightMotor.setPower(power); // pos for F og
@@ -167,6 +175,10 @@ public class RobotDrive {
         bRightMotor.setPower(-power); //pos for F
 
     }
+
+
+
+
 
     public void driveRight(double power) {
         power = clip(power);
@@ -187,13 +199,17 @@ public class RobotDrive {
 
     public void testDriveSlow() {
         fLeftMotor.setPower(-TEST_POWER);
-        fRightMotor.setPower(TEST_POWER);
         bLeftMotor.setPower(-TEST_POWER);
         bRightMotor.setPower(TEST_POWER);
     }
 
-    public double getDistanceInches(DistanceSensor distanceSensor){
-        return distanceSensor.getDistance(DistanceUnit.INCH);
+    public double getDistanceInches(DistanceSensors distanceSensor){
+        if (distanceSensor.validReading()) {
+            return distanceSensor.getDistance();
+        }
+        else {
+            return -1;
+        }
     }
 
 
@@ -209,13 +225,13 @@ public class RobotDrive {
         if( currentReading < desiredDistance){
             do{
                 driveBackward(0.5);
-            } while( getDistanceInches(frontLeftDistance) < desiredDistance&& teamUtil.theOpMode.opModeIsActive());
+            } while( getDistanceInches(frontLeftDistance) < desiredDistance && teamUtil.theOpMode.opModeIsActive());
 
         } else if( currentReading > desiredDistance){
 
             do{
                 driveForward(0.5);
-            } while( getDistanceInches(frontRightDistance) > desiredDistance&& teamUtil.theOpMode.opModeIsActive());
+            } while( getDistanceInches(frontRightDistance) > desiredDistance && teamUtil.theOpMode.opModeIsActive());
 
         }
     }
@@ -244,7 +260,11 @@ public class RobotDrive {
         speed = clip(speed);
 
         do {
+//            double driveSpeed = Range.clip( Math.abs(fRightMotor.getCurrentPosition()-encoderCounts)/700, 0.2, 1);
             driveForward(speed);
+
+            teamUtil.log("difference: " + Math.abs(fRightMotor.getCurrentPosition()-encoderCounts));
+            teamUtil.log("rightMotorPower: " + fRightMotor.getPower());
             teamUtil.log("fRightMotor: " + getBackLeftMotorPos());
             encoderTelemetry();
 
@@ -308,7 +328,7 @@ public class RobotDrive {
         fRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //sets the number of desired inches on both motors
 
-        int encoderCounts = (int) (COUNTS_PER_INCH * inches);
+        int encoderCounts = (int) (COUNTS_PER_INCH_SIDEWAYS * inches);
         speed = clip(speed);
 
         do {
@@ -342,7 +362,7 @@ public class RobotDrive {
         fRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //sets the number of desired inches on both motors
 
-        int encoderCounts = (int) (COUNTS_PER_INCH * inches);
+        int encoderCounts = (int) (COUNTS_PER_INCH_SIDEWAYS * inches);
         speed = clip(speed);
 
         do {
@@ -443,20 +463,25 @@ public class RobotDrive {
     }
 
     public void imuRotate(double angle) {
+        teamUtil.log("HI");
         double startHeading = getHeading();
         int rotateDirection;
-        double tolerance = 0.1;
+        double tolerance = 5;
         boolean completedRotating;
 
 
         double rawDesiredHeading = startHeading + angle;
-        double desiredHeading = adjustAngle(rawDesiredHeading);
 
+        teamUtil.log("START_HEADING: " + startHeading);
+        teamUtil.log("RAW_DESIRED_HEADING: " + rawDesiredHeading);
 
         double changeInAngle = Math.abs(getHeading() - rawDesiredHeading);
 
+
         //to make sure that the speed of rotation matches the amount of angle we have to our desired heading
-        double rotatePower = Range.clip(changeInAngle / 135, MIN_ROTATING_POWER, 1);
+        double rotatePower = Range.clip(Math.abs(getHeading() - rawDesiredHeading) / 135, MIN_ROTATING_POWER, 0.5);
+//        teamUtil.log("RotatePower: " + rotatePower);
+
 
 
         if (angle > 0) {
@@ -464,47 +489,67 @@ public class RobotDrive {
         } else rotateDirection = -1; //CW
 
 
-        if (changeInAngle > tolerance) {
+        if (Math.abs(getHeading() - rawDesiredHeading) > tolerance) {
             completedRotating = false;
         } else {
             completedRotating = true;
             telemetry.addData("I'M DONE ROTATING", "");
+            teamUtil.log("done rotating");
         }
 
-        if (!completedRotating) {
+        teamUtil.log("CHANGE_IN_ANGLE: " + changeInAngle);
+
+        teamUtil.log("DIRECTION: " + rotateDirection);
+
+        do {
+             rotatePower = Range.clip(Math.abs(getHeading() - rawDesiredHeading) / 130, MIN_ROTATING_POWER, 0.5);
+             teamUtil.log("rotatePower: " + fLeftMotor.getPower());
+             teamUtil.log("difference: " + Math.abs(getHeading() - rawDesiredHeading));
+             teamUtil.log("heading : " + getHeading());
+             teamUtil.log("completedRotating: " + completedRotating);
+
 
             rotateCCW(rotatePower * rotateDirection);
-            telemetry.addData("startHeading", startHeading);
-            telemetry.addData("desiredHeading", desiredHeading);
 
-            telemetry.addData("changeInAngle", changeInAngle);
-            telemetry.addData("rotatingPower", rotatePower);
-            telemetry.addData("direction", rotateDirection);
-            telemetry.update();
+            if (Math.abs(getHeading() - rawDesiredHeading) > tolerance) {
+                completedRotating = false;
+            } else {
+                completedRotating = true;
+                telemetry.addData("I'm done rotating now", "");
+                teamUtil.log("done rotating");
+            }
 
-        } else {
+//            telemetry.addData("startHeading", startHeading);
+//            telemetry.addData("desiredHeading", desiredHeading);
+//
+//            telemetry.addData("changeInAngle", changeInAngle);
+//            telemetry.addData("rotatingPower", rotatePower);
+//            telemetry.addData("direction", rotateDirection);
+//            telemetry.update();
+
+        } while(!completedRotating && teamUtil.theOpMode.opModeIsActive());
             stopMotors();
             return;
 
         }
 
 
-    }
+
 
     public void rotateCCW(double rotatingPower) {
-        double power = clip(rotatingPower);
-        fLeftMotor.setPower(-power);
-        fRightMotor.setPower(-power);
-        bLeftMotor.setPower(-power);
-        bRightMotor.setPower(-power);
-    }
-
-    public void rotateCW(double rotatingPower) {
         double power = clip(rotatingPower);
         fLeftMotor.setPower(power);
         fRightMotor.setPower(power);
         bLeftMotor.setPower(power);
         bRightMotor.setPower(power);
+    }
+
+    public void rotateCW(double rotatingPower) {
+        double power = clip(rotatingPower);
+        fLeftMotor.setPower(-power);
+        fRightMotor.setPower(-power);
+        bLeftMotor.setPower(-power);
+        bRightMotor.setPower(-power);
     }
 
     public boolean checkJoyStickMovement(float leftJoyStickX, float leftJoyStickY, float rightJoyStickX, float rightJoyStickY) {
@@ -543,9 +588,50 @@ public class RobotDrive {
         return (float) (0.9950472 * Math.pow(Math.abs(joyStickDistance), 1.82195) * sign);
     }
 
+
+
+    public void driveToHeading(double speed, double inches, double desiredHeading){
+        //resets the motors
+        fRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+
+        setZeroAllDriveMotors();
+        //sets the number of desired inches on both motors
+
+        int encoderCounts = (int) (COUNTS_PER_INCH * inches);
+        float driveSpeed = (float)(clip(speed));
+
+        do {
+//            double driveSpeed = Range.clip( Math.abs(fRightMotor.getCurrentPosition()-encoderCounts)/700, 0.2, 1);
+            universalJoystick(0, driveSpeed, 0, desiredHeading);
+
+            teamUtil.log("difference: " + Math.abs(fRightMotor.getCurrentPosition()-encoderCounts));
+            teamUtil.log("rightMotorPower: " + fRightMotor.getPower());
+            teamUtil.log("fRightMotor: " + getBackLeftMotorPos());
+            encoderTelemetry();
+
+
+        } while (Math.abs(fRightMotor.getCurrentPosition()) < encoderCounts && teamUtil.theOpMode.opModeIsActive());
+        //runs to the set number of inches at the desired speed
+
+
+        while (fLeftMotor.isBusy() && fRightMotor.isBusy()) {
+            encoderTelemetry();
+        }
+
+        //turns off both motors
+        stopMotors();
+
+        //sets it back to normal
+        setAllMotorsWithoutEncoder();
+
+
+
+
+    }
+
     public void universalJoystick(float leftJoyStickX, float leftJoyStickY, float rightJoyStickX, double robotHeading){
-
-
         double angleInDegrees = robotHeading * Math.PI/180;
         float leftX = leftJoyStickX;
         float leftY = leftJoyStickY;

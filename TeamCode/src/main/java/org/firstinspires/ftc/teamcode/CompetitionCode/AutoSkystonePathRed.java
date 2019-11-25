@@ -8,10 +8,10 @@ import org.firstinspires.ftc.teamcode.Assemblies.Latch;
 import org.firstinspires.ftc.teamcode.Assemblies.Lift;
 import org.firstinspires.ftc.teamcode.Assemblies.RobotDrive;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
-@Autonomous(name="AutoSkystonePath")
+@Autonomous(name="AutoSkystonePathRed")
 
 @Disabled
-public class AutoSkystonePath extends LinearOpMode {
+public class AutoSkystonePathRed extends LinearOpMode {
 
     RobotDrive robot;
     Latch latch;

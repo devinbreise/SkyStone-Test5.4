@@ -9,12 +9,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 //This code can be used for using the distance sensor to go to a certain distance or square up on the wall or just to get a valid reading of the distance sensors.
 //
 
-public class distanceSensors {
+public class DistanceSensors {
     private Telemetry telemetry;//This is the telemetry to define the data
     private Rev2mDistanceSensor rev2mDistanceSensor;//This is the distance sensor variable
 
 
-    public distanceSensors(Telemetry thetelemetry, Rev2mDistanceSensor theDistanceSensor) {
+    public DistanceSensors(Telemetry thetelemetry, Rev2mDistanceSensor theDistanceSensor) {
             telemetry = thetelemetry;
             rev2mDistanceSensor = theDistanceSensor;//This names our distance sensor as theDistanceSensor
 

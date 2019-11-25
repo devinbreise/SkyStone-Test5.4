@@ -1,12 +1,14 @@
 package org.firstinspires.ftc.teamcode.TestCode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Assemblies.RobotDrive;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
-@TeleOp(name = "TestEncoderMovement")
+@Autonomous(name = "TestEncoderMovement")
+@Disabled
 public class TestEncoderMovement extends LinearOpMode {
 
 
@@ -19,6 +21,7 @@ public class TestEncoderMovement extends LinearOpMode {
 
         robot = new RobotDrive(hardwareMap, telemetry);
         robot.initDriveMotors();
+        robot.initImu();
 
         robot.resetAllDriveEncoders();
         robot.setAllMotorsWithoutEncoder();
@@ -34,9 +37,11 @@ public class TestEncoderMovement extends LinearOpMode {
 
 
 
-//            robot.moveInchesForward(0.5, 20);
-        robot.driveForward(0.5, 500 );
-//    robot.driveForward(0.5);
+            robot.moveInchesLeft(0.5, 30);
+            sleep(2000);
+            robot.moveInchesRight(0.5, 30);
+
+            //robot.moveInchesLeft(0.5, 30);
 
     teamUtil.log("BACKLEFT " + robot.getBackLeftMotorPos());
     teamUtil.log("BACKRIGHT " + robot.getBackRightMotorPos());

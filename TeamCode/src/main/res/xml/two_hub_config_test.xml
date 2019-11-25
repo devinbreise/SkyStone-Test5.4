@@ -1,5 +1,7 @@
 <?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
 <Robot type="FirstInspires-FTC">
+    <!-- <Webcam serialNumber="CCB77690" name="Webcam 1"/>-->
+    <LynxUsbDevice serialNumber="DQ2F3DNX" name="Expansion Hub Portal 1" parentModuleAddress="2"/>
     <LynxUsbDevice name="Expansion Hub Portal 1" serialNumber="DQ2F3DNX" parentModuleAddress="2">
         <LynxModule name="Expansion Hub 2" port="2">
             <goBILDA5202SeriesMotor name="liftBase" port="0" />

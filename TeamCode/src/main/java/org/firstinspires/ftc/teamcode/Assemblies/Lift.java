@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 public class Lift {
 
     private double liftBasePower = .5;
+    private final double liftBaseTopLimit_EncoderClicks = 3090;
     private DcMotor liftBase;
     private DcMotor rSpindle;
     private DcMotor lSpindle;
@@ -28,6 +29,8 @@ public class Lift {
     private final double TENSION_POWER = 0.075;
 
 
+
+
     HardwareMap hardwareMap;
     Telemetry telemetry;
 
@@ -40,6 +43,7 @@ public class Lift {
     public void initLift(){
         liftBase = hardwareMap.dcMotor.get("liftBase");
         liftBase.setDirection(DcMotorSimple.Direction.REVERSE);
+        liftBase.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         rSpindle = hardwareMap.dcMotor.get("rSpindle");
         lSpindle = hardwareMap.dcMotor.get("lSpindle");
@@ -59,16 +63,52 @@ public class Lift {
     public void shutDownLiftBase(){
         liftBase.setPower(0);
     }
+
     public void liftBaseUp(){
-        liftBase.setPower(liftBasePower);
+        if(liftBase.getCurrentPosition()<liftBaseTopLimit_EncoderClicks){
+            liftBase.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            liftBase.setPower(liftBasePower);
+        }
     }
+
+    public void upPosition(double power){
+        liftBase.setPower(0);
+        liftBase.setTargetPosition(3090);
+        liftBase.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        liftBase.setPower(power);
+        teamUtil.log("liftEncoder: " + liftBase.getCurrentPosition());
+
+    }
+
+    public void downPosition(double power){
+        do{
+            liftBaseDown();
+
+        }while(!liftDownLimit.isPressed());
+        liftBase.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        teamUtil.log("encoder reset");
+        teamUtil.log("liftBase encoder: " + liftBase.getCurrentPosition());
+
+        shutDownLiftBase();
+        }
+
     public void liftBaseDown(){
         if(liftDownLimit.isPressed()){
             shutDownLiftBase();
+            liftBase.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            teamUtil.log("encoder reset");
+
         } else {
+            liftBase.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             liftBase.setPower(-liftBasePower);
         }
     }
+
+
+    public double getBasePosition(){
+        return liftBase.getCurrentPosition();
+    }
+
     public void increaseLiftBasePower(){
         // If enough time has passed since we last updated the power
         if (System.currentTimeMillis() > nextControlUpdate)
@@ -100,6 +140,19 @@ public class Lift {
         lSpindle.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rSpindle.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lSpindle.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    public void tensionLiftStringContinuous(){
+        rSpindle.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        lSpindle.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rSpindle.setPower(TENSION_POWER);
+        lSpindle.setPower(TENSION_POWER);
+    }
+
+    public void liftLoop(Lift lift){
+        if(rSpindle.getCurrentPosition()<0 || lSpindle.getCurrentPosition()<0){
+            lift.tensionLiftStringContinuous();
+        }
     }
 
     // Move the lift up to the specified level using FTC PID controller
