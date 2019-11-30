@@ -15,16 +15,16 @@ public class Grabber {
 
 
     //far from the robot
-    public final double GRABBER_ONE_STOW_POS = 1; //1
-    public final double GRABBER_ONE_OPEN_POS = 0.5;
-    public final double GRABBER_ONE_WIDE_CLOSED_POS = 0.3;
-    public final double GRABBER_ONE_NARROW_CLOSED_POS = 0.07;
-
-    //close to the robot
-    public final double GRABBER_TWO_STOW_POS = 0;
-    public final double GRABBER_TWO_OPEN_POS = 0.5;
-    public final double GRABBER_TWO_WIDE_CLOSED_POS = 0.7;
-    public final double GRABBER_TWO_NARROW_CLOSED_POS = 0.78;
+    public final double GRABBER_ONE_STOW_POS = 0.84; //1
+    public final double GRABBER_ONE_OPEN_POS = 0.27;
+    public final double GRABBER_ONE_WIDE_CLOSED_POS = 0.135;
+    public final double GRABBER_ONE_NARROW_CLOSED_POS = 0.03;
+    //
+    //    //close to the robot
+    public final double GRABBER_TWO_STOW_POS = 0.13;
+    public final double GRABBER_TWO_OPEN_POS = 0.68;
+    public final double GRABBER_TWO_WIDE_CLOSED_POS = 0.815;
+    public final double GRABBER_TWO_NARROW_CLOSED_POS = 0.93;
 
     public final double rotate_outside = 0.79;
     public final double rotate_narrow = 0.476;
@@ -66,6 +66,10 @@ public class Grabber {
 
 
         grabberState = GrabberState.GRABBER_STOWED;
+    }
+    public void grabberStow(){
+        grabberOne.setPosition(GRABBER_ONE_STOW_POS);
+        grabberTwo.setPosition(GRABBER_TWO_STOW_POS);
     }
     public void stowGrabber(){
         if(grabberRunning == false){

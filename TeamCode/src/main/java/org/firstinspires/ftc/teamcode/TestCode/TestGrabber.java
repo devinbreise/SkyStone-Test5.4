@@ -26,12 +26,15 @@ public class TestGrabber extends OpMode {
         if (gamepad2.y) { //open
             grabber.openGrabber();
         }
-        if (teamGamepad.gamepad2bBounced()) { //close wide
+        if (gamepad2.b) { //close wide
 
-            grabber.closeGrabberToggle();
+            grabber.grabberStow();
         }
         if (gamepad2.x) { //close narrow
             grabber.closeGrabberWide();
+        }
+        if (gamepad2.a){
+            grabber.closeGrabberNarrow();
         }
         if(gamepad2.dpad_up){
             grabber.rotateOutside();
