@@ -6,7 +6,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 
+import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
 import org.firstinspires.ftc.teamcode.Assemblies.Lift;
+import org.firstinspires.ftc.teamcode.Assemblies.LiftSystem;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 @TeleOp(name = "TestLift")
@@ -16,11 +18,16 @@ public class TestLift extends OpMode {
     private int targetLevel = 0;
 
     private Lift lift;
+    private LiftSystem liftSystem;
+
+
 
     public void init() {
 
         lift = new Lift(hardwareMap, telemetry);
+        liftSystem = new LiftSystem(hardwareMap, telemetry);
         lift.initLift();
+        liftSystem.initLiftSystem();
         //lift.tensionLiftString();
 
     }
@@ -42,20 +49,20 @@ public class TestLift extends OpMode {
         if (gamepad1.dpad_up) {
             lift.increaseLiftBasePower();
         }
-        if (gamepad2.dpad_left) {
+        if (gamepad1.dpad_left) {
             targetLevel--;
             teamUtil.sleep(500);
         }
-        if (gamepad2.dpad_right) {
+        if (gamepad1.dpad_right) {
             targetLevel++;
             teamUtil.sleep(500);        }
 
         // manual elevator control
-        if (gamepad2.a) {
+        if (gamepad1.y) {
             lift.tensionLiftString();
             //while (gamepad2.a) {};
         }
-        if (gamepad2.x) {
+        if (gamepad1.x) {
             lift.goToLevel(0);
             //while (gamepad2.x) { }
 
@@ -79,6 +86,15 @@ public class TestLift extends OpMode {
                 teamUtil.log("lSpindle:"+lSpindle.getCurrentPosition());
            }
 */
+        }
+        if(gamepad2.right_bumper){
+            liftSystem.grabAndStowNoWait();
+        }
+        if(gamepad2.left_bumper){
+            liftSystem.deployForPickUpNoWait();
+        }
+        if(gamepad2.dpad_up){
+            liftSystem.deployForPlaceNoWait(1, Grabber.GrabberRotation.OUTSIDE);
         }
         if (gamepad2.y) {
             lift.goToLevel(targetLevel);

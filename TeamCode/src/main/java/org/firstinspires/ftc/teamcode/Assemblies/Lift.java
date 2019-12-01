@@ -28,6 +28,12 @@ public class Lift {
     private final int LEVEL_INCREMENT = 570;
     private final double TENSION_POWER = 0.075;
 
+    //stuff that should be an enum
+    private boolean isMovingUp = false;
+    private boolean isMovingDown = false;
+
+    private boolean hasSetZeroSpindle = false;
+
 
 
 
@@ -72,15 +78,39 @@ public class Lift {
     }
 
     public void upPosition(double power){
+        isMovingUp = true;
         liftBase.setPower(0);
         liftBase.setTargetPosition(3090);
         liftBase.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         liftBase.setPower(power);
+        while(liftBase.getCurrentPosition()<3000){
+            teamUtil.log("liftEncoder: " + liftBase.getCurrentPosition());
+        }
+        teamUtil.log("==============> encoder is up" );
+        if(hasSetZeroSpindle == false){
+            tensionLiftString();
+            hasSetZeroSpindle = true;
+        }
         teamUtil.log("liftEncoder: " + liftBase.getCurrentPosition());
+        isMovingUp = false;
+    }
 
+    public void upPositionNoWait(final double power){
+        if(isMovingUp == false) {
+
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    upPosition(power);
+                }
+            });
+
+            thread.start();
+        }
     }
 
     public void downPosition(double power){
+        isMovingDown = true;
         do{
             liftBaseDown();
 
@@ -90,7 +120,20 @@ public class Lift {
         teamUtil.log("liftBase encoder: " + liftBase.getCurrentPosition());
 
         shutDownLiftBase();
+        isMovingDown = false;
+    }
+    public void downPositionNoWait(final double power){
+        if(isMovingUp == false) {
+
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    downPosition(power);
+                }
+            });
+            thread.start();
         }
+    }
 
     public void liftBaseDown(){
         if(liftDownLimit.isPressed()){
@@ -108,6 +151,7 @@ public class Lift {
     public double getBasePosition(){
         return liftBase.getCurrentPosition();
     }
+
 
     public void increaseLiftBasePower(){
         // If enough time has passed since we last updated the power

@@ -16,12 +16,14 @@ public class Grabber {
 
     //far from the robot
     public final double GRABBER_ONE_STOW_POS = 0.84; //1
+    public final double GRABBER_ONE_PICKUP_POS = 0.5;
     public final double GRABBER_ONE_OPEN_POS = 0.27;
     public final double GRABBER_ONE_WIDE_CLOSED_POS = 0.135;
     public final double GRABBER_ONE_NARROW_CLOSED_POS = 0.03;
     //
     //    //close to the robot
     public final double GRABBER_TWO_STOW_POS = 0.13;
+    public final double GRABBER_TWO_PICKUP_POS = 0.5;
     public final double GRABBER_TWO_OPEN_POS = 0.68;
     public final double GRABBER_TWO_WIDE_CLOSED_POS = 0.815;
     public final double GRABBER_TWO_NARROW_CLOSED_POS = 0.93;
@@ -52,7 +54,14 @@ public class Grabber {
         GRABBER_NARROW_DROP,
         GRABBER_OPEN,
         GRABBER_CLOSED_WIDE,
-        GRABBER_CLOSED_NARROW
+        GRABBER_CLOSED_NARROW,
+        GRABBER_PICKUP
+    }
+
+    public enum GrabberRotation{
+        INSIDE,
+        OUTSIDE,
+        MIDDLE
     }
 
     public void initGrabber() {
@@ -99,6 +108,12 @@ public class Grabber {
         grabberTwo.setPosition(GRABBER_TWO_OPEN_POS);
         grabberState = GrabberState.GRABBER_OPEN;
 
+    }
+
+    public void grabberPickup(){
+        grabberOne.setPosition(GRABBER_ONE_PICKUP_POS);
+        grabberTwo.setPosition(GRABBER_TWO_PICKUP_POS);
+        grabberState = GrabberState.GRABBER_PICKUP;
     }
 
     public void closeGrabberWide() {
@@ -149,6 +164,20 @@ public class Grabber {
 
     public void rotateNarrow(){
         rotateServo.setPosition(rotate_narrow);
+    }
+
+    public void rotate(Grabber.GrabberRotation rotation){
+        switch(rotation){
+            case INSIDE:
+                rotateInside();
+                break;
+            case OUTSIDE:
+                rotateOutside();
+                break;
+            case MIDDLE:
+                rotateNarrow();
+                break;
+        }
     }
     public double rotateGetPosition(){
         return rotateServo.getPosition();

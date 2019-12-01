@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.basicLibs;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import java.util.LinkedList;
