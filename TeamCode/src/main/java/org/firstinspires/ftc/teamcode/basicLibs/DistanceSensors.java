@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.basicLibs;
 
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -10,16 +11,16 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 //
 
 public class DistanceSensors {
-    private Telemetry telemetry;//This is the telemetry to define the data
+    HardwareMap hardwareMap;
     private Rev2mDistanceSensor rev2mDistanceSensor;//This is the distance sensor variable
 
 
-    public DistanceSensors(Telemetry thetelemetry, Rev2mDistanceSensor theDistanceSensor) {
-            telemetry = thetelemetry;
+    public DistanceSensors(Rev2mDistanceSensor theDistanceSensor) {
             rev2mDistanceSensor = theDistanceSensor;//This names our distance sensor as theDistanceSensor
-
-
     }
+
+
+
     //This method return's the current reading of the distance sensors and returns the value.
     public double getDistance() {//find the value that will be mostly used in the autonomous
         double distance = rev2mDistanceSensor.getDistance(DistanceUnit.INCH);//This get the current reading of the distance sensor

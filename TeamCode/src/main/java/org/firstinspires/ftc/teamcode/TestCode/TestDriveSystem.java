@@ -27,6 +27,7 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
             robot = new RobotDrive(hardwareMap, telemetry);
             robot.initDriveMotors();
             robot.initImu();
+            robot.initDistanceSensors();
             robot.resetHeading();
         }
 
@@ -37,6 +38,7 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
             //robot.scaleMovement(MAX_POWER, DRIVE_POWER);
 
             telemetry.addData("heading:", robot.getHeading());
+            robot.distanceTelemetry();
 
 
             if(gamepad1.left_trigger > 0.1){
@@ -90,8 +92,8 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
             }
             //add triggers for speed boosts
 
-            robot.driveTelemetry();
-            robot.telemetryDriveEncoders();
+//            robot.driveTelemetry();
+//            robot.telemetryDriveEncoders();
             telemetry.update();
 
         }
