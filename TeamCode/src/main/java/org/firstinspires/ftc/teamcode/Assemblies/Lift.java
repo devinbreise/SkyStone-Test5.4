@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.Assemblies;
 import com.qualcomm.hardware.rev.RevTouchSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -33,6 +32,7 @@ public class Lift {
     private boolean isMovingDown = false;
 
     private boolean hasSetZeroSpindle = false;
+    private boolean liftIsBusy = false;
 
 
 
@@ -201,6 +201,8 @@ public class Lift {
 
     // Move the lift up to the specified level using FTC PID controller
     public void goToLevel(int level) {
+        teamUtil.log("going to level: " + level);
+        teamUtil.log("firstSpindlePosition: " + rSpindle.getCurrentPosition());
         rSpindle.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lSpindle.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rSpindle.setTargetPosition(LEVEL_0 + (LEVEL_INCREMENT * level));
@@ -209,14 +211,31 @@ public class Lift {
         lSpindle.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rSpindle.setPower(.99);
         lSpindle.setPower(.99);
+
     }
 
     // Drop the lift to its lowest point
     public void goToBottom() {
+        liftIsBusy = true;
         rSpindle.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lSpindle.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rSpindle.setPower(0);
         lSpindle.setPower(0);
+        teamUtil.sleep(2000);
+        tensionLiftString();
+        liftIsBusy = false;
+    }
+
+    public void goToBottomNoWait(){
+        if (!liftIsBusy) {
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    goToBottom();
+                }
+            });
+            thread.start();
+        }
     }
 
     public void liftTelemetry(){

@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode.TestCode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 
 import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
@@ -88,13 +86,13 @@ public class TestLift extends OpMode {
 */
         }
         if(gamepad2.right_bumper){
-            liftSystem.grabAndStowNoWait();
+            liftSystem.grabAndStowNoWait("wide");
         }
         if(gamepad2.left_bumper){
-            liftSystem.deployForPickUpNoWait();
+            liftSystem.prepareToGrabNoWait();
         }
         if(gamepad2.dpad_up){
-            liftSystem.deployForPlaceNoWait(1, Grabber.GrabberRotation.OUTSIDE);
+            liftSystem.hoverOverFoundationNoWait(0, Grabber.GrabberRotation.OUTSIDE);
         }
         if (gamepad2.y) {
             lift.goToLevel(targetLevel);
@@ -107,8 +105,8 @@ public class TestLift extends OpMode {
 
 //super cereal disclaimer. ts not sponsered its just amazing. or mabye im lieing. mabye this is straight our part of a plan for world domination. "that sounds rather unrealistic" you say with a gulible expression on your face. now let me ask you. what about knees. "knees?" you say with suprise. yes knees. what about them. they are funky looking and all bendy. but you know the ld saying. where there are knees there are bees
         lift.liftTelemetry();
-        telemetry.addData("level:", targetLevel);
-        telemetry.addData("EncoderPosition:", lift.getBasePosition());
+//        telemetry.addData("level:", targetLevel);
+//        telemetry.addData("EncoderPosition:", lift.getBasePosition());
         telemetry.update();
     }
 }

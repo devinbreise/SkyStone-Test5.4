@@ -43,14 +43,14 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
             if(gamepad1.left_trigger > 0.1){
                 telemetry.addData("", "REGULAR DRIVE");
-                robot.driveJoyStick(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
+                robot.driveJoyStick(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x,1);
 
             } else {
                 telemetry.addData("", "IMU DRIVE");
 
                 robot.universalJoystick(gamepad1.left_stick_x,
                         gamepad1.left_stick_y,
-                        gamepad1.right_stick_x,
+                        gamepad1.right_stick_x,1,
                         robot.getHeading());
             }
 //TESIGN IMU CODE

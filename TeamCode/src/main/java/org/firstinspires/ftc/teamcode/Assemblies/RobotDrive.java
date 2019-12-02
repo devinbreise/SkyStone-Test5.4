@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.basicLibs.DistanceSensors;
 import org.firstinspires.ftc.teamcode.basicLibs.revHubIMUGyro;
@@ -43,13 +44,11 @@ public class RobotDrive {
     DcMotor bLeftMotor;
     DcMotor fRightMotor;
     DcMotor bRightMotor;
-
-    DistanceSensors frontLeftDistance;
-    DistanceSensors frontRightDistance;
-
-    DistanceSensors leftDistance;
-    DistanceSensors rightDistance;
-    DistanceSensors backDistance;
+    public DistanceSensors frontLeftDistance;
+    public DistanceSensors frontRightDistance;
+    public DistanceSensors leftDistanceSensor;
+    public DistanceSensors rightDistanceSensor;
+    public DistanceSensors backDistanceSensor;
 
     //    Servo latchOne;
 //    Servo latchTwo;
@@ -100,17 +99,12 @@ public class RobotDrive {
     }
 
 
-    public void initServos() {
-
-
-    }
 
     public void initDistanceSensors() {
-//        frontLeftDistance = new DistanceSensors(telemetry, hardwareMap.get(Rev2mDistanceSensor.class, "frontLeftDistance"));
-//        frontRightDistance = new DistanceSensors(telemetry, hardwareMap.get(Rev2mDistanceSensor.class, "frontRightDistance"));
-        leftDistance = new DistanceSensors(hardwareMap.get(Rev2mDistanceSensor.class, "leftDistance"));
-        rightDistance = new DistanceSensors(hardwareMap.get(Rev2mDistanceSensor.class, "rightDistance"));
-        backDistance = new DistanceSensors(hardwareMap.get(Rev2mDistanceSensor.class, "backDistance"));
+        frontLeftDistance = new DistanceSensors(hardwareMap.get(Rev2mDistanceSensor.class, "frontLeftDistance"));
+        frontRightDistance = new DistanceSensors(hardwareMap.get(Rev2mDistanceSensor.class, "frontRightDistance"));
+        leftDistanceSensor = new DistanceSensors(hardwareMap.get(Rev2mDistanceSensor.class, "LeftDistance"));
+        leftDistanceSensor = new DistanceSensors(hardwareMap.get(Rev2mDistanceSensor.class, "RightDistance"));
 
     }
 
@@ -205,9 +199,9 @@ public class RobotDrive {
         bRightMotor.setPower(TEST_POWER);
     }
 
-    public double getDistanceInches(DistanceSensors sensor){
-        if (sensor.validReading()) {
-            return sensor.getDistance();
+    public double getDistanceInches(DistanceSensors distanceSensor){
+        if (distanceSensor.validReading()) {
+            return distanceSensor.getDistance();
         }
         else {
             return -1;
@@ -216,12 +210,8 @@ public class RobotDrive {
 
 
     public void distanceTelemetry(){
-
-//        telemetry.addData("frontLeftDistance", getDistanceInches(frontLeftDistance));
-//        telemetry.addData("frontRightDistance", getDistanceInches(frontRightDistance));
-        telemetry.addData("leftDistance", getDistanceInches(leftDistance));
-        telemetry.addData("rightDistance", getDistanceInches(rightDistance));
-        telemetry.addData("backDistance", getDistanceInches(backDistance));
+        telemetry.addData("frontLeftDistance", getDistanceInches(frontLeftDistance));
+        telemetry.addData("frontRightDistance", getDistanceInches(frontRightDistance));
 
     }
 
@@ -596,7 +586,7 @@ public class RobotDrive {
 
 
 
-    public void driveAtHeading(double speed, double inches, double desiredHeading){
+    public void driveToHeading(double speed, double inches, double desiredHeading){
         //resets the motors
         fRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         fRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -610,7 +600,7 @@ public class RobotDrive {
 
         do {
 //            double driveSpeed = Range.clip( Math.abs(fRightMotor.getCurrentPosition()-encoderCounts)/700, 0.2, 1);
-            universalJoystick(0, driveSpeed, 0, desiredHeading);
+            universalJoystick(0, driveSpeed, 0,1, desiredHeading);
 
             teamUtil.log("difference: " + Math.abs(fRightMotor.getCurrentPosition()-encoderCounts));
             teamUtil.log("rightMotorPower: " + fRightMotor.getPower());
@@ -637,7 +627,7 @@ public class RobotDrive {
 
     }
 
-    public void universalJoystick(float leftJoyStickX, float leftJoyStickY, float rightJoyStickX, double robotHeading){
+    public void universalJoystick(float leftJoyStickX, float leftJoyStickY, float rightJoyStickX, double scaleAmount, double robotHeading){
         double angleInDegrees = robotHeading * Math.PI/180;
         float leftX = leftJoyStickX;
         float leftY = leftJoyStickY;
@@ -648,10 +638,10 @@ public class RobotDrive {
 
         //rotate to obtain new coordinates
 
-        driveJoyStick(rotatedLeftX, rotatedLeftY, rightX);
+        driveJoyStick(rotatedLeftX, rotatedLeftY, rightX, scaleAmount);
     }
 
-    public void driveJoyStick(float leftJoyStickX, float leftJoyStickY, float rightJoyStickX) {
+    public void driveJoyStick(float leftJoyStickX, float leftJoyStickY, float rightJoyStickX, double scaleAmount) {
 
         //left joystick is for moving, right stick is for rotation
 
@@ -661,11 +651,10 @@ public class RobotDrive {
         //back left should be negative
         //back right should be negative
 
-        float leftX = scalePowerJoystick(leftJoyStickX);
-        float leftY = scalePowerJoystick(leftJoyStickY);
-        float rightX = scalePowerJoystick(rightJoyStickX);
+        float leftX = (float)(scalePowerJoystick(leftJoyStickX) * scaleAmount);
+        float leftY = (float)(scalePowerJoystick(leftJoyStickY)*scaleAmount);
+        float rightX = (float)(rightJoyStickX*0.6*scaleAmount);
 
-//        float leftX = leftJoyStickX;
 //        float leftY = leftJoyStickY;
 //        float rightX = rightJoyStickX;
 

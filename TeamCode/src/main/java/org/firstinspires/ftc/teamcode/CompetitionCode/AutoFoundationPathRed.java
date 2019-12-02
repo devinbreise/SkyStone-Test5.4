@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
 import org.firstinspires.ftc.teamcode.Assemblies.Latch;
 import org.firstinspires.ftc.teamcode.Assemblies.Lift;
+import org.firstinspires.ftc.teamcode.Assemblies.LiftSystem;
 import org.firstinspires.ftc.teamcode.Assemblies.RobotDrive;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 @Autonomous(name="AutoFoundationPathRed")
@@ -13,9 +14,8 @@ public class AutoFoundationPathRed extends LinearOpMode {
 
     RobotDrive robot;
     Latch latch;
-    Lift lift;
-    Grabber grabber;
 
+    LiftSystem liftSystem;
 
 
     @Override
@@ -23,15 +23,13 @@ public class AutoFoundationPathRed extends LinearOpMode {
 
         robot = new RobotDrive(hardwareMap, telemetry);
         latch = new Latch(hardwareMap, telemetry);
-        lift = new Lift(hardwareMap, telemetry);
-        grabber = new Grabber(hardwareMap, telemetry);
+        liftSystem = new LiftSystem(hardwareMap, telemetry);
         teamUtil.theOpMode = this;
 
         robot.initDriveMotors();
         robot.initImu();
         latch.initLatch();
-        lift.initLift();
-        grabber.initGrabber();
+        liftSystem.initLiftSystem();
 
         while(!opModeIsActive()){
             robot.resetHeading();
@@ -47,8 +45,13 @@ public class AutoFoundationPathRed extends LinearOpMode {
             latch.latchDown();
             robot.moveInchesForward(0.5,37);
             latch.latchUp();
-            robot.moveInchesRight(0.5, 48);
-            teamUtil.log("Heading: " + robot.getHeading());
+            robot.moveInchesRight(0.5, 12);
+            robot.moveInchesBackward(0.5,1);
+            robot.moveInchesRight(0.5, 28);
+            robot.moveInchesBackward(0.5,20);
+            robot.moveInchesLeft(0.5, 24);
+            robot.moveInchesForward(0.5, 20);
+            robot.moveInchesRight(0.5, 32);
 
 
 

@@ -8,6 +8,7 @@ public class teamColorSensor {
     private Telemetry telemetry;
     private int matValueRed;
     private int matValueBlue;
+    private int SkystoneBlack;
 
     public teamColorSensor(Telemetry theTelemetry, ColorSensor theColorSensor) {
         telemetry = theTelemetry;
@@ -25,26 +26,18 @@ public class teamColorSensor {
     }
 
     public boolean isOnTape(){
-        if (onBlue()||onRed()) {
-            return true;
-        } else {
-            return false;
-        }
+        return onBlue() || onRed();
 
     }
     public boolean onBlue() {
-        if (colorSensor.blue()>matValueBlue*1.5) {
-            return true;
-        } else {
-            return false;
-        }
+        return colorSensor.blue() > matValueBlue * 1.5;
     }
     public boolean onRed() {
-        if (colorSensor.red()>matValueBlue*1.5) {
-            return true;
-        } else {
-            return false;
-        }
+        return colorSensor.red() > matValueBlue * 1.5;
+
+//        public boolean isSkystone(){
+//            if(colorSensor.alpha() < )
+//        }
 
 
     }

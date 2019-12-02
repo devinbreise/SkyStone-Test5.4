@@ -5,8 +5,6 @@ package org.firstinspires.ftc.teamcode.Assemblies;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
-import org.firstinspires.ftc.teamcode.Assemblies.Lift;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 public class LiftSystem {
@@ -36,6 +34,8 @@ public class LiftSystem {
         grabber.closeGrabberNarrow();
         teamUtil.sleep(750);
         grabber.rotateInside();
+        teamUtil.sleep(750);
+        grabber.grabberStow();
 
         lift.initLift();
         //add limit switch at the top of the lift
@@ -43,10 +43,18 @@ public class LiftSystem {
         // need to find init positions for the lift base
     }
 
-    public void grabAndStow(){
+    public void grabAndStow(String grabberPos){
         state = LiftSystemState.GRAB_AND_STOW;
-        grabber.closeGrabberWide();
-        teamUtil.log("grabbed");
+        if(grabberPos.equals("narrow")){
+            grabber.closeGrabberNarrow();
+            teamUtil.log("grabbed");
+
+        }else if(grabberPos.equals("wide")){
+            grabber.closeGrabberWide();
+            teamUtil.log("grabbed");
+        }else{
+            return;
+        }
         teamUtil.sleep(500);
         teamUtil.log("finnished wait");
         lift.downPositionNoWait(0.3);
@@ -60,19 +68,19 @@ public class LiftSystem {
         state = LiftSystemState.IDLE;
     }
 
-    public void grabAndStowNoWait () {
+    public void grabAndStowNoWait (final String grabberPos) {
         if (state == LiftSystemState.IDLE) {
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    grabAndStow();
+                    grabAndStow(grabberPos);
                 }
             });
             thread.start();
         }
     }
 
-    public void deployForPickUp(){
+    public void prepareToGrab(){
         state = LiftSystemState.DEPLOY_FOR_PICKUP;
         grabber.rotateInside();
         lift.upPositionNoWait(0.7);
@@ -82,33 +90,47 @@ public class LiftSystem {
         state = LiftSystemState.IDLE;
     }
 
-    public void deployForPickUpNoWait () {
+    public void prepareToGrabNoWait() {
         if (state == LiftSystemState.IDLE) {
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    deployForPickUp();
+                    prepareToGrab();
                 }
             });
             thread.start();
         }
     }
 
-    public void deployForPlace(int level, Grabber.GrabberRotation rotation){
+    public void hoverOverFoundation(int level, Grabber.GrabberRotation rotation){
         grabber.rotate(rotation);
         lift.upPosition(.7);
         lift.goToLevel(level);
     }
 
-    public void deployForPlaceNoWait (final int level, final Grabber.GrabberRotation rotation) {
+    public void hoverOverFoundationNoWait(final int level, final Grabber.GrabberRotation rotation) {
         if (state == LiftSystemState.IDLE) {
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    deployForPlace(level, rotation);
+                    hoverOverFoundation(level, rotation);
                 }
             });
             thread.start();
         }
+    }
+    public void drop(){
+        grabber.openGrabber();
+    }
+    public void liftDown(){
+        lift.goToBottomNoWait();
+    }
+
+    public void openGrabber(){
+        grabber.openGrabber();
+    }
+
+    public void closeGrabberWide(){
+        grabber.closeGrabberWide();
     }
 }
