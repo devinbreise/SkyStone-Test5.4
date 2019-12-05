@@ -39,6 +39,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.TestCode.CoachCode.Rev2mTunable;
 
 /**
  * {@link //SensorREV2mDistance} illustrates how to use the REV Robotics
@@ -52,19 +53,17 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * @see <a href="http://revrobotics.com">REV Robotics Web Page</a>
  */
 @TeleOp(name = "Sensor: distanceSensorTest")
-//@Disabled
 public class distanceSensorTest extends LinearOpMode {
 
     private DistanceSensor sensorRange;
+    private Rev2mTunable tunableSensor;
 
     @Override
     public void runOpMode() {
         // you can use this as a regular DistanceSensor.
-        sensorRange = hardwareMap.get(DistanceSensor.class, "distance0");
-
-        // you can also cast this to a Rev2mDistanceSensor if you want to use added
-        // methods associated with the Rev2mDistanceSensor class.
-        Rev2mDistanceSensor sensorTimeOfFlight = (Rev2mDistanceSensor)sensorRange;
+        //sensorRange = hardwareMap.get(DistanceSensor.class, "distance0");
+        //Rev2mDistanceSensor sensorTimeOfFlight = (Rev2mDistanceSensor)sensorRange;
+        tunableSensor = hardwareMap.get(Rev2mTunable.class, "distanceSensor");
 
         telemetry.addData(">>", "Press start to continue");
         telemetry.update();
@@ -79,8 +78,8 @@ public class distanceSensorTest extends LinearOpMode {
             telemetry.addData("range", String.format("%.01f in", sensorRange.getDistance(DistanceUnit.INCH)));
 
             // Rev2mDistanceSensor specific methods.
-            telemetry.addData("ID", String.format("%x", sensorTimeOfFlight.getModelID()));
-            telemetry.addData("did time out", Boolean.toString(sensorTimeOfFlight.didTimeoutOccur()));
+            telemetry.addData("ID", String.format("%x", tunableSensor.getModelID()));
+            telemetry.addData("did time out", Boolean.toString(tunableSensor.didTimeoutOccur()));
 
             telemetry.update();
         }
