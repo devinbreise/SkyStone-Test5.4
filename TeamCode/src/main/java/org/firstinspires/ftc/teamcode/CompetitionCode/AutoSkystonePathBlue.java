@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.Assemblies.LiftSystem;
 import org.firstinspires.ftc.teamcode.Assemblies.RobotDrive;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 @Autonomous(name="AutoSkystonePathBlue")
-@Disabled
+
 public class AutoSkystonePathBlue extends LinearOpMode {
 
     RobotDrive robot;
@@ -31,7 +31,6 @@ public class AutoSkystonePathBlue extends LinearOpMode {
 
         robot.initDriveMotors();
         robot.initImu();
-        latch.initLatch();
         robot.initDistanceSensors();
         liftSystem.initLiftSystem();
 
@@ -45,7 +44,7 @@ public class AutoSkystonePathBlue extends LinearOpMode {
         waitForStart();
 
 
-        robot.moveInchesForward(0.5, 22);
+        robot.moveInchesForward(0.5, 19);
         //check color sensor value to see if we got a skystone. IF YES: PATH ==1
 //        if (isSkystone) {
 //            PATH = 1;
@@ -61,13 +60,13 @@ public class AutoSkystonePathBlue extends LinearOpMode {
             liftSystem.prepareToGrab();
             liftSystem.openGrabber();
 
-            robot.moveInchesForward(0.5, 7);
-            liftSystem.grabAndStowNoWait("wide");
+            robot.moveInchesForward(0.5, 8);
+            liftSystem.grabAndStow("wide");
             robot.moveInchesBackward(0.5, 7);
 
 
-//            robot.moveInchesRight(0.5, 45);
-//            liftSystem.hoverOverFoundationNoWait(0, Grabber.GrabberRotation.MIDDLE);
+            robot.moveInchesRight(0.5, 45);
+            liftSystem.hoverOverFoundationNoWait(0, Grabber.GrabberRotation.MIDDLE);
 //
 //            do{
 //                robot.driveRight(0.5);

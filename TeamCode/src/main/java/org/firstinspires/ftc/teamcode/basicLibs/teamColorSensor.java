@@ -15,9 +15,18 @@ public class teamColorSensor {
         colorSensor = theColorSensor;
     }
 
-    public void detectColor() {
+    public boolean isSkystone(float reading){
+        return reading < 72;
+    }
 
 
+
+    public float getReading(){
+        return colorSensor.alpha();
+    }
+
+    public float getGreen(){
+        return colorSensor.green();
     }
 
     public void calibrate() {//Call this when light sensor are not on tape
@@ -34,12 +43,6 @@ public class teamColorSensor {
     }
     public boolean onRed() {
         return colorSensor.red() > matValueBlue * 1.5;
-
-//        public boolean isSkystone(){
-//            if(colorSensor.alpha() < )
-//        }
-
-
     }
     public int redValue() {
         return colorSensor.red();

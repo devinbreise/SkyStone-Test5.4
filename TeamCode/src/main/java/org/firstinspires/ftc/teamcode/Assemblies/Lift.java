@@ -139,7 +139,7 @@ public class Lift {
         if(liftDownLimit.isPressed()){
             shutDownLiftBase();
             liftBase.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            teamUtil.log("encoder reset");
+            teamUtil.log("Lift Base encoder reset");
 
         } else {
             liftBase.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);

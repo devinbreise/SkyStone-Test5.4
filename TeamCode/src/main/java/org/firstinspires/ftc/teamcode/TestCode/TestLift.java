@@ -38,7 +38,7 @@ public class TestLift extends OpMode {
             //lift.liftBaseUp();
         } else if (gamepad1.a) {
             lift.downPosition(0.3);
-           // lift.liftBaseDown();
+           //lift.liftBaseDown();
         } //else lift.shutDownLiftBase();
 
         if (gamepad1.dpad_down) {

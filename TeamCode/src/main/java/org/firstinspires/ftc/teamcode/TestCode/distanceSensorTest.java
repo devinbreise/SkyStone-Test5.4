@@ -63,7 +63,7 @@ public class distanceSensorTest extends LinearOpMode {
         // you can use this as a regular DistanceSensor.
         //sensorRange = hardwareMap.get(DistanceSensor.class, "distance0");
         //Rev2mDistanceSensor sensorTimeOfFlight = (Rev2mDistanceSensor)sensorRange;
-        tunableSensor = hardwareMap.get(Rev2mTunable.class, "distanceSensor");
+        tunableSensor = (Rev2mTunable)hardwareMap.get(Rev2mDistanceSensor.class, "distanceSensor");
 
         telemetry.addData(">>", "Press start to continue");
         telemetry.update();

@@ -103,8 +103,9 @@ public class RobotDrive {
     public void initDistanceSensors() {
         frontLeftDistance = new DistanceSensors(hardwareMap.get(Rev2mDistanceSensor.class, "frontLeftDistance"));
         frontRightDistance = new DistanceSensors(hardwareMap.get(Rev2mDistanceSensor.class, "frontRightDistance"));
-        leftDistanceSensor = new DistanceSensors(hardwareMap.get(Rev2mDistanceSensor.class, "LeftDistance"));
-        leftDistanceSensor = new DistanceSensors(hardwareMap.get(Rev2mDistanceSensor.class, "RightDistance"));
+        leftDistanceSensor = new DistanceSensors(hardwareMap.get(Rev2mDistanceSensor.class, "leftDistance"));
+        rightDistanceSensor = new DistanceSensors(hardwareMap.get(Rev2mDistanceSensor.class, "rightDistance"));
+        backDistanceSensor = new DistanceSensors(hardwareMap.get(Rev2mDistanceSensor.class, "backDistance"));
 
     }
 
@@ -212,22 +213,25 @@ public class RobotDrive {
     public void distanceTelemetry(){
         telemetry.addData("frontLeftDistance", getDistanceInches(frontLeftDistance));
         telemetry.addData("frontRightDistance", getDistanceInches(frontRightDistance));
+        telemetry.addData("leftDistance", getDistanceInches(leftDistanceSensor));
+        telemetry.addData("rightDistance", getDistanceInches(rightDistanceSensor));
+        telemetry.addData("backDistance", getDistanceInches(backDistanceSensor));
 
     }
 
-    public void frontLeftCloseToDistance(double desiredDistance){
+    public void frontLeftCloseToDistance(double desiredDistance, double power){
         double currentReading = getDistanceInches(frontLeftDistance);
 
         if( currentReading < desiredDistance){
             do{
-                driveBackward(0.5);
-            } while( getDistanceInches(frontLeftDistance) < desiredDistance && teamUtil.theOpMode.opModeIsActive());
+                driveBackward(power);
+            } while( getDistanceInches(frontLeftDistance) < desiredDistance /*&& teamUtil.theOpMode.opModeIsActive()*/);
 
         } else if( currentReading > desiredDistance){
 
             do{
-                driveForward(0.5);
-            } while( getDistanceInches(frontRightDistance) > desiredDistance && teamUtil.theOpMode.opModeIsActive());
+                driveForward(power);
+            } while( getDistanceInches(frontLeftDistance) > desiredDistance /*&& teamUtil.theOpMode.opModeIsActive()*/);
 
         }
     }
@@ -333,7 +337,7 @@ public class RobotDrive {
             encoderTelemetry();
 
 
-        } while (Math.abs(fRightMotor.getCurrentPosition()) < encoderCounts && teamUtil.theOpMode.opModeIsActive());
+        } while (Math.abs(fRightMotor.getCurrentPosition()) < encoderCounts /*&& teamUtil.theOpMode.opModeIsActive()*/);
         //runs to the set number of inches at the desired speed
 
 

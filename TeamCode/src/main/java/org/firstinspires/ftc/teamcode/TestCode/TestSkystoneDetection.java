@@ -120,6 +120,7 @@ public class TestSkystoneDetection extends LinearOpMode {
                             telemetry.addData(String.format("  right,bottom (%d)", i), "%.03f , %.03f",
                                     recognition.getRight(), recognition.getBottom());
                             telemetry.addData("center: ", (recognition.getRight()-recognition.getLeft())/2+recognition.getLeft());
+                            telemetry.addData("aspect ratio: ", (recognition.getRight()-recognition.getLeft())/(recognition.getTop()-recognition.getBottom()));
                             telemetry.addData("conf:", recognition.getConfidence());
                         }
                         telemetry.update();

@@ -1,7 +1,10 @@
 package org.firstinspires.ftc.teamcode.TestCode;
 
+import android.graphics.Color;
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
@@ -9,6 +12,7 @@ import org.firstinspires.ftc.teamcode.Assemblies.Latch;
 
 import org.firstinspires.ftc.teamcode.Assemblies.Lift;
 import org.firstinspires.ftc.teamcode.Assemblies.RobotDrive;
+import org.firstinspires.ftc.teamcode.basicLibs.teamColorSensor;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 
@@ -20,11 +24,13 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
         public static double MAX_POWER = 1;
         public static double DRIVE_POWER;
         RobotDrive robot;
+        teamColorSensor colorSensor;
 
 
         @Override
         public void init() {
             robot = new RobotDrive(hardwareMap, telemetry);
+            colorSensor = new teamColorSensor(telemetry, hardwareMap.get(ColorSensor.class, "colorSensor"));
             robot.initDriveMotors();
             robot.initImu();
             robot.initDistanceSensors();
@@ -39,6 +45,8 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
             telemetry.addData("heading:", robot.getHeading());
             robot.distanceTelemetry();
+            telemetry.addData("ColorSensor: ", colorSensor.getReading());
+            telemetry.addData("Is Skystone?", colorSensor.isSkystone(colorSensor.getReading()));
 
 
             if(gamepad1.left_trigger > 0.1){
