@@ -60,11 +60,13 @@ public class LiftSystem {
             grabber.closeGrabberWide();
             teamUtil.log("grabbed");
         }else{
+            teamUtil.log("BAD INPUT to Grab and Stow");
+            state = LiftSystemState.IDLE;
             return;
         }
         // Give the servos enough time to grab the stone
         teamUtil.sleep(500);
-        lift.downPositionNoWait(0.3, timeOutTime - System.currentTimeMillis());
+        lift.downPositionNoWait(0.5, timeOutTime - System.currentTimeMillis());
         // give a little time for the lift to get far enough down to safely rotate
         teamUtil.sleep(1500);
         if (teamUtil.keepGoing(timeOutTime)){
@@ -104,10 +106,16 @@ public class LiftSystem {
         timedOut = false;
         grabber.rotate(Grabber.GrabberRotation.INSIDE);
         lift.upPositionNoWait(0.7, timeOut);
+        // let the lift get moving first
         teamUtil.sleep(750);
         if (teamUtil.keepGoing(timeOutTime)) {
+            // then move the grabber panels
             grabber.grabberPickup();
             teamUtil.sleep(500);
+        }
+        // in case the lift isn't fully up yet...
+        while (lift.isBusy()) {
+            teamUtil.sleep(100);
         }
         state = LiftSystemState.IDLE;
         timedOut = (System.currentTimeMillis() > timeOutTime);

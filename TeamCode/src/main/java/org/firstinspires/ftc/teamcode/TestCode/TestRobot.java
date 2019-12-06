@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Assemblies.Robot;
+import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 @TeleOp(name = "testRobot")
 public class TestRobot extends LinearOpMode {
@@ -19,6 +20,7 @@ public class TestRobot extends LinearOpMode {
     public void runOpMode(){
         initialize();
         waitForStart();
+        teamUtil.inInitialization = false;
         while (opModeIsActive()) {
             if(gamepad1.right_bumper){
                 robot.autoIntake(true, 8000);

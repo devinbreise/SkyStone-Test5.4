@@ -14,7 +14,7 @@ public class Lift {
     final double LIFT_UP_POWER = .7;
     final double LIFT_DOWN_POWER = .5;
 
-    private final int liftBaseTopLimit_EncoderClicks = 3000;
+    private final int liftBaseTopLimit_EncoderClicks = 2900;
     private DcMotor liftBase;
     private DcMotor rSpindle;
     private DcMotor lSpindle;
@@ -87,7 +87,7 @@ public class Lift {
 
         while(!liftDownLimit.isPressed() && teamUtil.keepGoing(timeOutTime)){
             liftBaseDown();
-        };
+        }
         shutDownLiftBase();
         liftBase.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         teamUtil.log("Lift Base encoder reset");
@@ -135,7 +135,9 @@ public class Lift {
         liftBase.setTargetPosition(liftBaseTopLimit_EncoderClicks);
         liftBase.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         liftBase.setPower(power);
-        while (liftBase.isBusy() && teamUtil.keepGoing(timeOutTime)){
+        // wait for the lift to get close to its final position before we move on
+        // Using isBusy() on the liftbase motor takes a LONG time due to the PID slowing down at the end
+        while ((liftBase.getCurrentPosition()<(.95*liftBaseTopLimit_EncoderClicks)) && teamUtil.keepGoing(timeOutTime)){
 
         }
         shutDownLiftBase();

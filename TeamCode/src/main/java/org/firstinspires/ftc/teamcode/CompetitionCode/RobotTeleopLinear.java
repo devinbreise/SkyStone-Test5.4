@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.CompetitionCode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
 import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
 import org.firstinspires.ftc.teamcode.Assemblies.Latch;
 import org.firstinspires.ftc.teamcode.Assemblies.LiftSystem;
@@ -8,6 +10,7 @@ import org.firstinspires.ftc.teamcode.Assemblies.RobotDrive;
 import org.firstinspires.ftc.teamcode.basicLibs.TeamGamepad;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
+@TeleOp(name = "RobotTeleopLinear")
 public class RobotTeleopLinear extends LinearOpMode {
     public static final double SCALE_DOWN_CONSTANT = 0.3;
     RobotDrive robot;

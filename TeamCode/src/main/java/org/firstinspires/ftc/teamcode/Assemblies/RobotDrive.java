@@ -361,7 +361,7 @@ public class RobotDrive {
 
         do {
             driveLeft(speed);
-            teamUtil.log("fRightMotor: " + getBackLeftMotorPos());
+            //teamUtil.log("fRightMotor: " + getBackLeftMotorPos());
             encoderTelemetry();
 
 

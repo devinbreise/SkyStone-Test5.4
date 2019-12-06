@@ -25,14 +25,14 @@ public class Rev2mTunable extends Rev2mDistanceSensor {
     protected synchronized void adjustSensor() {
         // debug.
         // check rate limit before we set it.
-        RobotLog.dd(MYTAG, "initial sig rate lim (MCPS) %.06f", ourGetSignalRateLimit());
+        RobotLog.dd(MYTAG, "Tunable Sensor:initial sig rate lim (MCPS) %.06f", ourGetSignalRateLimit());
 
         // set new range signal rate limit to 0.25 MCPS (million counts per second)
         ourSetSignalRateLimit((float)1.0);
 
         // debug.
         // check rate limit after we set it.
-        RobotLog.dd(MYTAG, "adjusted sig rate lim (MCPS) %.06f", ourGetSignalRateLimit());
+        RobotLog.dd(MYTAG, "Tunable Sensor:adjusted sig rate lim (MCPS) %.06f", ourGetSignalRateLimit());
 
     }
 

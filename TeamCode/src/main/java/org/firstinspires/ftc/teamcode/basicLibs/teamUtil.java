@@ -10,9 +10,10 @@ public class teamUtil {
 
     public static final double YELLOW_JACKET_ENCODER_CLICKS=145.6;
     public static final double NEVERREST40_ENCODER_CLICKS=1120;
-    public static LinearOpMode theOpMode;
     public static final double NEVEREST20_ENCODER_CLICKS=537.6;
 
+    public static LinearOpMode theOpMode;
+    public static boolean inInitialization = true;
     /**
      * This method puts the current thread to sleep for the given time in msec.
      * It handles InterruptException where it recalculates the remaining time
@@ -32,13 +33,13 @@ public class teamUtil {
     }   //sleep
 
     // log something so we can filter out the FTC robot log info
-    // 3 -> 0 = getStackTrace, 1 = teamUtil.log, 2 = whoever called us
+    // 3 -> 0 = getStackTrace, 1 = teamUtil.log, 3 = whoever called us
     public static void log(String logString) {
-        RobotLog.d("14140LOG:" + Thread.currentThread().getStackTrace()[2].getMethodName() + ": " + logString);
+        RobotLog.d("14140LOG:" + Thread.currentThread().getStackTrace()[3].getMethodName() + ": " + logString);
     }
 
     public static boolean keepGoing(long timeOutTime) {
-        return theOpMode.opModeIsActive() && (System.currentTimeMillis() < timeOutTime);
+        return ((inInitialization || theOpMode.opModeIsActive()) && (System.currentTimeMillis() < timeOutTime));
     }
 
 
