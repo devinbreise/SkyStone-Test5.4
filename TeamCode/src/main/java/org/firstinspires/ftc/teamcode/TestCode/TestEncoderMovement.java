@@ -37,9 +37,9 @@ public class TestEncoderMovement extends LinearOpMode {
 
 
 
-            robot.moveInchesLeft(0.5, 30);
+            robot.moveInchesLeft(0.5, 30, 9000);
             sleep(2000);
-            robot.moveInchesRight(0.5, 30);
+            robot.moveInchesRight(0.5, 30, 9000);
 
             //robot.moveInchesLeft(0.5, 30);
 

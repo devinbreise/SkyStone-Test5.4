@@ -34,10 +34,10 @@ public class TestLift extends OpMode {
 
         // manual limbo
         if (gamepad1.b) {
-           lift.upPosition(0.99);
+           lift.upPosition(0.99, 7000);
             //lift.liftBaseUp();
         } else if (gamepad1.a) {
-            lift.downPosition(0.3);
+            lift.downPosition(0.3, 7000);
            //lift.liftBaseDown();
         } //else lift.shutDownLiftBase();
 
@@ -61,7 +61,7 @@ public class TestLift extends OpMode {
             //while (gamepad2.a) {};
         }
         if (gamepad1.x) {
-            lift.goToLevel(0);
+            lift.goToLevel(0, 2000);
             //while (gamepad2.x) { }
 
 /*            telemetry.addData("lifting to level 0", 0);
@@ -86,16 +86,16 @@ public class TestLift extends OpMode {
 */
         }
         if(gamepad2.right_bumper){
-            liftSystem.grabAndStowNoWait("wide");
+            liftSystem.grabAndStowNoWait("wide", 7000);
         }
         if(gamepad2.left_bumper){
-            liftSystem.prepareToGrabNoWait();
+            liftSystem.prepareToGrabNoWait(7000);
         }
         if(gamepad2.dpad_up){
-            liftSystem.hoverOverFoundationNoWait(0, Grabber.GrabberRotation.OUTSIDE);
+            liftSystem.hoverOverFoundationNoWait(0, Grabber.GrabberRotation.OUTSIDE, 7000);
         }
         if (gamepad2.y) {
-            lift.goToLevel(targetLevel);
+            lift.goToLevel(targetLevel, 5000);
             //while (gamepad2.y) { }
         }
         if (gamepad2.b) {

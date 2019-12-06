@@ -20,6 +20,8 @@ public class AutoFoundationPathRed extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+        telemetry.addLine("Initializing Op Mode");
+        telemetry.update();
 
         robot = new RobotDrive(hardwareMap, telemetry);
         latch = new Latch(hardwareMap, telemetry);
@@ -31,6 +33,10 @@ public class AutoFoundationPathRed extends LinearOpMode {
         latch.initLatch();
         liftSystem.initLiftSystem();
 
+        telemetry.addLine("Ready to Start");
+        telemetry.update();
+        waitForStart();
+
         while(!opModeIsActive()){
             robot.resetHeading();
             telemetry.addData("heading:", robot.getHeading());
@@ -41,17 +47,17 @@ public class AutoFoundationPathRed extends LinearOpMode {
         waitForStart();
 
 
-            robot.moveInchesBackward(0.5,32);
+            robot.moveInchesBackward(0.5,32,5000);
             latch.latchDown();
-            robot.moveInchesForward(0.5,37);
+            robot.moveInchesForward(0.5,37,6000);
             latch.latchUp();
-            robot.moveInchesRight(0.5, 12);
-            robot.moveInchesBackward(0.5,1);
-            robot.moveInchesRight(0.5, 28);
-            robot.moveInchesBackward(0.5,20);
-            robot.moveInchesLeft(0.5, 24);
-            robot.moveInchesForward(0.5, 20);
-            robot.moveInchesRight(0.5, 32);
+            robot.moveInchesRight(0.5, 12,5000);
+            robot.moveInchesBackward(0.5,1, 5000);
+            robot.moveInchesRight(0.5, 28,5000);
+            robot.moveInchesBackward(0.5,20,5000);
+            robot.moveInchesLeft(0.5, 24,5000);
+            robot.moveInchesForward(0.5, 20,5000);
+            robot.moveInchesRight(0.5, 32,5000);
 
 
 

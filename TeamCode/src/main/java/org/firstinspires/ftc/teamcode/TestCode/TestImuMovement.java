@@ -56,7 +56,7 @@ public class TestImuMovement extends LinearOpMode {
 
 
             sleep(2000);
-                robot.imuRotate(90);
+                robot.imuRotate(90, 5000);
 //                teamUtil.log("heading: " + robot.getHeading());
 
 

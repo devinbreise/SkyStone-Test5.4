@@ -105,18 +105,18 @@ public class RobotTeleop extends OpMode {
             grabberRotation = Grabber.GrabberRotation.INSIDE;
         }
         if(gamepad2.left_stick_button){
-            liftSystem.hoverOverFoundationNoWait(level, grabberRotation);
+            liftSystem.hoverOverFoundationNoWait(level, grabberRotation, 7000);
             teamUtil.log("tried to deploy");
             teamUtil.log("level: " + level);
         }
         if(gamepad2.left_bumper){
-            liftSystem.prepareToGrabNoWait();
+            liftSystem.prepareToGrabNoWait(9000);
         }
         if(gamepad2.right_trigger>0.5){
-            liftSystem.grabAndStowNoWait("narrow");
+            liftSystem.grabAndStowNoWait("narrow", 7000);
         }
         if(gamepad2.right_bumper){
-            liftSystem.grabAndStowNoWait("wide");
+            liftSystem.grabAndStowNoWait("wide", 5000);
         }
         if(gamepad2.right_stick_button){
             liftSystem.drop();

@@ -22,6 +22,8 @@ public class AutoSkystonePathRed extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+        telemetry.addLine("Initializing Op Mode");
+        telemetry.update();
 
         robot = new RobotDrive(hardwareMap, telemetry);
         latch = new Latch(hardwareMap, telemetry);
@@ -35,6 +37,10 @@ public class AutoSkystonePathRed extends LinearOpMode {
         lift.initLift();
         grabber.initGrabber();
 
+        telemetry.addLine("Ready to Start");
+        telemetry.update();
+        waitForStart();
+
         while(!opModeIsActive()){
             robot.resetHeading();
             telemetry.addData("heading:", robot.getHeading());
@@ -45,7 +51,7 @@ public class AutoSkystonePathRed extends LinearOpMode {
         waitForStart();
 
 
-        robot.moveInchesForward(0.5, 5);
+        robot.moveInchesForward(0.5, 5, 5000);
 
     }
 }

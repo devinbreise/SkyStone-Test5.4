@@ -31,10 +31,15 @@ public class teamUtil {
         }
     }   //sleep
 
+    // log something so we can filter out the FTC robot log info
+    // 3 -> 0 = getStackTrace, 1 = teamUtil.log, 2 = whoever called us
     public static void log(String logString) {
-        RobotLog.d("14140LOG: " + logString);
+        RobotLog.d("14140LOG:" + Thread.currentThread().getStackTrace()[2].getMethodName() + ": " + logString);
     }
 
+    public static boolean keepGoing(long timeOutTime) {
+        return theOpMode.opModeIsActive() && (System.currentTimeMillis() < timeOutTime);
+    }
 
 
 

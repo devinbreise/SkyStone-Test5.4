@@ -16,8 +16,10 @@ public class LiftSystem {
         IDLE,
         GRAB_AND_STOW,
         DEPLOY_FOR_PICKUP,
+        HOVER
     }
     LiftSystemState state = LiftSystemState.IDLE;
+    boolean timedOut = false;
 
 
     public LiftSystem(HardwareMap theHardwareMap, Telemetry theTelemetry){
@@ -30,21 +32,26 @@ public class LiftSystem {
 
     public void initLiftSystem(){
         grabber.initGrabber();
-        //here we are moving the grabber to a set position where it is out of the way and convienient
+        //here we are moving the grabber to a set position where it is out of the way
+        // and convienient
         grabber.closeGrabberNarrow();
         teamUtil.sleep(750);
-        grabber.rotateInside();
+        grabber.rotate(Grabber.GrabberRotation.INSIDE);
         teamUtil.sleep(750);
         grabber.grabberStow();
 
         lift.initLift();
-        //add limit switch at the top of the lift
-        lift.downPosition(.3);
+        //add limit switch at the top of the lift?
+        lift.downPosition(.3, 6000);
         // need to find init positions for the lift base
     }
 
-    public void grabAndStow(String grabberPos){
+    public void grabAndStow(String grabberPos, long timeOut){
         state = LiftSystemState.GRAB_AND_STOW;
+        teamUtil.log("Grab and Stow");
+        long timeOutTime= System.currentTimeMillis()+timeOut;
+        timedOut = false;
+
         if(grabberPos.equals("narrow")){
             grabber.closeGrabberNarrow();
             teamUtil.log("grabbed");
@@ -55,65 +62,101 @@ public class LiftSystem {
         }else{
             return;
         }
+        // Give the servos enough time to grab the stone
         teamUtil.sleep(500);
-        teamUtil.log("finnished wait");
-        lift.downPositionNoWait(0.3);
-        teamUtil.log("going down");
+        lift.downPositionNoWait(0.3, timeOutTime - System.currentTimeMillis());
+        // give a little time for the lift to get far enough down to safely rotate
         teamUtil.sleep(1500);
-        teamUtil.log("finnished wait");
-        grabber.rotateInside();
-        teamUtil.log("rotating inside");
-        teamUtil.sleep(500);
-        teamUtil.log("finnished wait");
+        if (teamUtil.keepGoing(timeOutTime)){
+            grabber.rotate(Grabber.GrabberRotation.INSIDE);
+            teamUtil.sleep(500);
+            // in case the lift isn't fully down yet...
+            while (lift.isBusy()) {
+                teamUtil.sleep(100);
+            }
+        }
         state = LiftSystemState.IDLE;
+        timedOut = (System.currentTimeMillis() > timeOutTime);
+        if (timedOut) {
+            teamUtil.log("Grab and Stow - TIMED OUT!");
+        }
+        teamUtil.log("Grab and Stow - Finished");
     }
 
-    public void grabAndStowNoWait (final String grabberPos) {
+    public void grabAndStowNoWait (final String grabberPos, final long timeOut) {
         if (state == LiftSystemState.IDLE) {
+            state = LiftSystemState.GRAB_AND_STOW;
+            teamUtil.log("Launching Thread to Grab and Stow");
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    grabAndStow(grabberPos);
+                    grabAndStow(grabberPos, timeOut);
                 }
             });
             thread.start();
         }
     }
 
-    public void prepareToGrab(){
+    public void prepareToGrab(long timeOut){
         state = LiftSystemState.DEPLOY_FOR_PICKUP;
-        grabber.rotateInside();
-        lift.upPositionNoWait(0.7);
+        teamUtil.log("Prepare to Grab");
+        long timeOutTime= System.currentTimeMillis()+timeOut;
+        timedOut = false;
+        grabber.rotate(Grabber.GrabberRotation.INSIDE);
+        lift.upPositionNoWait(0.7, timeOut);
         teamUtil.sleep(750);
-        grabber.grabberPickup();
-        teamUtil.sleep(500);
+        if (teamUtil.keepGoing(timeOutTime)) {
+            grabber.grabberPickup();
+            teamUtil.sleep(500);
+        }
         state = LiftSystemState.IDLE;
+        timedOut = (System.currentTimeMillis() > timeOutTime);
+        if (timedOut) {
+            teamUtil.log("Prepare to Grab - TIMED OUT!");
+        }
+        teamUtil.log("Prepare to Grab - Finished");
     }
 
-    public void prepareToGrabNoWait() {
+    public void prepareToGrabNoWait(final long timeOut) {
         if (state == LiftSystemState.IDLE) {
+            state = LiftSystemState.DEPLOY_FOR_PICKUP;
+            teamUtil.log("Launching Thread to Prepare to Grab");
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    prepareToGrab();
+                    prepareToGrab(timeOut);
                 }
             });
             thread.start();
         }
     }
 
-    public void hoverOverFoundation(int level, Grabber.GrabberRotation rotation){
+    public void hoverOverFoundation(int level, Grabber.GrabberRotation rotation, long timeOut){
+        state = LiftSystemState.HOVER;
+        teamUtil.log("Hover");
+        long timeOutTime= System.currentTimeMillis()+timeOut;
+        timedOut = false;
         grabber.rotate(rotation);
-        lift.upPosition(.7);
-        lift.goToLevel(level);
+        lift.upPosition(.7, timeOut);
+        if (!lift.timedOut && teamUtil.keepGoing(timeOutTime)) {
+            lift.goToLevel(level, timeOutTime - System.currentTimeMillis());
+        }
+        state = LiftSystemState.IDLE;
+        timedOut = (System.currentTimeMillis() > timeOutTime);
+        if (timedOut) {
+            teamUtil.log("Hover - TIMED OUT!");
+        }
+        teamUtil.log("Hover - Finished");
     }
 
-    public void hoverOverFoundationNoWait(final int level, final Grabber.GrabberRotation rotation) {
+    public void hoverOverFoundationNoWait(final int level, final Grabber.GrabberRotation rotation, final long timeOut) {
         if (state == LiftSystemState.IDLE) {
+            state = LiftSystemState.HOVER;
+            teamUtil.log("Launching Thread to Hover");
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    hoverOverFoundation(level, rotation);
+                    hoverOverFoundation(level, rotation, timeOut);
                 }
             });
             thread.start();

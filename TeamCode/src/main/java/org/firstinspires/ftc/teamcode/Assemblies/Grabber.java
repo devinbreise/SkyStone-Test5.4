@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.basicLibs.HiTecServo;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 
+// A class to encapsulate the motion of the 3 servos in the Stone Grabber
 public class Grabber {
 
 
@@ -38,13 +39,14 @@ public class Grabber {
 
     private boolean grabberRunning = false;
 
-    GrabberState grabberState;
+    GrabberState grabberState = GrabberState.GRABBER_UNKNOWN;
     Telemetry telemetry;
     HardwareMap hardwareMap;
     //private Servo rotateGrabber;
 
 
     public Grabber(HardwareMap theHardwareMap, Telemetry theTelemetry) {
+        teamUtil.log ("Constructing Grabber");
         telemetry = theTelemetry;
         hardwareMap = theHardwareMap;
     }
@@ -55,7 +57,8 @@ public class Grabber {
         GRABBER_OPEN,
         GRABBER_CLOSED_WIDE,
         GRABBER_CLOSED_NARROW,
-        GRABBER_PICKUP
+        GRABBER_PICKUP,
+        GRABBER_UNKNOWN
     }
 
     public enum GrabberRotation{
@@ -65,10 +68,10 @@ public class Grabber {
     }
 
     public void initGrabber() {
+        teamUtil.log ("Initializing Grabber");
         grabberOne = hardwareMap.servo.get("grabberOne");
         grabberTwo = hardwareMap.servo.get("grabberTwo");
         rotateServo = hardwareMap.servo.get("rotateServo");
-        //rotateGrabber = hardwareMap.servo.get("rotateGrabber");
 
         //CURRENT_POS = ROTATE_GRABBER_INITIAL_POS;
         //rotateGrabber.setPosition(CURRENT_POS);
@@ -80,7 +83,7 @@ public class Grabber {
         grabberOne.setPosition(GRABBER_ONE_STOW_POS);
         grabberTwo.setPosition(GRABBER_TWO_STOW_POS);
     }
-    public void stowGrabber(){
+    public void stowGrabberNoWait(){
         if(grabberRunning == false){
             grabberRunning = true;
             Thread t1 = new Thread(new Runnable(){
@@ -90,7 +93,7 @@ public class Grabber {
                     teamUtil.sleep(1500);
                     grabberOne.setPosition(GRABBER_ONE_STOW_POS);
                     grabberTwo.setPosition(GRABBER_TWO_STOW_POS);
-
+                    grabberRunning = false;
                 }
             });
         }
@@ -154,6 +157,21 @@ public class Grabber {
         }
     }
 
+    public void rotate(Grabber.GrabberRotation rotation){
+        switch(rotation){
+            case INSIDE:
+                rotateServo.setPosition(rotate_inside);
+                break;
+            case OUTSIDE:
+                rotateServo.setPosition(rotate_outside);
+                break;
+            case MIDDLE:
+                rotateServo.setPosition(rotate_narrow);
+                break;
+        }
+    }
+
+/* Obsolete
     public void rotateOutside(){
         rotateServo.setPosition(rotate_outside);
     }
@@ -166,25 +184,14 @@ public class Grabber {
         rotateServo.setPosition(rotate_narrow);
     }
 
-    public void rotate(Grabber.GrabberRotation rotation){
-        switch(rotation){
-            case INSIDE:
-                rotateInside();
-                break;
-            case OUTSIDE:
-                rotateOutside();
-                break;
-            case MIDDLE:
-                rotateNarrow();
-                break;
-        }
-    }
     public double rotateGetPosition(){
         return rotateServo.getPosition();
     }
     public void rotateSetPosition(double position){
         rotateServo.setPosition(position);
     }
+*/
+
 
 
 }

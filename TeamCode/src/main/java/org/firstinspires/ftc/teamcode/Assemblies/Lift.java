@@ -6,47 +6,56 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.basicLibs.TeamGamepad;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 public class Lift {
 
-    private double liftBasePower = .5;
-    private final double liftBaseTopLimit_EncoderClicks = 3090;
+    final double LIFT_UP_POWER = .7;
+    final double LIFT_DOWN_POWER = .5;
+
+    private final int liftBaseTopLimit_EncoderClicks = 3000;
     private DcMotor liftBase;
     private DcMotor rSpindle;
     private DcMotor lSpindle;
     private RevTouchSensor liftDownLimit;
     //NEVEREST20_ENCODER_CLICKS = 537.6
 
-    // Keep track of when controls are updated to limit how fast values can change
-    private long nextControlUpdate = System.currentTimeMillis();
-    private final long CONTROL_INTERVAL = 500;
-
     // Constants for the spindles
     private final int LEVEL_0 = 430;
     private final int LEVEL_INCREMENT = 570;
     private final double TENSION_POWER = 0.075;
 
-    //stuff that should be an enum
-    private boolean isMovingUp = false;
-    private boolean isMovingDown = false;
+    enum LiftState{
+        IDLE,
+        MOVING_UP,
+        MOVING_DOWN,
+    }
+    private LiftState liftState = LiftState.IDLE;
+    enum ElevatorState{
+        IDLE,
+        MOVING_UP,
+        HOLDING,
+        MOVING_DOWN,
+    }
+    private ElevatorState elevatorState = ElevatorState.IDLE;
 
     private boolean hasSetZeroSpindle = false;
-    private boolean liftIsBusy = false;
-
-
-
+    private boolean hasSetBaseZero = false;
+    boolean timedOut = false;
 
     HardwareMap hardwareMap;
     Telemetry telemetry;
 
+
     public Lift(HardwareMap theHardwareMap, Telemetry theTelmetry){
+        teamUtil.log ("Constructing Lift");
         hardwareMap = theHardwareMap;
         telemetry = theTelmetry;
-
     }
 
     public void initLift(){
+        teamUtil.log ("Initializing Lift");
         liftBase = hardwareMap.dcMotor.get("liftBase");
         liftBase.setDirection(DcMotorSimple.Direction.REVERSE);
         liftBase.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -60,48 +69,105 @@ public class Lift {
         lSpindle.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         liftDownLimit = hardwareMap.get(RevTouchSensor.class, "liftDownLimitSwitch");
-        //liftDownLimit.setMode(DigitalChannel.Mode.INPUT);
     }
 
-    // These 5 methods are for testing...they are intended to give you button control
-    // over the lift (e.g. while a button is held down, call liftUp, when the button is let go
-    // call shutDownLift()
+    public boolean isBusy() {
+        return ((liftState != LiftState.IDLE) || (elevatorState != ElevatorState.IDLE));
+    }
+
     public void shutDownLiftBase(){
         liftBase.setPower(0);
     }
 
-    public void liftBaseUp(){
-        if(liftBase.getCurrentPosition()<liftBaseTopLimit_EncoderClicks){
-            liftBase.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            liftBase.setPower(liftBasePower);
+    public void downPosition(double power, long timeOut){
+        liftState = LiftState.MOVING_DOWN;
+        teamUtil.log("Moving Lift Down");
+        long timeOutTime= System.currentTimeMillis()+timeOut;
+        timedOut = false;
+
+        while(!liftDownLimit.isPressed() && teamUtil.keepGoing(timeOutTime)){
+            liftBaseDown();
+        };
+        shutDownLiftBase();
+        liftBase.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        teamUtil.log("Lift Base encoder reset");
+        teamUtil.log("LiftBaseEncoder: " + liftBase.getCurrentPosition());
+
+        hasSetBaseZero = true;
+        liftState = LiftState.IDLE;
+
+        timedOut = (System.currentTimeMillis() > timeOutTime);
+        if (timedOut) {
+            teamUtil.log("Moving Lift Down - TIMED OUT!");
+        }
+        teamUtil.log("Moving Lift Down - Finished");
+    }
+
+    public void downPositionNoWait( final double power, final long timeOut){
+        if(liftState == LiftState.IDLE) {
+            liftState = LiftState.MOVING_DOWN;
+            teamUtil.log("Launching Thread to Move Lift Down");
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    downPosition(power, timeOut);
+                }
+            });
+            thread.start();
         }
     }
 
-    public void upPosition(double power){
-        isMovingUp = true;
+    // Moves the lift to the up position and returns when finished
+    // If this is the first time, also tensions elevator spindles
+    // Lift must previously have been moved to the downPosition or this will fail
+    public void upPosition(double power, long timeOut){
+        liftState = LiftState.MOVING_UP;
+        teamUtil.log("Moving Lift Up");
+        long timeOutTime= System.currentTimeMillis()+timeOut;
+        timedOut = false;
+
+       if (!hasSetBaseZero) {
+            teamUtil.log("ERROR: Attempt to Move Lift Up before resetting base");
+            liftState = LiftState.IDLE;
+            return;
+        }
         liftBase.setPower(0);
-        liftBase.setTargetPosition(3090);
+        liftBase.setTargetPosition(liftBaseTopLimit_EncoderClicks);
         liftBase.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         liftBase.setPower(power);
+        while (liftBase.isBusy() && teamUtil.keepGoing(timeOutTime)){
+
+        }
+        shutDownLiftBase();
+
+/*
         while(liftBase.getCurrentPosition()<3000){
             teamUtil.log("liftEncoder: " + liftBase.getCurrentPosition());
         }
-        teamUtil.log("==============> encoder is up" );
-        if(hasSetZeroSpindle == false){
+ */
+        teamUtil.log("LiftBase is Up" );
+        teamUtil.log("LiftBaseEncoder: " + liftBase.getCurrentPosition());
+        if(!hasSetZeroSpindle && (timeOutTime > System.currentTimeMillis())){
             tensionLiftString();
             hasSetZeroSpindle = true;
         }
-        teamUtil.log("liftEncoder: " + liftBase.getCurrentPosition());
-        isMovingUp = false;
+        liftState = LiftState.IDLE;
+        timedOut = (System.currentTimeMillis() > timeOutTime);
+        if (timedOut) {
+            teamUtil.log("Moving Lift Up - TIMED OUT!");
+        }
+        teamUtil.log("Moving Lift Up - Finished");
     }
 
-    public void upPositionNoWait(final double power){
-        if(isMovingUp == false) {
 
+    public void upPositionNoWait(final double power, final long timeOut){
+        if(liftState == LiftState.IDLE) {
+            liftState = LiftState.MOVING_UP;
+            teamUtil.log("Launching Thread to Move Lift Up");
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    upPosition(power);
+                    upPosition(power, timeOut);
                 }
             });
 
@@ -109,31 +175,6 @@ public class Lift {
         }
     }
 
-    public void downPosition(double power){
-        isMovingDown = true;
-        do{
-            liftBaseDown();
-
-        }while(!liftDownLimit.isPressed());
-        liftBase.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        teamUtil.log("encoder reset");
-        teamUtil.log("liftBase encoder: " + liftBase.getCurrentPosition());
-
-        shutDownLiftBase();
-        isMovingDown = false;
-    }
-    public void downPositionNoWait(final double power){
-        if(isMovingUp == false) {
-
-            Thread thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    downPosition(power);
-                }
-            });
-            thread.start();
-        }
-    }
 
     public void liftBaseDown(){
         if(liftDownLimit.isPressed()){
@@ -153,22 +194,6 @@ public class Lift {
     }
 
 
-    public void increaseLiftBasePower(){
-        // If enough time has passed since we last updated the power
-        if (System.currentTimeMillis() > nextControlUpdate)
-        {
-            liftBasePower = liftBasePower + 0.1;
-            nextControlUpdate = System.currentTimeMillis() + CONTROL_INTERVAL;
-        }
-    }
-    public void decreaseLiftBasePower(){
-        // If enough time has passed since we last updated the power
-        if (System.currentTimeMillis() > nextControlUpdate)
-        {
-            liftBasePower = liftBasePower - 0.1;
-            nextControlUpdate = System.currentTimeMillis() + CONTROL_INTERVAL;
-        }
-    }
 
     // we need to figure out where this sort of code should be run as the lift is
     // put through various operations
@@ -199,9 +224,12 @@ public class Lift {
         }
     }
 
-    // Move the lift up to the specified level using FTC PID controller
-    public void goToLevel(int level) {
-        teamUtil.log("going to level: " + level);
+    // Move the elevator up to the specified level using FTC PID controller
+    public void goToLevel(int level, long timeOut) {
+        elevatorState = ElevatorState.MOVING_UP;
+        teamUtil.log("Going to level: " + level);
+        long timeOutTime = System.currentTimeMillis() + timeOut;
+        timedOut = false;
         teamUtil.log("firstSpindlePosition: " + rSpindle.getCurrentPosition());
         rSpindle.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lSpindle.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -211,23 +239,53 @@ public class Lift {
         lSpindle.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rSpindle.setPower(.99);
         lSpindle.setPower(.99);
+        while (rSpindle.isBusy() && teamUtil.keepGoing(timeOutTime)) {
 
+        }
+        elevatorState = ElevatorState.HOLDING;
+        timedOut = (System.currentTimeMillis() > timeOutTime);
+        if (timedOut) {
+            teamUtil.log("Go To Level - TIMED OUT!");
+            goToBottomNoWait();
+        } else {
+            teamUtil.log("Go To Level - Finished");
+        }
     }
 
+    public void goToLevelNoWait(final int level, final long timeOut){
+        if (elevatorState == ElevatorState.IDLE) {
+            elevatorState = ElevatorState.MOVING_UP;
+            teamUtil.log("Launching Thread to Go To Level");
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    goToLevel(level, timeOut);
+                }
+            });
+            thread.start();
+        }
+    }
     // Drop the lift to its lowest point
+    // TODO : COACH - This needs to be an active mechanism (i.e. run the spindles to let
+    // out string at an appropriate pace (for extra credit, make it faster for the higher levels
+    // and slow down as it approaches the bottom so it doesn't slam
     public void goToBottom() {
-        liftIsBusy = true;
+        teamUtil.log("Moving Elevator to Bottom");
+        elevatorState = ElevatorState.MOVING_DOWN;
         rSpindle.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lSpindle.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rSpindle.setPower(0);
         lSpindle.setPower(0);
         teamUtil.sleep(2000);
         tensionLiftString();
-        liftIsBusy = false;
+        elevatorState = ElevatorState.IDLE;
+        teamUtil.log("Moving Elevator to Bottom - Finished");
     }
 
     public void goToBottomNoWait(){
-        if (!liftIsBusy) {
+        if ((elevatorState == ElevatorState.IDLE) ||(elevatorState == ElevatorState.IDLE)) {
+            elevatorState = ElevatorState.MOVING_UP;
+            teamUtil.log("Launching Thread to Move Elevator to Bottom");
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -245,6 +303,41 @@ public class Lift {
         telemetry.addData("lSpindle:", lSpindle.getCurrentPosition());
         telemetry.addData("rSpindle:", rSpindle.getCurrentPosition());
     }
+
+
+    /////////////////////////////////////////////////////////////////////////
+    // Some stuff for testing only
+
+    // Keep track of when controls are updated to limit how fast values can change
+    private long nextControlUpdate = System.currentTimeMillis();
+    private final long CONTROL_INTERVAL = 500;
+    private double liftBasePower = .5;
+
+
+    public void increaseLiftBasePower(){
+        // If enough time has passed since we last updated the power
+        if (System.currentTimeMillis() > nextControlUpdate)
+        {
+            liftBasePower = liftBasePower + 0.1;
+            nextControlUpdate = System.currentTimeMillis() + CONTROL_INTERVAL;
+        }
+    }
+    public void decreaseLiftBasePower(){
+        // If enough time has passed since we last updated the power
+        if (System.currentTimeMillis() > nextControlUpdate)
+        {
+            liftBasePower = liftBasePower - 0.1;
+            nextControlUpdate = System.currentTimeMillis() + CONTROL_INTERVAL;
+        }
+    }
+
+    public void liftBaseUp(){
+        if(liftBase.getCurrentPosition()<liftBaseTopLimit_EncoderClicks){
+            liftBase.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            liftBase.setPower(liftBasePower);
+        }
+    }
+
 }
 
 

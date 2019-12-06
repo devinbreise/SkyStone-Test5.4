@@ -37,14 +37,14 @@ public class TestGrabber extends OpMode {
             grabber.closeGrabberNarrow();
         }
         if(gamepad2.dpad_up){
-            grabber.rotateOutside();
+            grabber.rotate(Grabber.GrabberRotation.OUTSIDE);
         }
         if(gamepad2.dpad_down){
-            grabber.rotateSetPosition(grabber.rotateGetPosition()-0.01);
-          grabber.rotateInside();
+           // grabber.rotateSetPosition(grabber.rotateGetPosition()-0.01);
+            grabber.rotate(Grabber.GrabberRotation.INSIDE);
         }
         if(gamepad2.dpad_right){
-            grabber.rotateNarrow();
+            grabber.rotate(Grabber.GrabberRotation.MIDDLE);
         }
 
 

@@ -23,6 +23,8 @@ public class AutoSkystonePathBlue extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+        telemetry.addLine("Initializing Op Mode");
+        telemetry.update();
 
         robot = new RobotDrive(hardwareMap, telemetry);
         latch = new Latch(hardwareMap, telemetry);
@@ -34,6 +36,10 @@ public class AutoSkystonePathBlue extends LinearOpMode {
         robot.initDistanceSensors();
         liftSystem.initLiftSystem();
 
+        telemetry.addLine("Ready to Start");
+        telemetry.update();
+        waitForStart();
+
         while (!opModeIsActive()) {
             robot.resetHeading();
             telemetry.addData("heading:", robot.getHeading());
@@ -44,7 +50,7 @@ public class AutoSkystonePathBlue extends LinearOpMode {
         waitForStart();
 
 
-        robot.moveInchesForward(0.5, 19);
+        robot.moveInchesForward(0.5, 19,5000);
         //check color sensor value to see if we got a skystone. IF YES: PATH ==1
 //        if (isSkystone) {
 //            PATH = 1;
@@ -57,16 +63,16 @@ public class AutoSkystonePathBlue extends LinearOpMode {
 
 
         if (PATH == 1) {
-            liftSystem.prepareToGrab();
+            liftSystem.prepareToGrab(6000);
             liftSystem.openGrabber();
 
-            robot.moveInchesForward(0.5, 8);
-            liftSystem.grabAndStow("wide");
-            robot.moveInchesBackward(0.5, 7);
+            robot.moveInchesForward(0.5, 8,5000);
+            liftSystem.grabAndStow("wide", 7000);
+            robot.moveInchesBackward(0.5, 7,5000);
 
 
-            robot.moveInchesRight(0.5, 45);
-            liftSystem.hoverOverFoundationNoWait(0, Grabber.GrabberRotation.MIDDLE);
+            robot.moveInchesRight(0.5, 45,5000);
+            liftSystem.hoverOverFoundationNoWait(0, Grabber.GrabberRotation.MIDDLE, 7000);
 //
 //            do{
 //                robot.driveRight(0.5);

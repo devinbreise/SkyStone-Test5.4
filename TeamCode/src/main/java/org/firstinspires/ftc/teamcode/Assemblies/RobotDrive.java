@@ -40,6 +40,7 @@ public class RobotDrive {
 
     HardwareMap hardwareMap;
     Telemetry telemetry;
+    boolean timedOut = false;
     DcMotor fLeftMotor;
     DcMotor bLeftMotor;
     DcMotor fRightMotor;
@@ -173,10 +174,6 @@ public class RobotDrive {
 
     }
 
-
-
-
-
     public void driveRight(double power) {
         power = clip(power);
         fLeftMotor.setPower(-power);
@@ -198,6 +195,7 @@ public class RobotDrive {
         fLeftMotor.setPower(-TEST_POWER);
         bLeftMotor.setPower(-TEST_POWER);
         bRightMotor.setPower(TEST_POWER);
+        // back left ?! - COACH
     }
 
     public double getDistanceInches(DistanceSensors distanceSensor){
@@ -219,24 +217,35 @@ public class RobotDrive {
 
     }
 
-    public void frontLeftCloseToDistance(double desiredDistance, double power){
-        double currentReading = getDistanceInches(frontLeftDistance);
+    // Move the robot straight forward or straight backward until the sensor gets to the desired reading
+    public void moveToDistance(DistanceSensors sensor, double desiredDistance, double power, long timeOut){
+        teamUtil.log("Moving to Distance");
+        long timeOutTime= System.currentTimeMillis()+timeOut;
+        timedOut = false;
+        double currentReading = getDistanceInches(sensor);
 
-        if( currentReading < desiredDistance){
-            do{
+        // Need to move backwards
+        if( currentReading < desiredDistance) {
+            while ((getDistanceInches(sensor) < desiredDistance) && teamUtil.keepGoing(timeOutTime)) {
                 driveBackward(power);
-            } while( getDistanceInches(frontLeftDistance) < desiredDistance /*&& teamUtil.theOpMode.opModeIsActive()*/);
-
-        } else if( currentReading > desiredDistance){
-
-            do{
+            }
+        // need to move forwards
+        } else if ( currentReading > desiredDistance) {
+            while ((getDistanceInches(sensor) > desiredDistance) && teamUtil.keepGoing(timeOutTime)) {
                 driveForward(power);
-            } while( getDistanceInches(frontLeftDistance) > desiredDistance /*&& teamUtil.theOpMode.opModeIsActive()*/);
-
+            }
         }
+        stopMotors();
+        timedOut = (System.currentTimeMillis() > timeOutTime);
+        if (timedOut) {
+            teamUtil.log("Moving to Distance - TIMED OUT!");
+        }
+        teamUtil.log("Moving to Distance - Finished");
+
     }
 
     public void driveForward(double power, double timeInMilliseconds){
+        teamUtil.log("Moving Forward Milliseconds: " + timeInMilliseconds);
         ElapsedTime driveTime = new ElapsedTime();
         power = clip(power);
         setZeroAllDriveMotors();
@@ -244,18 +253,20 @@ public class RobotDrive {
             driveForward(power);
         } while(driveTime.milliseconds() < timeInMilliseconds && teamUtil.theOpMode.opModeIsActive());
         stopMotors();
+        teamUtil.log("Moving Forward Milliseconds - Finished");
     }
 
+    public void moveInchesForward(double speed, double inches, long timeOut) {
+        teamUtil.log("Moving Inches Forward: " + inches);
+        long timeOutTime= System.currentTimeMillis()+timeOut;
+        timedOut = false;
 
-    public void moveInchesForward(double speed, double inches) {
         //resets the motors
         fRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         fRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-
         setZeroAllDriveMotors();
-        //sets the number of desired inches on both motors
 
+        //sets the number of desired inches on both motors
         int encoderCounts = (int) (COUNTS_PER_INCH * inches);
         speed = clip(speed);
 
@@ -269,7 +280,7 @@ public class RobotDrive {
             encoderTelemetry();
 
 
-        } while (Math.abs(fRightMotor.getCurrentPosition()) < encoderCounts && teamUtil.theOpMode.opModeIsActive());
+        } while ((Math.abs(fRightMotor.getCurrentPosition()) < encoderCounts) && teamUtil.keepGoing(timeOutTime));
         //runs to the set number of inches at the desired speed
 
 
@@ -283,9 +294,18 @@ public class RobotDrive {
         //sets it back to normal
         setAllMotorsWithoutEncoder();
 
+        timedOut = (System.currentTimeMillis() > timeOutTime);
+        if (timedOut) {
+            teamUtil.log("Moving Inches Forward - TIMED OUT!");
+        }
+        teamUtil.log("Moving Inches Forward - Finished");
+
     }
 
-    public void moveInchesBackward(double speed, double inches) {
+    public void moveInchesBackward(double speed, double inches, long timeOut) {
+        teamUtil.log("Moving Inches Backward: " + inches);
+        long timeOutTime= System.currentTimeMillis()+timeOut;
+        timedOut = false;
         //resets the motors
         fRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         fRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -303,7 +323,7 @@ public class RobotDrive {
             encoderTelemetry();
 
 
-        } while (Math.abs(fRightMotor.getCurrentPosition()) < encoderCounts && teamUtil.theOpMode.opModeIsActive());
+        } while ((Math.abs(fRightMotor.getCurrentPosition()) < encoderCounts) && teamUtil.keepGoing(timeOutTime));
         //runs to the set number of inches at the desired speed
 
 
@@ -317,9 +337,17 @@ public class RobotDrive {
         //sets it back to normal
         setAllMotorsWithoutEncoder();
 
+        timedOut = (System.currentTimeMillis() > timeOutTime);
+        if (timedOut) {
+            teamUtil.log("Moving Inches Backward - TIMED OUT!");
+        }
+        teamUtil.log("Moving Inches Backward - Finished");
     }
 
-    public void moveInchesLeft(double speed, double inches) {
+    public void moveInchesLeft(double speed, double inches, long timeOut) {
+        teamUtil.log("Moving Inches Left: " + inches);
+        long timeOutTime= System.currentTimeMillis()+timeOut;
+        timedOut = false;
         //resets the motors
         fRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         fRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -337,7 +365,7 @@ public class RobotDrive {
             encoderTelemetry();
 
 
-        } while (Math.abs(fRightMotor.getCurrentPosition()) < encoderCounts /*&& teamUtil.theOpMode.opModeIsActive()*/);
+        } while ((Math.abs(fRightMotor.getCurrentPosition()) < encoderCounts) && teamUtil.keepGoing(timeOutTime));
         //runs to the set number of inches at the desired speed
 
 
@@ -351,9 +379,17 @@ public class RobotDrive {
         //sets it back to normal
         setAllMotorsWithoutEncoder();
 
+        timedOut = (System.currentTimeMillis() > timeOutTime);
+        if (timedOut) {
+            teamUtil.log("Moving Inches Left - TIMED OUT!");
+        }
+        teamUtil.log("Moving Inches Left - Finished");
     }
 
-    public void moveInchesRight(double speed, double inches) {
+    public void moveInchesRight(double speed, double inches, long timeOut) {
+        teamUtil.log("Moving Inches Right: " + inches);
+        long timeOutTime= System.currentTimeMillis()+timeOut;
+        timedOut = false;
         //resets the motors
         fRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         fRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -371,7 +407,7 @@ public class RobotDrive {
             encoderTelemetry();
 
 
-        } while (Math.abs(fRightMotor.getCurrentPosition()) < encoderCounts && teamUtil.theOpMode.opModeIsActive());
+        } while ((Math.abs(fRightMotor.getCurrentPosition()) < encoderCounts) && teamUtil.keepGoing(timeOutTime));
         //runs to the set number of inches at the desired speed
 
 
@@ -385,7 +421,67 @@ public class RobotDrive {
         //sets it back to normal
         setAllMotorsWithoutEncoder();
 
+        timedOut = (System.currentTimeMillis() > timeOutTime);
+        if (timedOut) {
+            teamUtil.log("Moving Inches Right - TIMED OUT!");
+        }
+        teamUtil.log("Moving Inches Right - Finished");
     }
+
+    // TODO: COACH-To do a wall follow, you will need a version of this that just powers the motors
+    // appropriately and doesn't bother with the encoders.  That would be called from within a loop
+    // that is checking the distance to the followed wall and adjusting the desiredHeading
+    // proportionally.
+    // However, since you have this method, I think you could refactor the implementation of 4 of your MoveInches
+    // methods to rely on this instead...but maybe a little later...
+    public void driveToHeading(double speed, double inches, double desiredHeading, long timeOut){
+        teamUtil.log("Moving Inches at Heading: Inches: " + inches + " Heading: " + desiredHeading);
+        long timeOutTime= System.currentTimeMillis()+timeOut;
+        timedOut = false;
+
+        //resets the motors
+        fRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+
+        setZeroAllDriveMotors();
+        //sets the number of desired inches on both motors
+
+        int encoderCounts = (int) (COUNTS_PER_INCH * inches);
+        float driveSpeed = (float)(clip(speed));
+
+        do {
+//            double driveSpeed = Range.clip( Math.abs(fRightMotor.getCurrentPosition()-encoderCounts)/700, 0.2, 1);
+            universalJoystick(0, driveSpeed, 0,1, desiredHeading);
+
+            teamUtil.log("difference: " + Math.abs(fRightMotor.getCurrentPosition()-encoderCounts));
+            teamUtil.log("rightMotorPower: " + fRightMotor.getPower());
+            teamUtil.log("fRightMotor: " + getBackLeftMotorPos());
+            encoderTelemetry();
+
+
+        } while ((Math.abs(fRightMotor.getCurrentPosition()) < encoderCounts) && teamUtil.keepGoing(timeOutTime));
+        //runs to the set number of inches at the desired speed
+
+
+        while (fLeftMotor.isBusy() && fRightMotor.isBusy()&& teamUtil.keepGoing(timeOutTime)) {
+            encoderTelemetry();
+        }
+
+        //turns off both motors
+        stopMotors();
+
+        //sets it back to normal
+        setAllMotorsWithoutEncoder();
+
+        timedOut = (System.currentTimeMillis() > timeOutTime);
+        if (timedOut) {
+            teamUtil.log("Moving Inches at Heading - TIMED OUT!");
+        }
+        teamUtil.log("Moving Inches at Heading - Finished");
+    }
+
+
 
     //need to remake encoder methods for that stuff
 
@@ -416,8 +512,9 @@ public class RobotDrive {
                 revImu.correctHeading(revImu.getHeading() - INITIAL_HEADING);
     }
 
+    // TODO: COACH-This method needs a "speed" parameter that will provide an upper bound
+    //  on the rotation speed so that it can be tuned by the caller
     public void imuRotateToAngle(double desiredHeading) {
-
         double startHeading = getHeading();
         int rotateDirection;
         double rotatePower;
@@ -462,8 +559,13 @@ public class RobotDrive {
         }
     }
 
-    public void imuRotate(double angle) {
-        teamUtil.log("HI");
+    // TODO: COACH-This method needs a "speed" parameter that will provide an upper bound
+    //  on the rotation speed so that it can be tuned by the caller
+    public void imuRotate(double angle, long timeOut) {
+        teamUtil.log("Rotating: " + angle);
+        long timeOutTime= System.currentTimeMillis()+timeOut;
+        timedOut = false;
+
         double startHeading = getHeading();
         int rotateDirection;
         double tolerance = 5;
@@ -527,11 +629,15 @@ public class RobotDrive {
 //            telemetry.addData("direction", rotateDirection);
 //            telemetry.update();
 
-        } while(!completedRotating && teamUtil.theOpMode.opModeIsActive());
-            stopMotors();
-            return;
+        } while(!completedRotating && teamUtil.keepGoing(timeOutTime));
+        stopMotors();
 
+        timedOut = (System.currentTimeMillis() > timeOutTime);
+        if (timedOut) {
+            teamUtil.log("Rotating - TIMED OUT!");
         }
+        teamUtil.log("Rotating - Finished");
+    }
 
 
 
@@ -589,47 +695,6 @@ public class RobotDrive {
     }
 
 
-
-    public void driveToHeading(double speed, double inches, double desiredHeading){
-        //resets the motors
-        fRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-
-        setZeroAllDriveMotors();
-        //sets the number of desired inches on both motors
-
-        int encoderCounts = (int) (COUNTS_PER_INCH * inches);
-        float driveSpeed = (float)(clip(speed));
-
-        do {
-//            double driveSpeed = Range.clip( Math.abs(fRightMotor.getCurrentPosition()-encoderCounts)/700, 0.2, 1);
-            universalJoystick(0, driveSpeed, 0,1, desiredHeading);
-
-            teamUtil.log("difference: " + Math.abs(fRightMotor.getCurrentPosition()-encoderCounts));
-            teamUtil.log("rightMotorPower: " + fRightMotor.getPower());
-            teamUtil.log("fRightMotor: " + getBackLeftMotorPos());
-            encoderTelemetry();
-
-
-        } while (Math.abs(fRightMotor.getCurrentPosition()) < encoderCounts && teamUtil.theOpMode.opModeIsActive());
-        //runs to the set number of inches at the desired speed
-
-
-        while (fLeftMotor.isBusy() && fRightMotor.isBusy()) {
-            encoderTelemetry();
-        }
-
-        //turns off both motors
-        stopMotors();
-
-        //sets it back to normal
-        setAllMotorsWithoutEncoder();
-
-
-
-
-    }
 
     public void universalJoystick(float leftJoyStickX, float leftJoyStickY, float rightJoyStickX, double scaleAmount, double robotHeading){
         double angleInDegrees = robotHeading * Math.PI/180;
