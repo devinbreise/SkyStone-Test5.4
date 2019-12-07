@@ -6,11 +6,12 @@ package org.firstinspires.ftc.teamcode.Assemblies;
         import org.firstinspires.ftc.robotcore.external.Telemetry;
         import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
-// A class to encapsultate the entire robot.
+// A class to encapsulate the entire robot.
 // This class is designed to be used ONLY in a linearOpMode (for Auto OR Teleop)
 public class Robot {
     public LiftSystem liftSystem;
     public RobotDrive drive;
+    public Latch latch;
     HardwareMap hardwareMap;
     Telemetry telemetry;
     boolean timedOut = false;
@@ -27,6 +28,7 @@ public class Robot {
         teamUtil.log ("Constructing Assemblies");
         liftSystem = new LiftSystem(hardwareMap, telemetry);
         drive = new RobotDrive(hardwareMap, telemetry);
+        latch = new Latch(hardwareMap, telemetry);
         teamUtil.log ("Constructing Assemblies - Finished");
         teamUtil.log ("Constructed Robot - Finished");
     }
@@ -39,6 +41,7 @@ public class Robot {
         drive.initDistanceSensors();
         drive.resetHeading();
         liftSystem.initLiftSystem();
+        latch.initLatch();
         teamUtil.log ("Initializing Robot - Finished");
     }
 

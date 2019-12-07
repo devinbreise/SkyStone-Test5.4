@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
 import org.firstinspires.ftc.teamcode.Assemblies.Latch;
 import org.firstinspires.ftc.teamcode.Assemblies.LiftSystem;
+import org.firstinspires.ftc.teamcode.Assemblies.Robot;
 import org.firstinspires.ftc.teamcode.Assemblies.RobotDrive;
 import org.firstinspires.ftc.teamcode.basicLibs.TeamGamepad;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
@@ -13,46 +14,36 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 @TeleOp(name = "RobotTeleopLinear")
 public class RobotTeleopLinear extends LinearOpMode {
     public static final double SCALE_DOWN_CONSTANT = 0.3;
-    RobotDrive robot;
-    Latch latch;
     int level = 0;
-    TeamGamepad teamGamePad;
-    LiftSystem liftSystem;
     Grabber.GrabberRotation grabberRotation;
+    TeamGamepad teamGamePad;
+
+    Robot robot;
 
     public void initialize() {
         teamUtil.theOpMode = this;
-        robot = new RobotDrive(hardwareMap, telemetry);
-        liftSystem = new LiftSystem(hardwareMap, telemetry);
-        latch = new Latch(hardwareMap, telemetry);
+        robot = new Robot(this);
+
         teamGamePad = new TeamGamepad(this);
 
-
-        robot.initDriveMotors();
-        robot.initImu();
-
-        latch.initLatch();
-
-        liftSystem.initLiftSystem();
-
+        robot.init();
         teamUtil.initPerf();
-        robot.resetHeading();
 
     }
     @Override
     public void runOpMode() throws InterruptedException {
-        telemetry.addLine("Initializing Op Mode");
+        telemetry.addLine("Initializing Op Mode...please wait");
         telemetry.update();
         initialize();
 
-        telemetry.addLine("Ready to Start");
+        telemetry.addLine("Ready to Stack :D");
         telemetry.update();
         waitForStart();
 
         while (opModeIsActive()) {
 
             //robot.scaleMovement(MAX_POWER, DRIVE_POWER);
-            telemetry.addData("Heading:", robot.getHeading());
+            telemetry.addData("Heading:", robot.drive.getHeading());
 ///////////////////////////////////////////////////////////////////////
             teamGamePad.gamepadLoop();
 
@@ -60,35 +51,35 @@ public class RobotTeleopLinear extends LinearOpMode {
 ///////////////////////////////////////////////////////////////////////
             //this code is for the drive
             if (gamepad1.left_trigger > 0.5) {
-                robot.universalJoystick(gamepad1.left_stick_x,
+                robot.drive.universalJoystick(gamepad1.left_stick_x,
                         gamepad1.left_stick_y,
                         gamepad1.right_stick_x, SCALE_DOWN_CONSTANT,
-                        robot.getHeading());
+                        robot.drive.getHeading());
 
             } else {
-                robot.universalJoystick(gamepad1.left_stick_x,
+                robot.drive.universalJoystick(gamepad1.left_stick_x,
                         gamepad1.left_stick_y,
                         gamepad1.right_stick_x, 1,
-                        robot.getHeading());
+                        robot.drive.getHeading());
 
             }
 
 
             if (gamepad1.left_stick_button && gamepad1.right_stick_button) {
-                robot.resetHeading();
+                robot.drive.resetHeading();
             }
 
 //////////////////////////////////////////////////////////////////////
             //this code is for the foundation latch
             if (gamepad1.dpad_down) {
-                latch.latchDown();
+                robot.latch.latchDown();
 
             } else if (gamepad1.dpad_up) {
-                latch.latchUp();
+                robot.latch.latchUp();
             }
 
             if (gamepad1.dpad_left || gamepad1.dpad_right) {
-                latch.latchMiddle();
+                robot.latch.latchMiddle();
             }
 /////////////////////////////////////////////////////////////////////
             //this code is for the lift system assembly
@@ -111,24 +102,24 @@ public class RobotTeleopLinear extends LinearOpMode {
                 grabberRotation = Grabber.GrabberRotation.INSIDE;
             }
             if (gamepad2.left_stick_button) {
-                liftSystem.hoverOverFoundationNoWait(level, grabberRotation, 7000);
+                robot.liftSystem.hoverOverFoundation(level, grabberRotation, 7000);
                 teamUtil.log("tried to deploy");
                 teamUtil.log("level: " + level);
             }
             if (gamepad2.left_bumper) {
-                liftSystem.prepareToGrabNoWait(9000);
+                robot.liftSystem.prepareToGrabNoWait(9000);
             }
             if (gamepad2.right_trigger > 0.5) {
-                liftSystem.grabAndStowNoWait("narrow", 7000);
+                robot.liftSystem.grabAndStowNoWait("narrow", 7000);
             }
             if (gamepad2.right_bumper) {
-                liftSystem.grabAndStowNoWait("wide", 5000);
+                robot.liftSystem.grabAndStowNoWait("wide", 5000);
             }
             if (gamepad2.right_stick_button) {
-                liftSystem.drop();
+                robot.liftSystem.drop();
             }
             if (gamepad2.x) {
-                liftSystem.liftDown();
+                robot.liftSystem.liftDown();
             }
 
 /////////////////////////////////////////////////////////////////////

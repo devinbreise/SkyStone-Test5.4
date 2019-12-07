@@ -47,6 +47,7 @@ public class teamUtil {
     // trackPerf : Call this in liftLoop() in your opmode to LOGCAT some stats on your software performance
     static sampleStats samples;
     static long lastLoopCall = Long.MAX_VALUE;
+
     public static void initPerf() {
         teamUtil.log("PERF---Initializing");
         samples = new sampleStats();
