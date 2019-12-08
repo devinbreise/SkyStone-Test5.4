@@ -118,8 +118,10 @@ public class RobotTeleopLinear extends LinearOpMode {
             if (gamepad2.right_stick_button) {
                 robot.liftSystem.drop();
             }
-            if (gamepad2.x) {
-                robot.liftSystem.liftDown();
+            if (teamGamePad.gamepad2XBounced()) {
+
+                teamUtil.log("i pressed x wae");
+                robot.liftSystem.lift.goToBottomNoWait();
             }
 
 /////////////////////////////////////////////////////////////////////

@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 public class LiftSystem {
     Grabber grabber;
-    Lift lift;
+    public Lift lift;
     Telemetry telemetry;
     HardwareMap hardwareMap;
     enum LiftSystemState{
@@ -20,6 +20,7 @@ public class LiftSystem {
     }
     LiftSystemState state = LiftSystemState.IDLE;
     boolean timedOut = false;
+    boolean isStowed = false;
 
 
     public LiftSystem(HardwareMap theHardwareMap, Telemetry theTelemetry){
@@ -31,18 +32,21 @@ public class LiftSystem {
     }
 
     public void initLiftSystem(){
+        isStowed = false;
         grabber.initGrabber();
         //here we are moving the grabber to a set position where it is out of the way
         // and convienient
         grabber.closeGrabberNarrow();
         teamUtil.sleep(750);
-        grabber.rotate(Grabber.GrabberRotation.INSIDE);
-        teamUtil.sleep(750);
-        grabber.grabberStow();
+
+
 
         lift.initLift();
         //add limit switch at the top of the lift?
         lift.downPosition(.3, 6000);
+        grabber.rotate(Grabber.GrabberRotation.INSIDE);
+        teamUtil.sleep(750);
+        grabber.grabberStow();
         // need to find init positions for the lift base
     }
 
@@ -82,6 +86,7 @@ public class LiftSystem {
         if (timedOut) {
             teamUtil.log("Grab and Stow - TIMED OUT!");
         }
+        isStowed = true;
         teamUtil.log("Grab and Stow - Finished");
     }
 
@@ -100,6 +105,7 @@ public class LiftSystem {
     }
 
     public void prepareToGrab(long timeOut){
+        isStowed = false;
         state = LiftSystemState.DEPLOY_FOR_PICKUP;
         teamUtil.log("Prepare to Grab");
         long timeOutTime= System.currentTimeMillis()+timeOut;
@@ -142,12 +148,22 @@ public class LiftSystem {
     public void hoverOverFoundation(int level, Grabber.GrabberRotation rotation, long timeOut){
         state = LiftSystemState.HOVER;
         teamUtil.log("Hover");
-        long timeOutTime= System.currentTimeMillis()+timeOut;
+        long timeOutTime = System.currentTimeMillis() + timeOut;
         timedOut = false;
-        grabber.rotate(rotation);
-        lift.upPosition(.7, timeOut);
-        if (!lift.timedOut && teamUtil.keepGoing(timeOutTime)) {
-            lift.goToLevel(level, timeOutTime - System.currentTimeMillis());
+        if(isStowed) {
+            grabber.rotate(rotation);
+            lift.upPosition(.7, timeOut);
+            if (!lift.timedOut && teamUtil.keepGoing(timeOutTime)) {
+                lift.goToLevel(level, timeOutTime - System.currentTimeMillis());
+            }
+
+        }else{
+            grabber.closeGrabberWide();
+            lift.upPosition(.7, timeOut);
+            if (!lift.timedOut && teamUtil.keepGoing(timeOutTime)) {
+                lift.goToLevel(level, timeOutTime - System.currentTimeMillis());
+                grabber.rotate(rotation);
+            }
         }
         state = LiftSystemState.IDLE;
         timedOut = (System.currentTimeMillis() > timeOutTime);

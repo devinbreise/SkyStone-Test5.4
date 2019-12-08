@@ -1,14 +1,9 @@
 package org.firstinspires.ftc.teamcode.TestCode;
 
-import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Assemblies.RobotDrive;
-import org.firstinspires.ftc.teamcode.basicLibs.revHubIMUGyro;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 @Autonomous(name = "TestImuMovement")
@@ -38,25 +33,14 @@ public class TestImuMovement extends LinearOpMode {
 
 
 
-//            if(gamepad1.left_bumper){
-//                robot.rotateCW(0.1);
-//            } else if(gamepad1.right_bumper){
-//                robot.rotateCCW(0.1);
-//            } else robot.stopMotors();
-
-//            if(gamepad1.a){
-//                robot.resetHeading();
-//            }
-//
-//           telemetry.addData("Absoluteheading:", robot.getAbsoluteHeading());
-//            telemetry.addData("heading:", robot.getHeading());
-//
-//           telemetry.addData("INIT", RobotDrive.INITIAL_HEADING);
-//            telemetry.update();
 
 
-            sleep(2000);
-                robot.imuRotate(90, 5000);
+            sleep(5000);
+                robot.turn(180, 5000);
+                sleep(5000);
+                robot.rotateToHeading(90);
+
+
 //                teamUtil.log("heading: " + robot.getHeading());
 
 

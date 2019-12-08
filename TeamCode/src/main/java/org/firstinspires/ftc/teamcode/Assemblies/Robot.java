@@ -9,6 +9,10 @@ package org.firstinspires.ftc.teamcode.Assemblies;
 // A class to encapsulate the entire robot.
 // This class is designed to be used ONLY in a linearOpMode (for Auto OR Teleop)
 public class Robot {
+    public static final double DISTANCE_TO_BLOCK = 3.2;
+    public static final double AUTOINTAKE_POWER = 0.25;
+    public static final double AUTOINTAKE_SIDEWAYS_POWER = 0.33;
+
     public LiftSystem liftSystem;
     public RobotDrive drive;
     public Latch latch;
@@ -16,7 +20,7 @@ public class Robot {
     Telemetry telemetry;
     boolean timedOut = false;
 
-    int MIN_DISTANCE_FOR_AUTO_PICKUP = 15;
+    int MIN_DISTANCE_FOR_AUTO_PICKUP = 10;
 
     public Robot(LinearOpMode opMode){
         teamUtil.log ("Constructing Robot");
@@ -48,16 +52,11 @@ public class Robot {
     ////////////////////////////////////////////////////
     // Automagically align on a stone, pick it up, and stow it.
     // stop if we don't finish maneuvering within timeOut msecs
-    public void autoIntake(boolean isBlue, long timeOut){
+    public void autoIntake(long timeOut){
         long timeOutTime= System.currentTimeMillis()+timeOut;
 
         // Rotate is not that accurate at the moment, so we are relying on the driver
-        if(isBlue) {
-            //drive.imuRotateToAngle(180);
-        }
-        else {
-            //drive.imuRotateToAngle(0);
-        }
+
 
         // Get the lift system ready to grab if it isn't already...
         liftSystem.prepareToGrabNoWait(7000);
@@ -66,19 +65,21 @@ public class Robot {
 
         // line up using the front left sensor
         if (drive.frontLeftDistance.getDistance()< MIN_DISTANCE_FOR_AUTO_PICKUP) {
-            drive.moveToDistance(drive.frontLeftDistance, 3, 0.25, 5000);
-            while((drive.frontLeftDistance.getDistance()<10) && teamUtil.keepGoing(timeOutTime)) {
-                drive.driveLeft(0.3);
+            teamUtil.log("autointake -- see something in front left!");
+            drive.moveToDistance(drive.frontLeftDistance, DISTANCE_TO_BLOCK, AUTOINTAKE_POWER, 5000);
+            while((drive.frontLeftDistance.getDistance()<MIN_DISTANCE_FOR_AUTO_PICKUP) && teamUtil.keepGoing(timeOutTime) && teamUtil.theOpMode.opModeIsActive()) {
+                drive.driveLeft(AUTOINTAKE_POWER);
             }
-            drive.moveInchesLeft(.3, 2, timeOutTime - System.currentTimeMillis());
+            drive.moveInchesLeft(AUTOINTAKE_SIDEWAYS_POWER, 2, timeOutTime - System.currentTimeMillis());
 
             // line up using the front right sensor
         } else if (drive.frontRightDistance.getDistance()< MIN_DISTANCE_FOR_AUTO_PICKUP) {
-            drive.moveToDistance(drive.frontRightDistance, 3, 0.3, 5000);
-            while ((drive.frontRightDistance.getDistance() < 10) && teamUtil.keepGoing(timeOutTime)) {
-                drive.driveRight(0.3);
+            teamUtil.log("autointake -- see something in front right!");
+            drive.moveToDistance(drive.frontRightDistance, DISTANCE_TO_BLOCK, AUTOINTAKE_POWER, 5000);
+            while ((drive.frontRightDistance.getDistance() < MIN_DISTANCE_FOR_AUTO_PICKUP) && teamUtil.keepGoing(timeOutTime) && teamUtil.theOpMode.opModeIsActive()) {
+                drive.driveRight(AUTOINTAKE_POWER);
             }
-            drive.moveInchesRight(.3, 2, timeOutTime - System.currentTimeMillis());
+            drive.moveInchesRight(AUTOINTAKE_SIDEWAYS_POWER, 2, timeOutTime - System.currentTimeMillis());
         }
 
         // In case we were still getting the lift system ready to grab

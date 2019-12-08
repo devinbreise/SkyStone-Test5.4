@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.TestCode;
+package org.firstinspires.ftc.teamcode.basicLibs;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -8,7 +8,6 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 import java.util.List;
 
@@ -57,7 +56,6 @@ public class SkystoneDetector {
             }
             /** Wait for the game to begin */
             telemetry.addData(">", "Press Play to start op mode");
-            telemetry.update();
 
     }
 
@@ -77,7 +75,7 @@ public class SkystoneDetector {
         return object.getLabel() == "Skystone" && getCenter(object) > 350;
     }
 
-    public boolean middleIsSkystone(Recognition object) {
+    public boolean leftMostIsSkystone(Recognition object) {
         return object.getLabel() == "Skystone" && getCenter(object) > 130;
     }
 
@@ -108,14 +106,14 @@ public class SkystoneDetector {
                     }
 
 
-                    if (rightMostIsSkystone(firstObject) && !middleIsSkystone(secondObject)) {
+                    if (rightMostIsSkystone(firstObject)) {
                         teamUtil.log("PATH 1");
                         return 1;
-                    } else if (!rightMostIsSkystone(firstObject) && middleIsSkystone(secondObject)) {
+                    } else if (leftMostIsSkystone(secondObject)) {
                         teamUtil.log("PATH 2");
                         return 2;
 
-                    } else if (!rightMostIsSkystone(firstObject) && !middleIsSkystone(secondObject)){
+                    } else if (!rightMostIsSkystone(firstObject) && !leftMostIsSkystone(secondObject)){
                         teamUtil.log("PATH 3");
                         return 3;
                     }
@@ -142,7 +140,7 @@ public class SkystoneDetector {
 
                 for (Recognition recognition : updatedRecognitions) {
 //                    telemetry.addData("rightIsSky?: ", rightMostIsSkystone(recognition));
-//                    telemetry.addData("middleIsSky?: ", middleIsSkystone(recognition));
+//                    telemetry.addData("middleIsSky?: ", leftMostIsSkystone(recognition));
 
                     telemetry.addData("label:", recognition.getLabel());
 

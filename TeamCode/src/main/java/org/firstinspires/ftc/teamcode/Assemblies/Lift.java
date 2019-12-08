@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.basicLibs.TeamGamepad;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 public class Lift {
@@ -14,7 +13,7 @@ public class Lift {
     final double LIFT_UP_POWER = .7;
     final double LIFT_DOWN_POWER = .5;
 
-    private final int liftBaseTopLimit_EncoderClicks = 2900;
+    private final int LIFT_BASE_TOP_LIMIT_ENCODER_CLICKS = 3090;
     private DcMotor liftBase;
     private DcMotor rSpindle;
     private DcMotor lSpindle;
@@ -132,12 +131,12 @@ public class Lift {
             return;
         }
         liftBase.setPower(0);
-        liftBase.setTargetPosition(liftBaseTopLimit_EncoderClicks);
+        liftBase.setTargetPosition(LIFT_BASE_TOP_LIMIT_ENCODER_CLICKS);
         liftBase.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         liftBase.setPower(power);
         // wait for the lift to get close to its final position before we move on
         // Using isBusy() on the liftbase motor takes a LONG time due to the PID slowing down at the end
-        while ((liftBase.getCurrentPosition()<(.95*liftBaseTopLimit_EncoderClicks)) && teamUtil.keepGoing(timeOutTime)){
+        while ((liftBase.getCurrentPosition()<(.95* LIFT_BASE_TOP_LIMIT_ENCODER_CLICKS)) && teamUtil.keepGoing(timeOutTime)){
 
         }
         shutDownLiftBase();
@@ -276,16 +275,17 @@ public class Lift {
         elevatorState = ElevatorState.MOVING_DOWN;
         rSpindle.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lSpindle.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rSpindle.setPower(0);
-        lSpindle.setPower(0);
-        teamUtil.sleep(2000);
+        rSpindle.setPower(-0.1);
+        lSpindle.setPower(-0.1);
+        teamUtil.sleep(2500);
         tensionLiftString();
         elevatorState = ElevatorState.IDLE;
         teamUtil.log("Moving Elevator to Bottom - Finished");
     }
 
     public void goToBottomNoWait(){
-        if ((elevatorState == ElevatorState.IDLE) ||(elevatorState == ElevatorState.IDLE)) {
+        teamUtil.log("elevatorstate is " + elevatorState);
+        if ((elevatorState == ElevatorState.HOLDING)){
             elevatorState = ElevatorState.MOVING_UP;
             teamUtil.log("Launching Thread to Move Elevator to Bottom");
             Thread thread = new Thread(new Runnable() {
@@ -334,7 +334,7 @@ public class Lift {
     }
 
     public void liftBaseUp(){
-        if(liftBase.getCurrentPosition()<liftBaseTopLimit_EncoderClicks){
+        if(liftBase.getCurrentPosition()< LIFT_BASE_TOP_LIMIT_ENCODER_CLICKS){
             liftBase.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             liftBase.setPower(liftBasePower);
         }

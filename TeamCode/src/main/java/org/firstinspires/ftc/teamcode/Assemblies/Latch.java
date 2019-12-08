@@ -15,7 +15,7 @@ public class Latch {
     public static final double LATCH_ONE_MIDDLE = 0.64;
     public static final double LATCH_ONE_DOWN = 0.72;
 
-    public static final double LATCH_TWO_UP = 0.65;
+    public static final double LATCH_TWO_UP = 0.73;
     public static final double LATCH_TWO_MIDDLE = 0.31;
     public static final double LATCH_TWO_DOWN = 0.18;
 

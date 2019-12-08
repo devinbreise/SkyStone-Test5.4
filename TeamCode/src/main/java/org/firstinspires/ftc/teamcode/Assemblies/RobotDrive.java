@@ -514,11 +514,15 @@ public class RobotDrive {
 
     // TODO: COACH-This method needs a "speed" parameter that will provide an upper bound
     //  on the rotation speed so that it can be tuned by the caller
-    public void imuRotateToAngle(double desiredHeading) {
+    public void rotateToHeading(double desiredHeading) {
+
         double startHeading = getHeading();
+
+        teamUtil.log("startAngle: " + startHeading);
+
         int rotateDirection;
         double rotatePower;
-        double tolerance = 0.1;
+        double tolerance = 3;
         boolean completedRotating;
 
         double rawChangeInAngle = desiredHeading - getHeading();
@@ -531,44 +535,51 @@ public class RobotDrive {
             rotateDirection = -1;
         }
 
-        rotatePower = Range.clip(changeInAngle / 135, MIN_ROTATING_POWER, 1);
+        do {
+            rotatePower = Range.clip(Math.abs((desiredHeading-getHeading())) / 130, MIN_ROTATING_POWER, 0.5);
+            teamUtil.log("rotatePower: " + fLeftMotor.getPower());
+            teamUtil.log("difference: " + Math.abs((desiredHeading-getHeading())));
+            teamUtil.log("heading : " + getHeading());
+//            teamUtil.log("completedRotating: " + completedRotating);
 
-        if (changeInAngle > tolerance) {
-            completedRotating = false;
-        } else {
-            completedRotating = true;
-            telemetry.addData("I'M DONE ROTATING", "");
-        }
-
-        if (!completedRotating) {
 
             rotateCCW(rotatePower * rotateDirection);
-            telemetry.addData("startHeading", startHeading);
-            telemetry.addData("desiredHeading", desiredHeading);
 
-            telemetry.addData("changeInAngle", changeInAngle);
-            telemetry.addData("rotatingPower", rotatePower);
-            telemetry.addData("direction", rotateDirection);
-            telemetry.update();
+            if (Math.abs(adjustAngle(desiredHeading-getHeading())) > tolerance) {
+                completedRotating = false;
+            } else {
+                completedRotating = true;
+                telemetry.addData("I'm done rotating now", "");
+                teamUtil.log("done rotating");
+            }
 
-        } else {
-            stopMotors();
-            return;
+//            telemetry.addData("startHeading", startHeading);
+//            telemetry.addData("desiredHeading", desiredHeading);
+//
+//            telemetry.addData("changeInAngle", changeInAngle);
+//            telemetry.addData("rotatingPower", rotatePower);
+//            telemetry.addData("direction", rotateDirection);
+//            telemetry.update();
+
+        } while(!completedRotating);
+        stopMotors();
+
+        teamUtil.log("Rotating - Finished");
 
 
         }
-    }
+
 
     // TODO: COACH-This method needs a "speed" parameter that will provide an upper bound
     //  on the rotation speed so that it can be tuned by the caller
-    public void imuRotate(double angle, long timeOut) {
+    public void turn(double angle, long timeOut) {
         teamUtil.log("Rotating: " + angle);
         long timeOutTime= System.currentTimeMillis()+timeOut;
         timedOut = false;
 
         double startHeading = getHeading();
         int rotateDirection;
-        double tolerance = 5;
+        double tolerance = 3;
         boolean completedRotating;
 
 
@@ -581,9 +592,7 @@ public class RobotDrive {
 
 
         //to make sure that the speed of rotation matches the amount of angle we have to our desired heading
-        double rotatePower = Range.clip(Math.abs(getHeading() - rawDesiredHeading) / 135, MIN_ROTATING_POWER, 0.5);
-//        teamUtil.log("RotatePower: " + rotatePower);
-
+        double rotatePower;
 
 
         if (angle > 0) {

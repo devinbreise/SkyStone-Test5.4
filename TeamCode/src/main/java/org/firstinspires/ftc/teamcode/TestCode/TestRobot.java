@@ -23,7 +23,7 @@ public class TestRobot extends LinearOpMode {
         teamUtil.inInitialization = false;
         while (opModeIsActive()) {
             if(gamepad1.right_bumper){
-                robot.autoIntake(true, 8000);
+                robot.autoIntake(8000);
             }
         }
     }
