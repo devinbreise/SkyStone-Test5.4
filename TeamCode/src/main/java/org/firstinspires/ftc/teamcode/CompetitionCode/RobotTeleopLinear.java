@@ -53,13 +53,13 @@ public class RobotTeleopLinear extends LinearOpMode {
             if (gamepad1.left_trigger > 0.5) {
                 robot.drive.universalJoystick(gamepad1.left_stick_x,
                         gamepad1.left_stick_y,
-                        gamepad1.right_stick_x, SCALE_DOWN_CONSTANT,
+                        gamepad1.right_stick_x, 1,
                         robot.drive.getHeading());
 
             } else {
                 robot.drive.universalJoystick(gamepad1.left_stick_x,
                         gamepad1.left_stick_y,
-                        gamepad1.right_stick_x, 1,
+                        gamepad1.right_stick_x, SCALE_DOWN_CONSTANT,
                         robot.drive.getHeading());
 
             }
@@ -68,8 +68,13 @@ public class RobotTeleopLinear extends LinearOpMode {
             if (gamepad1.left_stick_button && gamepad1.right_stick_button) {
                 robot.drive.resetHeading();
             }
+/////////////////////////////////////////////////////////////////////////
+            //this is the code for the auto intake and drop off
+            if(gamepad1.left_bumper){
+                robot.autoIntake(6000);
+            }
 
-//////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
             //this code is for the foundation latch
             if (gamepad1.dpad_down) {
                 robot.latch.latchDown();

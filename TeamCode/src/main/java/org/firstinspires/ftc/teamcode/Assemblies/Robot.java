@@ -10,7 +10,9 @@ package org.firstinspires.ftc.teamcode.Assemblies;
 // This class is designed to be used ONLY in a linearOpMode (for Auto OR Teleop)
 public class Robot {
     public static final double DISTANCE_TO_BLOCK = 3.2;
-    public static final double AUTOINTAKE_POWER = 0.25;
+    public static final int MIN_DISTANCE_FOR_AUTO_DROPOFF = 6;
+    public final double DISTANCE_TO_FOUNDATION = 2;
+    public static final double AUTOINTAKE_POWER = 0.33;
     public static final double AUTOINTAKE_SIDEWAYS_POWER = 0.33;
 
     public LiftSystem liftSystem;
@@ -20,7 +22,8 @@ public class Robot {
     Telemetry telemetry;
     boolean timedOut = false;
 
-    int MIN_DISTANCE_FOR_AUTO_PICKUP = 10;
+    private final int MIN_DISTANCE_FOR_AUTO_PICKUP = 10;
+    private final int MAX_DISTANCE_FOR_AUTO_DROPOFF = 10;
 
     public Robot(LinearOpMode opMode){
         teamUtil.log ("Constructing Robot");
@@ -87,6 +90,39 @@ public class Robot {
             teamUtil.sleep(100);
         }
         liftSystem.grabAndStow("wide", timeOutTime - System.currentTimeMillis());
+
+    }
+    public void autoDropOff(long timeOut){
+        long timeOutTime= System.currentTimeMillis()+timeOut;
+
+        // Rotate is not that accurate at the moment, so we are relying on the driver
+
+
+        // Get the lift system ready to grab if it isn't already...
+
+
+
+        // determine which side we are lined up on
+
+        // line up using the front left sensor
+        if (drive.frontLeftDistance.getDistance()< MAX_DISTANCE_FOR_AUTO_DROPOFF && drive.frontLeftDistance.getDistance() > MIN_DISTANCE_FOR_AUTO_DROPOFF) {
+            teamUtil.log("autointake -- see something in front left!");
+            liftSystem.hoverOverFoundationNoWait(0, Grabber.GrabberRotation.INSIDE, 8500);
+            teamUtil.sleep(5000);
+            drive.moveToDistance(drive.frontLeftDistance, DISTANCE_TO_FOUNDATION, AUTOINTAKE_POWER, 5000);
+
+            while((drive.frontLeftDistance.getDistance()< MAX_DISTANCE_FOR_AUTO_DROPOFF) && teamUtil.keepGoing(timeOutTime) && teamUtil.theOpMode.opModeIsActive()) {
+                drive.driveLeft(AUTOINTAKE_POWER);
+            }
+            drive.moveInchesLeft(AUTOINTAKE_SIDEWAYS_POWER, 1, 8000);
+            //drive.moveInchesLeft(AUTOINTAKE_SIDEWAYS_POWER, 5, timeOutTime - System.currentTimeMillis());
+
+            liftSystem.drop();
+            // line up using the front right sensor
+        }
+
+        // In case we were still getting the lift system ready to grab
+
 
     }
 }

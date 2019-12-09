@@ -15,6 +15,8 @@ public class SkystoneDetector {
     private static final String TFOD_MODEL_ASSET = "Skystone.tflite";
     private static final String LABEL_STONE = "Stone";
     private static final String LABEL_SKYSTONE = "Skystone";
+    private final int SKYSTONE_BOUNDARY_1 = 250;
+    private final int SKYSTONE_BOUNDARY_2 = 475;
     private Telemetry telemetry;
     private HardwareMap hardwareMap;
 
@@ -26,6 +28,7 @@ public class SkystoneDetector {
 
 
     public SkystoneDetector(Telemetry theTelemetry, HardwareMap theHardwareMap) {
+        teamUtil.log("Constructing Detector");
         this.telemetry = theTelemetry;
         this.hardwareMap = theHardwareMap;
 
@@ -40,26 +43,18 @@ public class SkystoneDetector {
         } else {
             telemetry.addData("Sorry!", "This device is not compatible with TFOD");
         }
+        teamUtil.log("Initializing Detector - Finished");
     }
 
-    public void startTracking() {
-        teamUtil.log("Detector -- start tracking");
-        /**
-         * Activate TensorFlow Object Detection before we wait for the start command.
-         * Do it here so that the Camera Stream window will have the TensorFlow annotations visible.
-         **/
-
+    public void activateDetector() {
+        teamUtil.log("Detector -- Activating");
             if (tfod != null) {
                 teamUtil.log("Detector -- calling activate on tfod");
-
                 tfod.activate();
             }
-            /** Wait for the game to begin */
-            telemetry.addData(">", "Press Play to start op mode");
-
     }
 
-    public void stopTracking() {
+    public void shutdownDector() {
         if (tfod != null) {
             teamUtil.log("Detector -- calling shutdown on tfod");
             tfod.shutdown();
@@ -80,33 +75,37 @@ public class SkystoneDetector {
     }
 
     public int detect() {
+        teamUtil.log("Detect");
 
         if (tfod != null) {
             // getUpdatedRecognitions() will return null if no new information is available since
             // the last time that call was made.
             List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
 
+            String logString = "Detected:";
             if (updatedRecognitions != null) {
-                    Recognition firstObject = null;
-                    Recognition secondObject = null;
+                    logString = logString+updatedRecognitions.size()+":";
+                    //Recognition firstObject = null;
+                    //Recognition secondObject = null;
                     for (Recognition recognition : updatedRecognitions) {
-                        if (firstObject == null) {
-                            firstObject = recognition;
-                        } else if (secondObject == null) {
-                            secondObject = recognition;
-                        } else {
-                            teamUtil.log("detect -- couldn't find objects");
-                            return (1);
+                         logString = logString+ recognition.getLabel() + " C:"+ getCenter(recognition) + " / ";
 
+                        if(recognition.getLabel()== LABEL_SKYSTONE){
+                            if(getCenter(recognition)< SKYSTONE_BOUNDARY_1){
+                                teamUtil.log("Detect 1 - Finished");
+                                return 1;
+                            }else if(getCenter(recognition)< SKYSTONE_BOUNDARY_2){
+                                teamUtil.log("Detect 2 - Finished");
+                                return 2;
+                            }else{
+                                teamUtil.log("Detect 3 - Finished");
+                                return 3;
+                            }
                         }
                     }
+                    teamUtil.log(logString);
 
-                    if (firstObject == null || secondObject == null) {
-                        return 0;
-                    }
-
-
-                    if (rightMostIsSkystone(firstObject)) {
+ /*                   if (rightMostIsSkystone(firstObject)) {
                         teamUtil.log("PATH 1");
                         return 1;
                     } else if (leftMostIsSkystone(secondObject)) {
@@ -117,12 +116,17 @@ public class SkystoneDetector {
                         teamUtil.log("PATH 3");
                         return 3;
                     }
-            }//else {teamUtil.log("detect -- no updated recognitions");}
+*/
+            } else {
+                teamUtil.log("detect -- no updated recognitions");
+                return -1;
+            }
         } else {
             teamUtil.log("detect -- tfod inactivated");
+            return -1;
         }
 
-        teamUtil.log("wtf am I doing");
+        teamUtil.log("Detect - Finished");
         return -1;
     }
 

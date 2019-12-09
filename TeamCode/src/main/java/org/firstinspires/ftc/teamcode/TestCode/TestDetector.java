@@ -13,16 +13,30 @@ public class TestDetector extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         teamUtil.theOpMode = this;
+        teamUtil.inInitialization = true;
+        teamUtil.log("starting OpMode");
 
 
         detector = new SkystoneDetector(telemetry, hardwareMap);
         detector.initDetector();
 
-        detector.startTracking();
+        telemetry.addLine("initialized");
+        telemetry.update();
 
 
+        // Start looking at Skystones before the start...
+        detector.activateDetector();
+        telemetry.addLine("Starting to Detect");
+        telemetry.update();
+        //sleep(5000);
 
-        waitForStart();
+        while (!opModeIsActive() && !isStopRequested()) {
+            sleep(200);
+            detector.detect();
+        }
+
+
+        //waitForStart();
 
         while(opModeIsActive()){
             //detector.detect();
@@ -36,6 +50,6 @@ public class TestDetector extends LinearOpMode {
 
         }
 
-        detector.stopTracking();
+        detector.shutdownDector();
     }
 }

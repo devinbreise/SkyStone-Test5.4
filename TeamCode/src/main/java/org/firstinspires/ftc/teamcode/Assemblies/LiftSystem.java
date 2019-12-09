@@ -43,7 +43,7 @@ public class LiftSystem {
 
         lift.initLift();
         //add limit switch at the top of the lift?
-        lift.downPosition(.3, 6000);
+        lift.downPosition(.3, 8000);
         grabber.rotate(Grabber.GrabberRotation.INSIDE);
         teamUtil.sleep(750);
         grabber.grabberStow();

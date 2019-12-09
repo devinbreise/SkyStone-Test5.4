@@ -18,12 +18,19 @@ public class TestRobot extends LinearOpMode {
 
     @Override
     public void runOpMode(){
+        teamUtil.inInitialization = true;
         initialize();
         waitForStart();
         teamUtil.inInitialization = false;
         while (opModeIsActive()) {
             if(gamepad1.right_bumper){
                 robot.autoIntake(8000);
+            }
+            if(gamepad1.left_bumper){
+                robot.autoDropOff(8000);
+            }
+            if(gamepad2.x){
+                robot.drive.moveInchesRight(0.5, 36, 15000);
             }
         }
     }

@@ -31,14 +31,14 @@ public class TestImuMovement extends LinearOpMode {
             telemetry.update();
         }
 
+        teamUtil.log("currentHeading: " + robot.getHeading());
 
 
 
 
-            sleep(5000);
-                robot.turn(180, 5000);
-                sleep(5000);
-                robot.rotateToHeading(90);
+
+            sleep(8000);
+                robot.rotateToHeadingCCW(0);
 
 
 //                teamUtil.log("heading: " + robot.getHeading());

@@ -86,7 +86,7 @@ public class revHubIMUGyro {
 
     public double getHeading(){
         double angle = getAbsoluteHeading();
-        return correctHeading(angle);
+        return angle;
     }
 
 

@@ -13,7 +13,7 @@ public class Lift {
     final double LIFT_UP_POWER = .7;
     final double LIFT_DOWN_POWER = .5;
 
-    private final int LIFT_BASE_TOP_LIMIT_ENCODER_CLICKS = 3090;
+    private final int LIFT_BASE_TOP_LIMIT_ENCODER_CLICKS = 3000;
     private DcMotor liftBase;
     private DcMotor rSpindle;
     private DcMotor lSpindle;
@@ -21,7 +21,7 @@ public class Lift {
     //NEVEREST20_ENCODER_CLICKS = 537.6
 
     // Constants for the spindles
-    private final int LEVEL_0 = 430;
+    private final int LEVEL_0 = 450; //was 430
     private final int LEVEL_INCREMENT = 570;
     private final double TENSION_POWER = 0.075;
 
@@ -83,8 +83,10 @@ public class Lift {
         teamUtil.log("Moving Lift Down");
         long timeOutTime= System.currentTimeMillis()+timeOut;
         timedOut = false;
+        teamUtil.log("Limit Switch:"+liftDownLimit.isPressed());
 
         while(!liftDownLimit.isPressed() && teamUtil.keepGoing(timeOutTime)){
+            teamUtil.log("Limit Switch:"+liftDownLimit.isPressed());
             liftBaseDown();
         }
         shutDownLiftBase();
