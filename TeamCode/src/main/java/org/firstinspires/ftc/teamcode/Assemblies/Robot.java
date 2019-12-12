@@ -43,12 +43,13 @@ public class Robot {
     // Call this before first use!
     public void init(){
         teamUtil.log ("Initializing Robot");
+        liftSystem.initLiftSystem();
         drive.initImu();
         drive.initDriveMotors();
-        drive.initDistanceSensors();
+        drive.initSensors();
         drive.resetHeading();
-        liftSystem.initLiftSystem();
         latch.initLatch();
+        liftSystem.resetSpindles();
         teamUtil.log ("Initializing Robot - Finished");
     }
 

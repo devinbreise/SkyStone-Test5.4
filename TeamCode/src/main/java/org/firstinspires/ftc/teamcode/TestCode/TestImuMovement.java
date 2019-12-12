@@ -38,7 +38,7 @@ public class TestImuMovement extends LinearOpMode {
 
 
             sleep(8000);
-                robot.rotateToHeadingCCW(0);
+
 
 
 //                teamUtil.log("heading: " + robot.getHeading());

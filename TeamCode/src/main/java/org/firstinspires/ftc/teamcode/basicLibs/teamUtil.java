@@ -19,8 +19,13 @@ public class teamUtil {
      * It handles InterruptException where it recalculates the remaining time
      * and calls sleep again repeatedly until the specified sleep time has past.
      *
-     * @param sleepTime specifies sleep time in msec.
-     */
+//     * @param sleepTime specifies sleep time in msec.
+//     */
+
+    public static void init (LinearOpMode opMode) {
+        theOpMode = opMode;
+        inInitialization = true;
+    }
     public static void sleep(long sleepTime) {
         long wakeupTime= System.currentTimeMillis()+sleepTime;
         while(sleepTime>0){

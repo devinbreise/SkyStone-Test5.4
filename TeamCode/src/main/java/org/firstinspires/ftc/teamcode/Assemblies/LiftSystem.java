@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Assemblies;
 
 
 
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -34,20 +35,28 @@ public class LiftSystem {
     public void initLiftSystem(){
         isStowed = false;
         grabber.initGrabber();
-        //here we are moving the grabber to a set position where it is out of the way
-        // and convienient
-        grabber.closeGrabberNarrow();
-        teamUtil.sleep(750);
-
-
-
         lift.initLift();
+        if (!lift.liftBaseIsDown()) {
+            //move the grabber to a set position where it is out of the way for the lift base to go down
+            grabber.closeGrabberNarrow();
+            teamUtil.sleep(750);
+        }
+
         //add limit switch at the top of the lift?
+        // move the lift down and rest the encoder
         lift.downPosition(.3, 8000);
+        lift.tensionLiftStringContinuous();
         grabber.rotate(Grabber.GrabberRotation.INSIDE);
         teamUtil.sleep(750);
+         //MAYBE
         grabber.grabberStow();
+
         // need to find init positions for the lift base
+    }
+
+    public void resetSpindles(){
+        lift.rSpindle.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift.lSpindle.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
     public void grabAndStow(String grabberPos, long timeOut){
@@ -104,6 +113,17 @@ public class LiftSystem {
         }
     }
 
+    public void grabAndDip(){
+        grabber.openGrabber();
+        lift.goToBottom();
+        teamUtil.sleep(1250);
+        teamUtil.log("going to bottom ;-;");
+        grabber.closeGrabberWide();
+        teamUtil.sleep(750);
+        lift.goToLevel(0, 5000);
+        teamUtil.log("grabbed and gone back up!");
+    }
+
     public void prepareToGrab(long timeOut){
         isStowed = false;
         state = LiftSystemState.DEPLOY_FOR_PICKUP;
@@ -121,8 +141,10 @@ public class LiftSystem {
         }
         // in case the lift isn't fully up yet...
         while (lift.isBusy()) {
+            // This is where we can elevate once lift.safeToElevate() returns true...
             teamUtil.sleep(100);
         }
+        lift.goToLevelNoWait(0, 5000);
         state = LiftSystemState.IDLE;
         timedOut = (System.currentTimeMillis() > timeOutTime);
         if (timedOut) {
@@ -145,32 +167,36 @@ public class LiftSystem {
         }
     }
 
-    public void hoverOverFoundation(int level, Grabber.GrabberRotation rotation, long timeOut){
-        state = LiftSystemState.HOVER;
-        teamUtil.log("Hover");
-        long timeOutTime = System.currentTimeMillis() + timeOut;
-        timedOut = false;
-        if(isStowed) {
-            grabber.rotate(rotation);
-            lift.upPosition(.7, timeOut);
-            if (!lift.timedOut && teamUtil.keepGoing(timeOutTime)) {
-                lift.goToLevel(level, timeOutTime - System.currentTimeMillis());
-            }
-
-        }else{
-            grabber.closeGrabberWide();
-            lift.upPosition(.7, timeOut);
-            if (!lift.timedOut && teamUtil.keepGoing(timeOutTime)) {
-                lift.goToLevel(level, timeOutTime - System.currentTimeMillis());
+    public void hoverOverFoundation(int level, Grabber.GrabberRotation rotation, long timeOut) {
+        if (lift.isSafeToElevate()) {
+            state = LiftSystemState.HOVER;
+            teamUtil.log("Hover");
+            long timeOutTime = System.currentTimeMillis() + timeOut;
+            timedOut = false;
+            if (isStowed) {
                 grabber.rotate(rotation);
+                // This is where we can use the "noWait" version of upPosition and then, in the loop while we wait for it to finish
+                // we can elevate once lift.safeToElevate() returns true...
+                lift.upPosition(.7, timeOut);
+                if (!lift.timedOut && teamUtil.keepGoing(timeOutTime)) {
+                    lift.goToLevel(level, timeOutTime - System.currentTimeMillis());
+                }
+
+            } else {
+                grabber.closeGrabberWide();
+                lift.upPosition(.7, timeOut);
+                if (!lift.timedOut && teamUtil.keepGoing(timeOutTime)) {
+                    lift.goToLevel(level, timeOutTime - System.currentTimeMillis());
+                    grabber.rotate(rotation);
+                }
             }
+            state = LiftSystemState.IDLE;
+            timedOut = (System.currentTimeMillis() > timeOutTime);
+            if (timedOut) {
+                teamUtil.log("Hover - TIMED OUT!");
+            }
+            teamUtil.log("Hover - Finished");
         }
-        state = LiftSystemState.IDLE;
-        timedOut = (System.currentTimeMillis() > timeOutTime);
-        if (timedOut) {
-            teamUtil.log("Hover - TIMED OUT!");
-        }
-        teamUtil.log("Hover - Finished");
     }
 
     public void hoverOverFoundationNoWait(final int level, final Grabber.GrabberRotation rotation, final long timeOut) {

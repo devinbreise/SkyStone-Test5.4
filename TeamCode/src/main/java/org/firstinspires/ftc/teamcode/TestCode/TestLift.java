@@ -31,15 +31,16 @@ public class TestLift extends OpMode {
     }
 
     public void loop() {
+        lift.tensionLiftString();
 
         // manual limbo
         if (gamepad1.b) {
-           lift.upPosition(0.99, 7000);
-            //lift.liftBaseUp();
+           //lift.upPosition(0.99, 7000);
+            lift.liftBaseUp();
         } else if (gamepad1.a) {
-            lift.downPosition(0.3, 7000);
-           //lift.liftBaseDown();
-        } //else lift.shutDownLiftBase();
+            //lift.downPosition(0.3, 7000);
+           lift.liftBaseDown();
+        } else lift.shutDownLiftBase();
 
         if (gamepad1.dpad_down) {
             lift.decreaseLiftBasePower();
@@ -106,7 +107,7 @@ public class TestLift extends OpMode {
 //super cereal disclaimer. ts not sponsered its just amazing. or mabye im lieing. mabye this is straight our part of a plan for world domination. "that sounds rather unrealistic" you say with a gulible expression on your face. now let me ask you. what about knees. "knees?" you say with suprise. yes knees. what about them. they are funky looking and all bendy. but you know the ld saying. where there are knees there are bees
         lift.liftTelemetry();
 //        telemetry.addData("level:", targetLevel);
-//        telemetry.addData("EncoderPosition:", lift.getBasePosition());
+        telemetry.addData("EncoderPosition:", lift.getBasePosition());
         telemetry.update();
     }
 }

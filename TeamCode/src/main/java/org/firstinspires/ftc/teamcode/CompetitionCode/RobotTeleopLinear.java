@@ -21,7 +21,7 @@ public class RobotTeleopLinear extends LinearOpMode {
     Robot robot;
 
     public void initialize() {
-        teamUtil.theOpMode = this;
+        teamUtil.init(this);
         robot = new Robot(this);
 
         teamGamePad = new TeamGamepad(this);
@@ -30,8 +30,11 @@ public class RobotTeleopLinear extends LinearOpMode {
         teamUtil.initPerf();
 
     }
+
     @Override
     public void runOpMode() throws InterruptedException {
+
+
         telemetry.addLine("Initializing Op Mode...please wait");
         telemetry.update();
         initialize();
@@ -137,7 +140,7 @@ public class RobotTeleopLinear extends LinearOpMode {
             telemetry.addData("grabber rotation", grabberRotation);
             telemetry.update();
 
-            teamUtil.trackPerf();
+           // teamUtil.trackPerf();
 
 
         }

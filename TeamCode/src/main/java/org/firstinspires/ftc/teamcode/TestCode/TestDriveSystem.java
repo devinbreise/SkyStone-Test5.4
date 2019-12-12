@@ -1,22 +1,14 @@
 package org.firstinspires.ftc.teamcode.TestCode;
 
-import android.graphics.Color;
-
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
-import org.firstinspires.ftc.teamcode.Assemblies.Latch;
-
-import org.firstinspires.ftc.teamcode.Assemblies.Lift;
 import org.firstinspires.ftc.teamcode.Assemblies.RobotDrive;
 import org.firstinspires.ftc.teamcode.basicLibs.teamColorSensor;
-import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 
-    @TeleOp(name = "TestDriveSystem")
+@TeleOp(name = "TestDriveSystem")
     public class TestDriveSystem extends OpMode {
 
         // lift system code - should be in its own assembly class...
@@ -33,7 +25,7 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
             colorSensor = new teamColorSensor(telemetry, hardwareMap.get(ColorSensor.class, "colorSensor"));
             robot.initDriveMotors();
             robot.initImu();
-            robot.initDistanceSensors();
+            robot.initSensors();
             robot.resetHeading();
         }
 
@@ -94,9 +86,9 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 
             if(gamepad1.left_bumper){
-                robot.rotateCCW(DRIVE_POWER);
+                robot.rotateLeft(DRIVE_POWER);
             } else if(gamepad1.right_bumper){
-                robot.rotateCW(DRIVE_POWER);
+                robot.rotateRight(DRIVE_POWER);
             }
             //add triggers for speed boosts
 

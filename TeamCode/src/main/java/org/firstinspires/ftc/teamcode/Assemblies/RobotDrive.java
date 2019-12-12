@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Assemblies;
 
 
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -9,7 +10,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.basicLibs.DistanceSensors;
 import org.firstinspires.ftc.teamcode.basicLibs.revHubIMUGyro;
@@ -51,6 +51,10 @@ public class RobotDrive {
     public DistanceSensors leftDistanceSensor;
     public DistanceSensors rightDistanceSensor;
     public DistanceSensors backDistanceSensor;
+    public DistanceSensor frontmiddleDistance;
+    public ColorSensor frontmiddleColor;
+    public ColorSensor bottomColorSensor;
+
 
     //    Servo latchOne;
 //    Servo latchTwo;
@@ -102,13 +106,15 @@ public class RobotDrive {
     }
 
 
-    public void initDistanceSensors() {
+    public void initSensors() {
         frontLeftDistance = new DistanceSensors(hardwareMap.get(Rev2mDistanceSensor.class, "frontLeftDistance"));
         frontRightDistance = new DistanceSensors(hardwareMap.get(Rev2mDistanceSensor.class, "frontRightDistance"));
         leftDistanceSensor = new DistanceSensors(hardwareMap.get(Rev2mDistanceSensor.class, "leftDistance"));
         rightDistanceSensor = new DistanceSensors(hardwareMap.get(Rev2mDistanceSensor.class, "rightDistance"));
         backDistanceSensor = new DistanceSensors(hardwareMap.get(Rev2mDistanceSensor.class, "backDistance"));
-
+        frontmiddleDistance = hardwareMap.get(DistanceSensor.class, "frontColorSensor");
+        frontmiddleColor = hardwareMap.get(ColorSensor.class, "frontColorSensor");
+        bottomColorSensor = hardwareMap.get(ColorSensor.class, "bottomColorSensor");
     }
 
 
@@ -507,6 +513,7 @@ public class RobotDrive {
 
     }
 
+
     public double getHeading() {
         return
                 revImu.correctHeading(revImu.getHeading() - INITIAL_HEADING);
@@ -547,7 +554,7 @@ public class RobotDrive {
 //            teamUtil.log("completedRotating: " + completedRotating);
 
 
-            rotateCCW(rotatePower * rotateDirection);
+            rotateLeft(rotatePower * rotateDirection);
 
             if (Math.abs(adjustAngle(desiredHeading - getHeading())) > tolerance) {
                 completedRotating = false;
@@ -573,68 +580,93 @@ public class RobotDrive {
 
     }
 
+    public void rotateToHeading180Left(){
+
+        double startHeading = getHeading();
+        double rotatePower;
+
+        do {
+            rotatePower = Range.clip( Math.abs(180-getHeading())/ 130, MIN_ROTATING_POWER, 0.5);
+
+            rotateLeft(rotatePower);
+
+            teamUtil.log("startHeading: " + startHeading);
+            teamUtil.log("daHeading: " + getHeading());
+            teamUtil.log("DifferenceInAngle: "+ (180-getHeading()));
+            teamUtil.log("rotatePower: " + rotatePower);
 
 
-        public void rotateToHeadingCW(double desiredHeading){
+        } while(getHeading() < 180);
 
-        //assuming -180 to 180
-        double startHeading = getOriginalHeading();
-        double rotatePower = 0.5;
+        stopMotors();
+        teamUtil.log("I'M DONE");
+    }
 
-        if(startHeading > desiredHeading){
+    public void rotateToHeading180Right(){
 
-//            do{
-//                rotatePower = Range.clip(Math.abs((getOriginalHeading()-desiredHeading)) / 130, MIN_ROTATING_POWER, 0.5);
-//                rotateCW(rotatePower);
-//                teamUtil.log("rotatePower: " + fLeftMotor.getPower());
-//                teamUtil.log("difference: " + Math.abs((getHeading()-desiredHeading)));
-//                teamUtil.log("heading : " + getOriginalHeading());
-//
-//
-//            }while();
+        double startHeading = getHeading();
+        double rotatePower;
 
-        } else {
-            do{
-                rotatePower = Range.clip(Math.abs(desiredHeading - getOriginalHeading()) / 130, MIN_ROTATING_POWER, 0.5);
-                rotateCW(rotatePower);
-                teamUtil.log("rotatePower: " + fLeftMotor.getPower());
-                teamUtil.log("difference: " + Math.abs((desiredHeading - getOriginalHeading())));
-                teamUtil.log("heading : " + getOriginalHeading());
+        do {
+            rotatePower = Range.clip( Math.abs(180-getHeading())/ 130, MIN_ROTATING_POWER, 0.5);
 
-            }while(getOriginalHeading() < desiredHeading);
-        }
+            rotateRight(rotatePower);
 
-        }
+            teamUtil.log("startHeading: " + startHeading);
+            teamUtil.log("daHeading: " + getHeading());
+            teamUtil.log("DifferenceInAngle: "+ (180-getHeading()));
+            teamUtil.log("rotatePower: " + rotatePower);
 
-    public void rotateToHeadingCCW(double desiredHeading){
-//assuming -180 to 180 range
-        double startHeading = getOriginalHeading();
+        } while(getHeading() > 180);
 
-        double rotatePower = 0.5;
-
-        if(startHeading > desiredHeading){
-
-            do{
-
-                rotatePower = Range.clip(Math.abs(desiredHeading - getOriginalHeading()) / 130, MIN_ROTATING_POWER, 0.5);
-                rotateCCW(rotatePower);
-                teamUtil.log("rotatePower: " + fLeftMotor.getPower());
-                teamUtil.log("difference: " + Math.abs((desiredHeading - getOriginalHeading())));
-                teamUtil.log("heading : " + getOriginalHeading());
-
-            }while(getOriginalHeading() < desiredHeading);
-
-        } else {
-
-            do{
-                rotateCW(rotatePower);
-                teamUtil.log("rotatePower: " + fLeftMotor.getPower());
-                teamUtil.log("difference: " + Math.abs((desiredHeading - getOriginalHeading())));
-                teamUtil.log("heading : " + getOriginalHeading());
-            }while(getOriginalHeading() < desiredHeading);
-        }
+        stopMotors();
+        teamUtil.log("I'M DONE");
 
     }
+
+
+    public double getRelativeHeading(double pseudoHeading){
+        return revImu.correctHeading(adjustAngle(pseudoHeading + getHeading()));
+    }
+
+
+    public void rotateToHeadingZeroLeft(){
+        double startHeading = getHeading();
+        teamUtil.log("startHeading: " + startHeading);
+        teamUtil.log("getRelativeHeading: " + getRelativeHeading(180));
+
+        double rotatePower;
+
+        do{
+            rotatePower = Range.clip( Math.abs(180-getRelativeHeading(180))/ 120, MIN_ROTATING_POWER, 0.5);
+
+            rotateLeft(rotatePower);
+
+        }while(getRelativeHeading(180) < 180);
+
+        stopMotors();
+        teamUtil.log("I'M DONE");
+
+
+    }
+
+    public void rotateToHeadingZeroRight(){
+        double startHeading = getHeading();
+
+        double rotatePower;
+
+        do{
+            rotatePower = Range.clip( Math.abs(180-getRelativeHeading(180))/ 130, MIN_ROTATING_POWER, 0.5);
+
+            rotateRight(rotatePower);
+
+        }while(getRelativeHeading(180) > 180);
+
+        stopMotors();
+        teamUtil.log("I'M DONE");
+
+    }
+
 
 
 
@@ -690,7 +722,7 @@ public class RobotDrive {
              teamUtil.log("completedRotating: " + completedRotating);
 
 
-            rotateCCW(rotatePower * rotateDirection);
+            rotateLeft(rotatePower * rotateDirection);
 
             if (Math.abs(getHeading() - rawDesiredHeading) > tolerance) {
                 completedRotating = false;
@@ -721,7 +753,7 @@ public class RobotDrive {
 
 
 
-    public void rotateCCW(double rotatingPower) {
+    public void rotateLeft(double rotatingPower) {
         double power = clip(rotatingPower);
         fLeftMotor.setPower(power);
         fRightMotor.setPower(power);
@@ -729,7 +761,7 @@ public class RobotDrive {
         bRightMotor.setPower(power);
     }
 
-    public void rotateCW(double rotatingPower) {
+    public void rotateRight(double rotatingPower) {
         double power = clip(rotatingPower);
         fLeftMotor.setPower(-power);
         fRightMotor.setPower(-power);

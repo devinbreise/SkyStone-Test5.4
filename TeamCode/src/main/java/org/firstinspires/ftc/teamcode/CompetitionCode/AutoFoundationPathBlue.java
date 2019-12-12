@@ -15,18 +15,18 @@ public class AutoFoundationPathBlue extends LinearOpMode {
 
     Robot robot;
 
+    public void initialize() {
+        teamUtil.init(this);
+        robot = new Robot(this);
+        robot.init();
+    }
 
     @Override
     public void runOpMode() throws InterruptedException {
 
         telemetry.addLine("Initializing Op Mode");
         telemetry.update();
-
-        robot = new Robot(this);
-
-        teamUtil.theOpMode = this;
-
-        robot.init();
+        initialize();
         robot.latch.latchUp();
 
         telemetry.addLine("Ready to Start");

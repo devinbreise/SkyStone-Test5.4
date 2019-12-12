@@ -32,6 +32,12 @@ public class TestRobot extends LinearOpMode {
             if(gamepad2.x){
                 robot.drive.moveInchesRight(0.5, 36, 15000);
             }
+            if(gamepad2.right_bumper){
+                robot.drive.rotateToHeading180Right();
+            }
+            if(gamepad2.left_bumper){
+                robot.drive.rotateToHeadingZeroLeft();
+            }
         }
     }
 

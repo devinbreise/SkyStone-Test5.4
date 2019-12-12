@@ -17,25 +17,28 @@ public class AutoSkystonePathRed extends LinearOpMode {
     SkystoneDetector detector;
     int path = 1;
 
+    public void initialize() {
+        teamUtil.init(this);
+        robot = new Robot(this);
+        robot.init();
+    }
 
 
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry.addLine("Initializing Op Mode");
         telemetry.update();
+        initialize();
+        robot.latch.latchUp();
 
         detector = new SkystoneDetector(telemetry, hardwareMap);
-        robot = new Robot(this);
-        teamUtil.theOpMode = this;
+        detector.initDetector();
+        detector.activateDetector();
 
-        robot.init();
-        robot.latch.latchUp();
-        //   detector.initDetector();
-
-        //     detector.startTracking();
         telemetry.addLine("Ready to Start");
         telemetry.update();
 
+        // Start detecting but wait for start of match to move
         while (!opModeIsActive() && !isStopRequested()) {
             sleep(200);
             int detected = detector.detect();
@@ -43,7 +46,7 @@ public class AutoSkystonePathRed extends LinearOpMode {
                 path = detected;
             }
         }
-
+        detector.shutdownDector();
         robot.drive.moveInchesForward(0.5, 19,5000);
 
         if (path == 1) {
@@ -63,7 +66,7 @@ public class AutoSkystonePathRed extends LinearOpMode {
 
             robot.drive.moveInchesRight(0.75, 90,15000);
             robot.drive.rotateToHeading(0);
-            robot.drive.moveToDistance(robot.drive.frontLeftDistance, 7, robot.AUTOINTAKE_POWER, 5000);
+            robot.drive.moveToDistance(robot.drive.frontLeftDistance, 7, Robot.AUTOINTAKE_POWER, 5000);
             robot.autoDropOff(9001);
 
             //robot.liftSystem.hoverOverFoundationNoWait(0, Grabber.GrabberRotation.MIDDLE, 7000);

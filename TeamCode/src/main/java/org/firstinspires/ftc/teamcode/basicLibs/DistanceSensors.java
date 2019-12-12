@@ -13,27 +13,28 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class DistanceSensors {
     HardwareMap hardwareMap;
     private Rev2mDistanceSensor rev2mDistanceSensor;//This is the distance sensor variable
+    private float offset;
 
 
     public DistanceSensors(Rev2mDistanceSensor theDistanceSensor) {
             rev2mDistanceSensor = theDistanceSensor;//This names our distance sensor as theDistanceSensor
     }
 
-
+    public void setOffset(float theOffset){
+        offset = theOffset;
+    }
 
     //This method return's the current reading of the distance sensors and returns the value.
     public double getDistance() {//find the value that will be mostly used in the autonomous
         double distance = rev2mDistanceSensor.getDistance(DistanceUnit.INCH);//This get the current reading of the distance sensor
-        return distance;//This return the value of the current distance sensor
+        return distance + offset;//This return the value of the current distance sensor minus whatever offset has been set for this sensor
 
 
     }//This method check's if the reading is valid and the distance sensor's are detecting a vaild reading under the point where it does not read the correct distance.
     public boolean validReading(){ //find the value that will be mostly used in the autonomous
-        if (getDistance()<50) {//This see's if the current distance is less than 50
-            return true;//If the current reating is less thean 50 it will return the value as a valid reading
-        } else {
-            return false;//This returns the false value if the number uis greater than 50
-        }
+        //This see's if the current distance is less than 50
+        //This returns the false value if the number uis greater than 50
+        return getDistance() < 20;//If the current reating is less thean 50 it will return the value as a valid reading
 
     }
 

@@ -14,22 +14,24 @@ public class Lift {
     final double LIFT_DOWN_POWER = .5;
 
     private final int LIFT_BASE_TOP_LIMIT_ENCODER_CLICKS = 3000;
+    private final int LIFT_BASE_SAFE_TO_ELEVATE = 2000;
     private DcMotor liftBase;
-    private DcMotor rSpindle;
-    private DcMotor lSpindle;
+    public DcMotor rSpindle;
+    public DcMotor lSpindle;
     private RevTouchSensor liftDownLimit;
     //NEVEREST20_ENCODER_CLICKS = 537.6
 
     // Constants for the spindles
     private final int LEVEL_0 = 450; //was 430
     private final int LEVEL_INCREMENT = 570;
-    private final double TENSION_POWER = 0.075;
+    private final double TENSION_POWER = 0.098;
 
     enum LiftState{
         IDLE,
         MOVING_UP,
         MOVING_DOWN,
     }
+
     private LiftState liftState = LiftState.IDLE;
     enum ElevatorState{
         IDLE,
@@ -55,13 +57,17 @@ public class Lift {
 
     public void initLift(){
         teamUtil.log ("Initializing Lift");
+        hasSetZeroSpindle = false;
+        hasSetBaseZero = false;
+        timedOut = false;
+
         liftBase = hardwareMap.dcMotor.get("liftBase");
         liftBase.setDirection(DcMotorSimple.Direction.REVERSE);
         liftBase.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         rSpindle = hardwareMap.dcMotor.get("rSpindle");
         lSpindle = hardwareMap.dcMotor.get("lSpindle");
-        lSpindle.setDirection(DcMotorSimple.Direction.REVERSE);
+        rSpindle.setDirection(DcMotorSimple.Direction.REVERSE);
         rSpindle.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         lSpindle.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         rSpindle.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -72,6 +78,13 @@ public class Lift {
 
     public boolean isBusy() {
         return ((liftState != LiftState.IDLE) || (elevatorState != ElevatorState.IDLE));
+    }
+
+    public boolean liftBaseIsDown() {
+        return liftDownLimit.isPressed();
+    }
+    public boolean isSafeToElevate () {
+        return hasSetBaseZero && liftBase.getCurrentPosition()>LIFT_BASE_SAFE_TO_ELEVATE;
     }
 
     public void shutDownLiftBase(){
@@ -91,6 +104,7 @@ public class Lift {
         }
         shutDownLiftBase();
         liftBase.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         teamUtil.log("Lift Base encoder reset");
         teamUtil.log("LiftBaseEncoder: " + liftBase.getCurrentPosition());
 
@@ -139,7 +153,7 @@ public class Lift {
         // wait for the lift to get close to its final position before we move on
         // Using isBusy() on the liftbase motor takes a LONG time due to the PID slowing down at the end
         while ((liftBase.getCurrentPosition()<(.95* LIFT_BASE_TOP_LIMIT_ENCODER_CLICKS)) && teamUtil.keepGoing(timeOutTime)){
-
+            teamUtil.log("liftEncoder: " + liftBase.getCurrentPosition());
         }
         shutDownLiftBase();
 
