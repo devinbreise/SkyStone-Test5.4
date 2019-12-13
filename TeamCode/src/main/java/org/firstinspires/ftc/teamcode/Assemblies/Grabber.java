@@ -14,7 +14,6 @@ public class Grabber {
 
     public static final double ROTATE_GRABBER_INCREMENT = 0.1;
 
-
     //far from the robot
     public final double GRABBER_ONE_STOW_POS = 0.84; //1
     public final double GRABBER_ONE_PICKUP_POS = 0.5;
@@ -37,20 +36,6 @@ public class Grabber {
     private Servo grabberTwo;
     private Servo rotateServo;
 
-    private boolean grabberRunning = false;
-
-    GrabberState grabberState = GrabberState.GRABBER_UNKNOWN;
-    Telemetry telemetry;
-    HardwareMap hardwareMap;
-    //private Servo rotateGrabber;
-
-
-    public Grabber(HardwareMap theHardwareMap, Telemetry theTelemetry) {
-        teamUtil.log ("Constructing Grabber");
-        telemetry = theTelemetry;
-        hardwareMap = theHardwareMap;
-    }
-
     public enum GrabberState {
         GRABBER_STOWED,
         GRABBER_NARROW_DROP,
@@ -62,28 +47,127 @@ public class Grabber {
     }
 
     public enum GrabberRotation{
+        UNKNOWN,
         INSIDE,
         OUTSIDE,
         MIDDLE
     }
 
+    private boolean grabberRunning = false;
+    GrabberState grabberState = GrabberState.GRABBER_UNKNOWN;
+    public GrabberRotation rotation = GrabberRotation.UNKNOWN;
+
+    Telemetry telemetry;
+    HardwareMap hardwareMap;
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public Grabber(HardwareMap theHardwareMap, Telemetry theTelemetry) {
+        teamUtil.log ("Constructing Grabber");
+        telemetry = theTelemetry;
+        hardwareMap = theHardwareMap;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void initGrabber() {
         teamUtil.log ("Initializing Grabber");
         grabberOne = hardwareMap.servo.get("grabberOne");
         grabberTwo = hardwareMap.servo.get("grabberTwo");
         rotateServo = hardwareMap.servo.get("rotateServo");
-
-        //CURRENT_POS = ROTATE_GRABBER_INITIAL_POS;
-        //rotateGrabber.setPosition(CURRENT_POS);
-
-
         grabberState = GrabberState.GRABBER_STOWED;
+        rotation = GrabberRotation.UNKNOWN;
     }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void grabberStow(){
         grabberOne.setPosition(GRABBER_ONE_STOW_POS);
         grabberTwo.setPosition(GRABBER_TWO_STOW_POS);
+        grabberState = GrabberState.GRABBER_STOWED;
     }
-    public void stowGrabberNoWait(){
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public void openGrabber() {
+        grabberOne.setPosition(GRABBER_ONE_OPEN_POS);
+        grabberTwo.setPosition(GRABBER_TWO_OPEN_POS);
+        grabberState = GrabberState.GRABBER_OPEN;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public void grabberPickup(){
+        grabberOne.setPosition(GRABBER_ONE_PICKUP_POS);
+        grabberTwo.setPosition(GRABBER_TWO_PICKUP_POS);
+        grabberState = GrabberState.GRABBER_PICKUP;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public void closeGrabberWide() {
+        grabberOne.setPosition(GRABBER_ONE_WIDE_CLOSED_POS);
+        grabberTwo.setPosition(GRABBER_TWO_WIDE_CLOSED_POS);
+        grabberState = GrabberState.GRABBER_CLOSED_WIDE;
+
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public void closeGrabberNarrow() {
+        grabberOne.setPosition(GRABBER_ONE_NARROW_CLOSED_POS);
+        grabberTwo.setPosition(GRABBER_TWO_NARROW_CLOSED_POS);
+        grabberState = GrabberState.GRABBER_CLOSED_NARROW;
+
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public void closeGrabberToggle() {
+        if (grabberState == GrabberState.GRABBER_OPEN) {
+            closeGrabberWide();
+        } else if (grabberState == GrabberState.GRABBER_CLOSED_WIDE) {
+            closeGrabberNarrow();
+        } else if (grabberState == GrabberState.GRABBER_CLOSED_NARROW) {
+            closeGrabberWide();
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public void narrowDrop(){
+        grabberOne.setPosition(GRABBER_ONE_OPEN_POS);
+        grabberTwo.setPosition(GRABBER_TWO_WIDE_CLOSED_POS);
+        grabberState = GrabberState.GRABBER_NARROW_DROP;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public void toggleRotate() {
+        if(rotateServo.getPosition() == rotate_outside){
+            rotateServo.setPosition(rotate_inside);
+            rotation = GrabberRotation.INSIDE;
+        }else {
+            rotateServo.setPosition(rotate_outside);
+            rotation = GrabberRotation.OUTSIDE;
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public boolean isSafeToRotate() {
+        return grabberState == GrabberState.GRABBER_CLOSED_WIDE || grabberState == GrabberState.GRABBER_CLOSED_NARROW;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public void rotate(Grabber.GrabberRotation newRotation){
+        switch(newRotation){
+            case INSIDE:
+                rotateServo.setPosition(rotate_inside);
+                rotation = GrabberRotation.INSIDE;
+                break;
+            case OUTSIDE:
+                rotateServo.setPosition(rotate_outside);
+                rotation = GrabberRotation.OUTSIDE;
+                break;
+            case MIDDLE:
+                rotateServo.setPosition(rotate_narrow);
+                rotation = GrabberRotation.MIDDLE;
+                break;
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /*    public void stowGrabberNoWait(){
         if(grabberRunning == false){
             grabberRunning = true;
             Thread t1 = new Thread(new Runnable(){
@@ -99,100 +183,16 @@ public class Grabber {
         }
     }
 
+ */
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void grabberTelemetry() {
+        telemetry.addData("Grabber State: ", grabberState);
+        telemetry.addData("Grabber Rotation: ", rotation);
         telemetry.addData("GrabberOne: ", grabberOne.getPosition());
         telemetry.addData("GrabberTwo: ", grabberTwo.getPosition());
-        telemetry.addData("GrabberState: ", grabberState);
-        telemetry.addData("RotatePosition: ", rotateServo.getPosition());
+        telemetry.addData("RotateServo: ", rotateServo.getPosition());
     }
-
-    public void openGrabber() {
-        grabberOne.setPosition(GRABBER_ONE_OPEN_POS);
-        grabberTwo.setPosition(GRABBER_TWO_OPEN_POS);
-        grabberState = GrabberState.GRABBER_OPEN;
-
-    }
-
-    public void grabberPickup(){
-        grabberOne.setPosition(GRABBER_ONE_PICKUP_POS);
-        grabberTwo.setPosition(GRABBER_TWO_PICKUP_POS);
-        grabberState = GrabberState.GRABBER_PICKUP;
-    }
-
-    public void closeGrabberWide() {
-        grabberOne.setPosition(GRABBER_ONE_WIDE_CLOSED_POS);
-        grabberTwo.setPosition(GRABBER_TWO_WIDE_CLOSED_POS);
-        grabberState = GrabberState.GRABBER_CLOSED_WIDE;
-
-    }
-
-    public void closeGrabberNarrow() {
-        grabberOne.setPosition(GRABBER_ONE_NARROW_CLOSED_POS);
-        grabberTwo.setPosition(GRABBER_TWO_NARROW_CLOSED_POS);
-        grabberState = GrabberState.GRABBER_CLOSED_NARROW;
-
-    }
-
-    public void closeGrabberToggle() {
-        if (grabberState == GrabberState.GRABBER_OPEN) {
-            closeGrabberWide();
-        } else if (grabberState == GrabberState.GRABBER_CLOSED_WIDE) {
-            closeGrabberNarrow();
-        } else if (grabberState == GrabberState.GRABBER_CLOSED_NARROW) {
-            closeGrabberWide();
-        }
-    }
-
-    public void narrowDrop(){
-        grabberOne.setPosition(GRABBER_ONE_OPEN_POS);
-        grabberTwo.setPosition(GRABBER_TWO_WIDE_CLOSED_POS);
-        grabberState = GrabberState.GRABBER_NARROW_DROP;
-    }
-
-    public void toggleRotate() {
-        if(rotateServo.getPosition() == rotate_outside){
-            rotateServo.setPosition(rotate_inside);
-        }else {
-            rotateServo.setPosition(rotate_outside);
-        }
-    }
-
-    public void rotate(Grabber.GrabberRotation rotation){
-        switch(rotation){
-            case INSIDE:
-                rotateServo.setPosition(rotate_inside);
-                break;
-            case OUTSIDE:
-                rotateServo.setPosition(rotate_outside);
-                break;
-            case MIDDLE:
-                rotateServo.setPosition(rotate_narrow);
-                break;
-        }
-    }
-
-/* Obsolete
-    public void rotateOutside(){
-        rotateServo.setPosition(rotate_outside);
-    }
-
-    public void rotateInside(){
-        rotateServo.setPosition(rotate_inside);
-    }
-
-    public void rotateNarrow(){
-        rotateServo.setPosition(rotate_narrow);
-    }
-
-    public double rotateGetPosition(){
-        return rotateServo.getPosition();
-    }
-    public void rotateSetPosition(double position){
-        rotateServo.setPosition(position);
-    }
-*/
-
-
 
 }
 

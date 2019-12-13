@@ -9,21 +9,24 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 public class LiftSystem {
-    Grabber grabber;
+    public Grabber grabber;
     public Lift lift;
     Telemetry telemetry;
     HardwareMap hardwareMap;
     enum LiftSystemState{
         IDLE,
-        GRAB_AND_STOW,
-        DEPLOY_FOR_PICKUP,
-        HOVER
+        GRAB, // MOVING TO GRAB
+        GRAB_AND_STOW, // MOVING TO GRAB AND STOW
+        PREPARE_TO_GRAB, // MOVING TO PREPARE TO GRAB
+        MOVING_TO_HOVER, // moving to a new hover position
+        HOVER // ELEVATOR HOVERING (not moving)
     }
     LiftSystemState state = LiftSystemState.IDLE;
     boolean timedOut = false;
-    boolean isStowed = false;
+    //boolean isStowed = false;
 
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public LiftSystem(HardwareMap theHardwareMap, Telemetry theTelemetry){
         telemetry = theTelemetry;
         hardwareMap = theHardwareMap;
@@ -32,8 +35,12 @@ public class LiftSystem {
         lift = new Lift(hardwareMap, telemetry);
     }
 
+    public boolean isMoving() {
+        return (state != LiftSystemState.IDLE) && (state != LiftSystemState.HOVER);
+    }
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // move the lift system down and into stowed position while calibrating
     public void initLiftSystem(){
-        isStowed = false;
         grabber.initGrabber();
         lift.initLift();
         if (!lift.liftBaseIsDown()) {
@@ -41,30 +48,99 @@ public class LiftSystem {
             grabber.closeGrabberNarrow();
             teamUtil.sleep(750);
         }
+        // move the lift down
+        lift.moveLiftBaseDown(.3, 8000);
+        lift.calibrateSpindles();
+        if (grabber.rotation != Grabber.GrabberRotation.INSIDE) {  // rotate to inside position
 
-        //add limit switch at the top of the lift?
-        // move the lift down and rest the encoder
-        lift.downPosition(.3, 8000);
-        lift.tensionLiftStringContinuous();
-        grabber.rotate(Grabber.GrabberRotation.INSIDE);
-        teamUtil.sleep(750);
-         //MAYBE
+            // WARNING!  if the lift base was down and the paddles are in a position that can't rotate
+            // we will crash here when we try to rotate
+            // but the alternative is to always extend the paddles to a safe rotation position, which will extend past
+            // the front of the robot and possibly crash into the wall...
+            grabber.rotate(Grabber.GrabberRotation.INSIDE);
+            teamUtil.sleep(750);
+        }
         grabber.grabberStow();
-
-        // need to find init positions for the lift base
+        state = LiftSystemState.IDLE;
     }
 
-    public void resetSpindles(){
-        lift.rSpindle.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        lift.lSpindle.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public void prepareToGrab(long timeOut){
+        state = LiftSystemState.PREPARE_TO_GRAB;
+        teamUtil.log("Prepare to Grab");
+        long timeOutTime= System.currentTimeMillis()+timeOut;
+        timedOut = false;
+
+        // Start the lift moving up if needed
+        if (!lift.liftBaseIsUp()) {
+            lift.moveLiftBaseUpNoWait(0.95, timeOut);
+        }
+
+        // meanwhile see about getting the grabber in the right position
+        //teamUtil.log("Grabber Rotation: " + grabber.rotation);
+        if (grabber.rotation != Grabber.GrabberRotation.INSIDE) { // need to rotate inside
+            teamUtil.log("Rotating Grabber Inside");
+            if (!grabber.isSafeToRotate()) { // but don't try to rotate if the paddles are in a bad position
+                grabber.closeGrabberWide();
+                teamUtil.log("Moving paddles to safe position to rotate");
+                teamUtil.sleep(500);
+            }
+            if (!lift.isSafeToRotate()) {// make sure the lift is in safe position to rotate (we can't rotate in the up position at the bottom of the elevator)
+                while (!lift.isSafeToElevate() && teamUtil.keepGoing(timeOutTime)) {
+                    teamUtil.sleep(100); // wait until the lift is far enough up to elevate
+                }
+                if (teamUtil.keepGoing(timeOutTime)) {
+                    lift.moveElevator(lift.SAFE_TO_ROTATE,2000 );
+                }
+            }
+            grabber.rotate(Grabber.GrabberRotation.INSIDE);
+            teamUtil.sleep(500);
+        }
+        grabber.grabberPickup();
+        // start the elevator when we can
+        while (!lift.isSafeToElevate() && teamUtil.keepGoing(timeOutTime)) {
+            teamUtil.sleep(100);
+        }
+        // hover at foundation level ... we will dip down to grab the stone
+        teamUtil.log("Moving up to HOVER_FOR_GRAB"); // TODO use moveElevatorToPosition() with a lower position but still above bottom
+        lift.moveElevator(lift.HOVER_FOR_GRAB, 2000); // a little closer to the ground then level 0
+        //lift.moveElevatorToLevelNoWait(0, 3000);
+        state = LiftSystemState.IDLE;
+        timedOut = (System.currentTimeMillis() > timeOutTime);
+        if (timedOut) {
+            teamUtil.log("Prepare to Grab - TIMED OUT!");
+        }
+        teamUtil.log("Prepare to Grab - Finished");
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public void prepareToGrabNoWait(final long timeOut) {
+        if (!isMoving()) {
+            state = LiftSystemState.PREPARE_TO_GRAB;
+            teamUtil.log("Launching Thread to Prepare to Grab");
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    prepareToGrab(timeOut);
+                }
+            });
+            thread.start();
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Grab a stone and stow the lift for travel
     public void grabAndStow(String grabberPos, long timeOut){
+        if (!lift.liftBaseIsUp()) {
+            teamUtil.log("WARNING: grabAndStow called when lift was not up");
+            state = LiftSystemState.IDLE;
+            return;
+        }
         state = LiftSystemState.GRAB_AND_STOW;
         teamUtil.log("Grab and Stow");
         long timeOutTime= System.currentTimeMillis()+timeOut;
         timedOut = false;
-
+        lift.moveElevatorToBottom();  // dip down for the grab
         if(grabberPos.equals("narrow")){
             grabber.closeGrabberNarrow();
             teamUtil.log("grabbed");
@@ -79,12 +155,11 @@ public class LiftSystem {
         }
         // Give the servos enough time to grab the stone
         teamUtil.sleep(500);
-        lift.downPositionNoWait(0.5, timeOutTime - System.currentTimeMillis());
+        lift.moveLiftBaseDownNoWait(0.5, timeOutTime - System.currentTimeMillis());
         // give a little time for the lift to get far enough down to safely rotate
-        teamUtil.sleep(1500);
+        teamUtil.sleep(1000);
         if (teamUtil.keepGoing(timeOutTime)){
             grabber.rotate(Grabber.GrabberRotation.INSIDE);
-            teamUtil.sleep(500);
             // in case the lift isn't fully down yet...
             while (lift.isBusy()) {
                 teamUtil.sleep(100);
@@ -95,12 +170,12 @@ public class LiftSystem {
         if (timedOut) {
             teamUtil.log("Grab and Stow - TIMED OUT!");
         }
-        isStowed = true;
         teamUtil.log("Grab and Stow - Finished");
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void grabAndStowNoWait (final String grabberPos, final long timeOut) {
-        if (state == LiftSystemState.IDLE) {
+        if (!isMoving()) {
             state = LiftSystemState.GRAB_AND_STOW;
             teamUtil.log("Launching Thread to Grab and Stow");
             Thread thread = new Thread(new Runnable() {
@@ -113,95 +188,87 @@ public class LiftSystem {
         }
     }
 
-    public void grabAndDip(){
-        grabber.openGrabber();
-        lift.goToBottom();
-        teamUtil.sleep(1250);
-        teamUtil.log("going to bottom ;-;");
-        grabber.closeGrabberWide();
-        teamUtil.sleep(750);
-        lift.goToLevel(0, 5000);
-        teamUtil.log("grabbed and gone back up!");
-    }
-
-    public void prepareToGrab(long timeOut){
-        isStowed = false;
-        state = LiftSystemState.DEPLOY_FOR_PICKUP;
-        teamUtil.log("Prepare to Grab");
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // dip down, grab a stone and then return to level 0
+    public void Grab(String grabberPos, long timeOut){
+        state = LiftSystemState.GRAB;
+        teamUtil.log("Grab");
+        if (!lift.liftBaseIsUp()) {
+            teamUtil.log("WARNING: Grab called when lift was not up");
+            state = LiftSystemState.IDLE;
+            return;
+        }
         long timeOutTime= System.currentTimeMillis()+timeOut;
         timedOut = false;
-        grabber.rotate(Grabber.GrabberRotation.INSIDE);
-        lift.upPositionNoWait(0.7, timeOut);
-        // let the lift get moving first
-        teamUtil.sleep(750);
-        if (teamUtil.keepGoing(timeOutTime)) {
-            // then move the grabber panels
-            grabber.grabberPickup();
-            teamUtil.sleep(500);
-        }
-        // in case the lift isn't fully up yet...
-        while (lift.isBusy()) {
-            // This is where we can elevate once lift.safeToElevate() returns true...
-            teamUtil.sleep(100);
-        }
-        lift.goToLevelNoWait(0, 5000);
-        state = LiftSystemState.IDLE;
-        timedOut = (System.currentTimeMillis() > timeOutTime);
-        if (timedOut) {
-            teamUtil.log("Prepare to Grab - TIMED OUT!");
-        }
-        teamUtil.log("Prepare to Grab - Finished");
-    }
-
-    public void prepareToGrabNoWait(final long timeOut) {
-        if (state == LiftSystemState.IDLE) {
-            state = LiftSystemState.DEPLOY_FOR_PICKUP;
-            teamUtil.log("Launching Thread to Prepare to Grab");
-            Thread thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    prepareToGrab(timeOut);
-                }
-            });
-            thread.start();
-        }
-    }
-
-    public void hoverOverFoundation(int level, Grabber.GrabberRotation rotation, long timeOut) {
-        if (lift.isSafeToElevate()) {
-            state = LiftSystemState.HOVER;
-            teamUtil.log("Hover");
-            long timeOutTime = System.currentTimeMillis() + timeOut;
-            timedOut = false;
-            if (isStowed) {
-                grabber.rotate(rotation);
-                // This is where we can use the "noWait" version of upPosition and then, in the loop while we wait for it to finish
-                // we can elevate once lift.safeToElevate() returns true...
-                lift.upPosition(.7, timeOut);
-                if (!lift.timedOut && teamUtil.keepGoing(timeOutTime)) {
-                    lift.goToLevel(level, timeOutTime - System.currentTimeMillis());
-                }
-
-            } else {
-                grabber.closeGrabberWide();
-                lift.upPosition(.7, timeOut);
-                if (!lift.timedOut && teamUtil.keepGoing(timeOutTime)) {
-                    lift.goToLevel(level, timeOutTime - System.currentTimeMillis());
-                    grabber.rotate(rotation);
-                }
-            }
+        lift.moveElevatorToBottom();  // dip down for the grab
+        if(grabberPos.equals("narrow")){
+            grabber.closeGrabberNarrow();
+            teamUtil.log("grabbed");
+        }else if(grabberPos.equals("wide")){
+            grabber.closeGrabberWide();
+            teamUtil.log("grabbed");
+        }else{
+            teamUtil.log("BAD INPUT to Grab and Stow");
             state = LiftSystemState.IDLE;
-            timedOut = (System.currentTimeMillis() > timeOutTime);
-            if (timedOut) {
-                teamUtil.log("Hover - TIMED OUT!");
-            }
-            teamUtil.log("Hover - Finished");
+            return;
         }
+        // Give the servos enough time to grab the stone
+        teamUtil.sleep(500);
+        lift.moveElevator(lift.HOVER_FOR_GRAB, timeOut); // a little closer to the ground then level 0
+        //lift.moveElevatorToLevel(0, timeOut);
+        teamUtil.log("Grab - Finished");
+        state = LiftSystemState.IDLE;
     }
 
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // get ready to drop a stone (presumbably being held when this is called) at the specified level
+    // in the specified rotation.
+    // This will raise the lift if needed and rotate the grabber
+    public void hoverOverFoundation(int level, Grabber.GrabberRotation rotation, long timeOut) {
+        state = LiftSystemState.MOVING_TO_HOVER;
+        teamUtil.log("Moving to Hover");
+        long timeOutTime = System.currentTimeMillis() + timeOut;
+        timedOut = false;
+        if (!lift.liftBaseIsUp()) { // raise lift base if needed
+            lift.moveLiftBaseUpNoWait(.7, timeOut);
+        }
+        if (grabber.rotation != rotation) { // we need to rotate the grabber
+            if (!grabber.isSafeToRotate()) { // make sure the paddles are in a safe position to rotate
+                grabber.closeGrabberWide();
+                teamUtil.log("WARNING: hoverOverFoundation called while paddles not in a grabbing position");
+                teamUtil.sleep(500);
+            }
+            if (!lift.isSafeToRotate()) {// make sure the lift is in safe position to rotate (we can't rotate in the up position at the bottom of the elevator)
+                while (!lift.isSafeToElevate() && teamUtil.keepGoing(timeOutTime)) {
+                    teamUtil.sleep(100); // wait until the lift is far enough up to elevate
+                }
+                if (teamUtil.keepGoing(timeOutTime)) {
+                    lift.moveElevator(lift.SAFE_TO_ROTATE,2000 );
+                }
+            }
+            // rotate now that we have made sure it is safe
+            grabber.rotate(rotation);
+        }
+        // wait for the lift to be far enough up
+        while (!lift.isSafeToElevate() && teamUtil.keepGoing(timeOutTime )) {
+            // waiting to elevate
+        }
+        if (!lift.timedOut && teamUtil.keepGoing(timeOutTime)) {
+            lift.moveElevatorToLevel(level, 3000);
+        }
+        state = LiftSystemState.HOVER;
+        timedOut = (System.currentTimeMillis() > timeOutTime) || lift.timedOut;
+        if (timedOut) {
+            teamUtil.log("Hover - TIMED OUT!");
+        }
+        teamUtil.log("Hover - Finished");
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void hoverOverFoundationNoWait(final int level, final Grabber.GrabberRotation rotation, final long timeOut) {
-        if (state == LiftSystemState.IDLE) {
-            state = LiftSystemState.HOVER;
+        if (!isMoving()) {
+            state = LiftSystemState.MOVING_TO_HOVER;
             teamUtil.log("Launching Thread to Hover");
             Thread thread = new Thread(new Runnable() {
                 @Override
@@ -212,17 +279,24 @@ public class LiftSystem {
             thread.start();
         }
     }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // TODO maybe dip just an inch or so before dropping?
     public void drop(){
         grabber.openGrabber();
     }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void liftDown(){
-        lift.goToBottomNoWait();
+        lift.moveElevatorToBottomNoWait();
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void openGrabber(){
         grabber.openGrabber();
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void closeGrabberWide(){
         grabber.closeGrabberWide();
     }

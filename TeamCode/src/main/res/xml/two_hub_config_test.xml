@@ -13,6 +13,9 @@
             <REV_VL53L0X_RANGE_SENSOR name="frontRightDistance" port="0" bus="1" />
             <REV_VL53L0X_RANGE_SENSOR name="leftDistance" port="0" bus="2"/>
             <LynxColorSensor name="bottomColorSensor" port="0" bus="3" />
+            <DigitalDevice name="liftUpMagSwitch1" port="1"/>
+            <DigitalDevice name="liftUpMagSwitch2" port="5"/>
+
         </LynxModule>
 
         <LynxModule name="Expansion Hub 3" port="3">

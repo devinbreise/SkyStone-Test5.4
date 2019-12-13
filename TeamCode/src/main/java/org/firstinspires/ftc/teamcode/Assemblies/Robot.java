@@ -49,7 +49,6 @@ public class Robot {
         drive.initSensors();
         drive.resetHeading();
         latch.initLatch();
-        liftSystem.resetSpindles();
         teamUtil.log ("Initializing Robot - Finished");
     }
 

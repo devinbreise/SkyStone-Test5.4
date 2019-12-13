@@ -4,10 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
-import org.firstinspires.ftc.teamcode.Assemblies.Latch;
-import org.firstinspires.ftc.teamcode.Assemblies.LiftSystem;
 import org.firstinspires.ftc.teamcode.Assemblies.Robot;
-import org.firstinspires.ftc.teamcode.Assemblies.RobotDrive;
 import org.firstinspires.ftc.teamcode.basicLibs.TeamGamepad;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
@@ -129,7 +126,7 @@ public class RobotTeleopLinear extends LinearOpMode {
             if (teamGamePad.gamepad2XBounced()) {
 
                 teamUtil.log("i pressed x wae");
-                robot.liftSystem.lift.goToBottomNoWait();
+                robot.liftSystem.lift.moveElevatorToBottomNoWait();
             }
 
 /////////////////////////////////////////////////////////////////////
