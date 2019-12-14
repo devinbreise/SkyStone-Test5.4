@@ -14,6 +14,7 @@ public class teamUtil {
 
     public static LinearOpMode theOpMode;
     public static boolean inInitialization = true;
+    public static Blinkin theBlinkin =null;
     /**
      * This method puts the current thread to sleep for the given time in msec.
      * It handles InterruptException where it recalculates the remaining time
@@ -25,6 +26,8 @@ public class teamUtil {
     public static void init (LinearOpMode opMode) {
         theOpMode = opMode;
         inInitialization = true;
+        theBlinkin = new Blinkin(opMode.hardwareMap, opMode.telemetry);
+        theBlinkin.init();
     }
     public static void sleep(long sleepTime) {
         long wakeupTime= System.currentTimeMillis()+sleepTime;

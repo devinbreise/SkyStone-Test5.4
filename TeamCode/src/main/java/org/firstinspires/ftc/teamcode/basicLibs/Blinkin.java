@@ -1,25 +1,47 @@
 package org.firstinspires.ftc.teamcode.basicLibs;
 
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Blinkin {
-    private Servo theServo;
+    public RevBlinkinLedDriver blinkinLedDriver;
     private Telemetry telemetry;
+    private HardwareMap hardwareMap;
 
     ///////////////////////////////////////////////////////////////////////////////
     //these are the slightly useful constants for certain patterns
     public final double larsonScanner = -0.01;
 
-
-    public Blinkin(Servo aServo, Telemetry aTelemetry ){
-        theServo = aServo;
-        telemetry = aTelemetry;
+    public enum Signals{
+        SIGNAL_1,
+        SIGNAL_2,
+        SIGNAL_3
     }
 
-    public void setPos(double position){
-        theServo.setPosition(position);
+    public Blinkin(HardwareMap map, Telemetry aTelemetry ){
+        hardwareMap = map;
+        telemetry = aTelemetry;
+    }
+    public void init () {
+        blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, "blinkin");
+        blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
+    }
+
+    public void setSignal(Signals signal){
+
+        switch(signal) {
+            case SIGNAL_1 :
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.LARSON_SCANNER_RED);
+                break;
+            case SIGNAL_2 :
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.TWINKLES_RAINBOW_PALETTE);
+                break;
+            case SIGNAL_3:
+
+        }
     }
 }
 /*

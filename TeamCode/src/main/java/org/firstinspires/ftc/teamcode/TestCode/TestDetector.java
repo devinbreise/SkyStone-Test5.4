@@ -32,18 +32,19 @@ public class TestDetector extends LinearOpMode {
 
         while (!opModeIsActive() && !isStopRequested()) {
             sleep(200);
-            detector.detect();
+            detector.detectRed();
         }
 
 
         //waitForStart();
 
         while(opModeIsActive()){
-            //detector.detect();
-//            telemetry.addData("path: ", detector.detect());
+            //detector.detectRed();
+//            telemetry.addData("path: ", detector.detectRed());
             sleep(3000);
             detector.reportStoneInformation();
-            telemetry.addData("path: ", detector.detect());
+            telemetry.addData("path: ", detector.detectRed());
+            telemetry.addData("path: ", detector.detectBlue());
 
             telemetry.update();
 

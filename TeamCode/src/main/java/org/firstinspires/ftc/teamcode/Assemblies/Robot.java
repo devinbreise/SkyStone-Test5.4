@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Assemblies;
 
+        import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
         import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
         import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -92,6 +93,7 @@ public class Robot {
         liftSystem.grabAndStow("wide", timeOutTime - System.currentTimeMillis());
 
     }
+
     public void autoDropOff(long timeOut){
         long timeOutTime= System.currentTimeMillis()+timeOut;
 
@@ -105,10 +107,9 @@ public class Robot {
         // determine which side we are lined up on
 
         // line up using the front left sensor
-        if (drive.frontLeftDistance.getDistance()< MAX_DISTANCE_FOR_AUTO_DROPOFF && drive.frontLeftDistance.getDistance() > MIN_DISTANCE_FOR_AUTO_DROPOFF) {
             teamUtil.log("autointake -- see something in front left!");
             liftSystem.hoverOverFoundationNoWait(0, Grabber.GrabberRotation.INSIDE, 8500);
-            teamUtil.sleep(5000);
+            teamUtil.sleep(2000);
             drive.moveToDistance(drive.frontLeftDistance, DISTANCE_TO_FOUNDATION, AUTOINTAKE_POWER, 5000);
 
             while((drive.frontLeftDistance.getDistance()< MAX_DISTANCE_FOR_AUTO_DROPOFF) && teamUtil.keepGoing(timeOutTime) && teamUtil.theOpMode.opModeIsActive()) {
@@ -125,5 +126,5 @@ public class Robot {
 
 
     }
-}
+
 

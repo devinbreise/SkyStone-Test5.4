@@ -10,9 +10,11 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.basicLibs.DistanceSensors;
 import org.firstinspires.ftc.teamcode.basicLibs.revHubIMUGyro;
+import org.firstinspires.ftc.teamcode.basicLibs.teamColorSensor;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 public class RobotDrive {
@@ -25,7 +27,7 @@ public class RobotDrive {
     public static final double FULL_POWER = 1;
     public static final double DEAD_ZONE_THRESHOLD = 0.03;
     public static final double TRIGGER_DIALATION = 0.6;
-    public static final double MIN_ROTATING_POWER = 0.15;
+    public static final double MIN_ROTATING_POWER = 0.2;
     public static final double TEST_POWER = 0.25;
     public static final double ROTATIONAL_DRIFT_CORRECTION = 0.94;
 
@@ -54,6 +56,7 @@ public class RobotDrive {
     public DistanceSensor frontmiddleDistance;
     public ColorSensor frontmiddleColor;
     public ColorSensor bottomColorSensor;
+    public teamColorSensor bottomColor;
 
 
     //    Servo latchOne;
@@ -115,6 +118,8 @@ public class RobotDrive {
         frontmiddleDistance = hardwareMap.get(DistanceSensor.class, "frontColorSensor");
         frontmiddleColor = hardwareMap.get(ColorSensor.class, "frontColorSensor");
         bottomColorSensor = hardwareMap.get(ColorSensor.class, "bottomColorSensor");
+        bottomColor = new teamColorSensor(telemetry, bottomColorSensor);
+        bottomColor.calibrate();
     }
 
 
@@ -167,18 +172,18 @@ public class RobotDrive {
     public void driveForward(double power) {
         power = clip(power);
         fLeftMotor.setPower(-power); //neg for F og
-        fRightMotor.setPower(power * ROTATIONAL_DRIFT_CORRECTION); // pos for F og
+        fRightMotor.setPower(power * .89); // pos for F og
         bLeftMotor.setPower(-power);  //neg for F og
-        bRightMotor.setPower(power * ROTATIONAL_DRIFT_CORRECTION); //pos for F og  }
+        bRightMotor.setPower(power * .89); //pos for F og  }
 
     }
 
     public void driveBackward(double power) {
         power = clip(power);
-        fLeftMotor.setPower(power * ROTATIONAL_DRIFT_CORRECTION); //neg for F
-        fRightMotor.setPower(-power); // pos for F
-        bLeftMotor.setPower(power * ROTATIONAL_DRIFT_CORRECTION);  //neg for F
-        bRightMotor.setPower(-power); //pos for F
+        fLeftMotor.setPower(power ); //neg for F
+        fRightMotor.setPower(-power* .93); // pos for F
+        bLeftMotor.setPower(power );  //neg for F
+        bRightMotor.setPower(-power* .93); //pos for F
 
     }
 
@@ -186,16 +191,16 @@ public class RobotDrive {
         power = clip(power);
         fLeftMotor.setPower(-power);
         fRightMotor.setPower(-power);
-        bLeftMotor.setPower(power * ROTATIONAL_DRIFT_CORRECTION);
-        bRightMotor.setPower(power * ROTATIONAL_DRIFT_CORRECTION);
+        bLeftMotor.setPower(power * .93);
+        bRightMotor.setPower(power * .93);
     }
 
     public void driveLeft(double power) {
         power = clip(power);
-        fLeftMotor.setPower(power * ROTATIONAL_DRIFT_CORRECTION);
-        fRightMotor.setPower(power * ROTATIONAL_DRIFT_CORRECTION);
-        bLeftMotor.setPower(-power);
-        bRightMotor.setPower(-power);
+        fLeftMotor.setPower(power );
+        fRightMotor.setPower(power );
+        bLeftMotor.setPower(-power * .93);
+        bRightMotor.setPower(-power* .93);
 
     }
 
@@ -217,6 +222,7 @@ public class RobotDrive {
 
     public void distanceTelemetry() {
         telemetry.addData("frontLeftDistance", getDistanceInches(frontLeftDistance));
+        telemetry.addData("frontMiddleDistance", frontmiddleDistance.getDistance(DistanceUnit.CM));
         telemetry.addData("frontRightDistance", getDistanceInches(frontRightDistance));
         telemetry.addData("leftDistance", getDistanceInches(leftDistanceSensor));
         telemetry.addData("rightDistance", getDistanceInches(rightDistanceSensor));
@@ -580,6 +586,17 @@ public class RobotDrive {
 
     }
 
+    public void rotateTo180(){
+        if(getHeading() > 180){
+            teamUtil.log("GONNA MOVE RIGHT");
+            rotateToHeading180Right();
+
+        } else if (getHeading() < 180){
+            teamUtil.log("GONNA MOVE LEFT");
+            rotateToHeading180Left();
+        }
+    }
+
     public void rotateToHeading180Left(){
 
         double startHeading = getHeading();
@@ -627,6 +644,17 @@ public class RobotDrive {
 
     public double getRelativeHeading(double pseudoHeading){
         return revImu.correctHeading(adjustAngle(pseudoHeading + getHeading()));
+    }
+
+    public void rotateToZero(){
+        if(getRelativeHeading(180) < 178){
+            teamUtil.log("ROTATING LEFT");
+            rotateToHeadingZeroLeft();
+        } else if(getRelativeHeading(180) > 182){
+            teamUtil.log("ROTATING RIGHT");
+            rotateToHeadingZeroRight();
+        }
+
     }
 
 

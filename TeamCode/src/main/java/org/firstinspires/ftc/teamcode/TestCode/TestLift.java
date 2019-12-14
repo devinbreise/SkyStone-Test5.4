@@ -133,9 +133,7 @@ public class TestLift extends LinearOpMode {
                 //while (gamepad2.b) { }
             }
             if (gamepad2.dpad_down) {
-                //TODO need a stow lift that drops the elevator and puts away the lift;
-                liftSystem.lift.moveElevatorToBottom();
-                liftSystem.lift.moveLiftBaseDown(.95, 3000);
+                liftSystem.putAwayLiftSystemNoWait(8000);
             }
 
 

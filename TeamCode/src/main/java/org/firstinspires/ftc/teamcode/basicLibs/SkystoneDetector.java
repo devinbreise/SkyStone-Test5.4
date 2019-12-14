@@ -74,7 +74,7 @@ public class SkystoneDetector {
         return object.getLabel() == "Skystone" && getCenter(object) > 130;
     }
 
-    public int detect() {
+    public int detectRed() {
         teamUtil.log("Detect");
 
         if (tfod != null) {
@@ -118,11 +118,11 @@ public class SkystoneDetector {
                     }
 */
             } else {
-                teamUtil.log("detect -- no updated recognitions");
+                teamUtil.log("detectRed -- no updated recognitions");
                 return -1;
             }
         } else {
-            teamUtil.log("detect -- tfod inactivated");
+            teamUtil.log("detectRed -- tfod inactivated");
             return -1;
         }
 
@@ -130,8 +130,65 @@ public class SkystoneDetector {
         return -1;
     }
 
+    public int detectBlue() {
+        teamUtil.log("Detect");
+
+        if (tfod != null) {
+            // getUpdatedRecognitions() will return null if no new information is available since
+            // the last time that call was made.
+            List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+
+            String logString = "Detected:";
+            if (updatedRecognitions != null) {
+                logString = logString+updatedRecognitions.size()+":";
+                //Recognition firstObject = null;
+                //Recognition secondObject = null;
+                for (Recognition recognition : updatedRecognitions) {
+                    logString = logString+ recognition.getLabel() + " C:"+ getCenter(recognition) + " / ";
+
+                    if(recognition.getLabel()== LABEL_SKYSTONE){
+                        if(getCenter(recognition)> 350){
+                            teamUtil.log("Detect 1 - Finished");
+                            return 1;
+                        }else if(getCenter(recognition) > 125){
+                            teamUtil.log("Detect 2 - Finished");
+                            return 2;
+                        }else{
+                            teamUtil.log("Detect 3 - Finished");
+                            return 3;
+                        }
+                    }
+                }
+                teamUtil.log(logString);
+
+ /*                   if (rightMostIsSkystone(firstObject)) {
+                        teamUtil.log("PATH 1");
+                        return 1;
+                    } else if (leftMostIsSkystone(secondObject)) {
+                        teamUtil.log("PATH 2");
+                        return 2;
+
+                    } else if (!rightMostIsSkystone(firstObject) && !leftMostIsSkystone(secondObject)){
+                        teamUtil.log("PATH 3");
+                        return 3;
+                    }
+*/
+            } else {
+                teamUtil.log("detectBlue -- no updated recognitions");
+                return -1;
+            }
+        } else {
+            teamUtil.log("detectBlue -- tfod inactivated");
+            return -1;
+        }
+
+        teamUtil.log("Detect - Finished");
+        return -1;
+    }
+
+
     public void reportPath() {
-        telemetry.addData("path: ", detect());
+        telemetry.addData("path: ", detectRed());
     }
 
     public void reportStoneInformation() {

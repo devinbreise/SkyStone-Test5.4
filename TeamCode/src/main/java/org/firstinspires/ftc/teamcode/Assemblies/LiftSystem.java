@@ -17,6 +17,7 @@ public class LiftSystem {
         IDLE,
         GRAB, // MOVING TO GRAB
         GRAB_AND_STOW, // MOVING TO GRAB AND STOW
+        LIFT_STOW, // moving to put lift system away without grab
         PREPARE_TO_GRAB, // MOVING TO PREPARE TO GRAB
         MOVING_TO_HOVER, // moving to a new hover position
         HOVER // ELEVATOR HOVERING (not moving)
@@ -274,6 +275,34 @@ public class LiftSystem {
                 @Override
                 public void run() {
                     hoverOverFoundation(level, rotation, timeOut);
+                }
+            });
+            thread.start();
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Drop the lift system without grabbing anything. TODO State management and dealing with rotation stuff...
+    public void putAwayLiftSystem ( long timeOut) {
+
+        // this is a bit dangerous...we are trusting that the liftsystem is in a position where we can do these
+        //  two servo movements...
+        grabber.closeGrabberWide();
+        teamUtil.sleep(750);
+        grabber.rotate(Grabber.GrabberRotation.INSIDE);
+        lift.moveElevatorToBottom();
+        lift.moveLiftBaseDown(.95, timeOut);
+        state=LiftSystemState.IDLE;
+    }
+
+    public void putAwayLiftSystemNoWait(final long timeOut) {
+        if (!isMoving()) {
+            state = LiftSystemState.LIFT_STOW;
+            teamUtil.log("Launching Thread to Hover");
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    putAwayLiftSystem(timeOut);
                 }
             });
             thread.start();

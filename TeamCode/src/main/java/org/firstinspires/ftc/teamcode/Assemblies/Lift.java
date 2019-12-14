@@ -42,7 +42,7 @@ public class Lift {
     }
 
     enum ElevatorState{
-        IDLE,
+        IDLE, // bottom
         MOVING_UP,
         HOLDING,
         MOVING_DOWN,
@@ -477,6 +477,7 @@ public class Lift {
 
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private void moveElevatorDown(int position, long timeOut) {
         if(!isSafeToElevate()) {
             teamUtil.log("ERROR: called moveElevator while not safe to elevate");
@@ -633,9 +634,14 @@ public class Lift {
             teamUtil.log("ERROR: called moveElevatorToBottom while not safe to elevate");
             return;
         }
-        elevatorState = ElevatorState.MOVING_DOWN;
-        teamUtil.log("firstSpindlePosition: " + rSpindle.getCurrentPosition());
-        moveElevatorToBottomActive();  // OR moveElevatorToBottomPassive();
+        if (elevatorState != ElevatorState.IDLE) { // if we are not already at the bottom
+            elevatorState = ElevatorState.MOVING_DOWN;
+            teamUtil.log("firstSpindlePosition: " + rSpindle.getCurrentPosition());
+            moveElevatorToBottomActive();  // OR moveElevatorToBottomPassive();
+        } else {
+            teamUtil.log("WARNING: called moveElevatorToBottom when it was already there");
+
+        }
     }
 
 
