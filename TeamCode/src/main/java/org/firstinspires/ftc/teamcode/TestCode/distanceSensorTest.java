@@ -53,6 +53,7 @@ import org.firstinspires.ftc.teamcode.TestCode.CoachCode.Rev2mTunable;
  * @see <a href="http://revrobotics.com">REV Robotics Web Page</a>
  */
 @TeleOp(name = "Sensor: distanceSensorTest")
+@Disabled
 public class distanceSensorTest extends LinearOpMode {
 
     private DistanceSensor sensorRange;

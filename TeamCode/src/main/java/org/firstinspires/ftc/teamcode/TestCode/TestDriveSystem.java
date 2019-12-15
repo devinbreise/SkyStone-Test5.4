@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.TestCode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -9,6 +10,8 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamColorSensor;
 
 
 @TeleOp(name = "TestDriveSystem")
+@Disabled
+
     public class TestDriveSystem extends OpMode {
 
         // lift system code - should be in its own assembly class...

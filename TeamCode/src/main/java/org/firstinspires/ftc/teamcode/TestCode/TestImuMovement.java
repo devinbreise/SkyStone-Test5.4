@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.TestCode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
@@ -7,6 +8,8 @@ import org.firstinspires.ftc.teamcode.Assemblies.RobotDrive;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 @Autonomous(name = "TestImuMovement")
+@Disabled
+
 public class TestImuMovement extends LinearOpMode {
 
 

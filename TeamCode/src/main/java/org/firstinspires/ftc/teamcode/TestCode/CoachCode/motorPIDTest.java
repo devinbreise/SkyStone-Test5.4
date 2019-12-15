@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 @TeleOp(name="motorPIDTest")
-//@Disabled
+@Disabled
 public class motorPIDTest extends OpMode {
 
     private DcMotor theMotor;

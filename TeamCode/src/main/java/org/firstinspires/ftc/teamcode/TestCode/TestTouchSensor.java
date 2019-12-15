@@ -44,6 +44,7 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list.
  */
 @TeleOp(name = "TestTouchSensor")
+@Disabled
 
 public class TestTouchSensor extends LinearOpMode {
     /**

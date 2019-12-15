@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.basicLibs.Blinkin;
 import org.firstinspires.ftc.teamcode.basicLibs.TeamGamepad;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
-@TeleOp(name = "RobotTeleopLinear")
+@TeleOp(name = "RobotTeleopLinear", group ="Competition")
 public class RobotTeleopLinear extends LinearOpMode {
     public static final double SCALE_DOWN_CONSTANT = 0.3;
     int level = 0;
@@ -45,6 +45,7 @@ public class RobotTeleopLinear extends LinearOpMode {
         telemetry.addLine("Ready to Stack :D");
         telemetry.update();
         waitForStart();
+        robot.latch.latchUp(); // move latches up at start of teleop
 
         while (opModeIsActive()) {
 

@@ -155,7 +155,7 @@ public class LiftSystem {
             return;
         }
         // Give the servos enough time to grab the stone
-        teamUtil.sleep(500);
+        teamUtil.sleep(750);
         lift.moveLiftBaseDownNoWait(0.5, timeOutTime - System.currentTimeMillis());
         // give a little time for the lift to get far enough down to safely rotate
         teamUtil.sleep(1000);
@@ -287,7 +287,7 @@ public class LiftSystem {
 
         // this is a bit dangerous...we are trusting that the liftsystem is in a position where we can do these
         //  two servo movements...
-        grabber.closeGrabberWide();
+        grabber.openGrabber();
         teamUtil.sleep(750);
         grabber.rotate(Grabber.GrabberRotation.INSIDE);
         lift.moveElevatorToBottom();

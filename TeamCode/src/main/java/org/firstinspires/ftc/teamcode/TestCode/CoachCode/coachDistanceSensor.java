@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.TestCode.CoachCode;
 
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -9,6 +10,8 @@ import org.firstinspires.ftc.teamcode.basicLibs.DistanceSensors;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 @TeleOp(name = "CoachDistanceSensorTest")
+@Disabled
+
 public class coachDistanceSensor extends OpMode {
     Rev2mDistanceSensor frontLeftDistance, frontRightDistance, leftDistanceSensor, rightDistanceSensor, backDistanceSensor;
 

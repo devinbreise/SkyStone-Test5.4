@@ -227,6 +227,7 @@ public class RobotDrive {
         telemetry.addData("leftDistance", getDistanceInches(leftDistanceSensor));
         telemetry.addData("rightDistance", getDistanceInches(rightDistanceSensor));
         telemetry.addData("backDistance", getDistanceInches(backDistanceSensor));
+        telemetry.addLine("front color"+frontmiddleColor.alpha()+":" +frontmiddleColor.red()+":" +frontmiddleColor.green()+":" +frontmiddleColor.blue());
 
     }
 

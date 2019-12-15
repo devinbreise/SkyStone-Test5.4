@@ -6,7 +6,7 @@ import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
 import org.firstinspires.ftc.teamcode.Assemblies.Robot;
 import org.firstinspires.ftc.teamcode.basicLibs.SkystoneDetector;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
-@Autonomous(name="AutoSkystonePathRedShort")
+@Autonomous(name="AutoSkystonePathRedShort", group ="Competition")
 
 
 public class AutoSkystonePathRedShort extends LinearOpMode {
@@ -100,6 +100,12 @@ public class AutoSkystonePathRedShort extends LinearOpMode {
 
             robot.drive.rotateToZero();
 
+            // Right here we might be directly in front of a stone if tensor flow got faked out, in which case the skystone is
+            // in position 3.  Here is a simple test that should detect that.
+            if (robot.drive.frontmiddleColor.red() > 21) {
+                telemetry.addLine("WARNING: driving path 2, but stone is in path 3...");
+                telemetry.update();
+            }
             robot.drive.moveInchesForward(0.25, 8, 5000);
             robot.drive.moveInchesBackward(0.25, 1.125, 3000);
             robot.liftSystem.grabAndStowNoWait("wide", 7000);

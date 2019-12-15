@@ -1,12 +1,15 @@
 package org.firstinspires.ftc.teamcode.TestCode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.basicLibs.SkystoneDetector;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 @Autonomous(name = "testDaDetector")
+@Disabled
+
 public class TestDetector extends LinearOpMode {
 
     SkystoneDetector detector;

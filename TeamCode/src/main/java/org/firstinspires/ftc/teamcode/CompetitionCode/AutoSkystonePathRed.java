@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
 import org.firstinspires.ftc.teamcode.Assemblies.Robot;
 import org.firstinspires.ftc.teamcode.basicLibs.SkystoneDetector;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
-@Autonomous(name="AutoSkystonePathRed")
+@Autonomous(name="AutoSkystonePathRed", group ="Competition")
 
 @Disabled
 public class AutoSkystonePathRed extends LinearOpMode {

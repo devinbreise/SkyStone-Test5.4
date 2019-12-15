@@ -95,7 +95,8 @@ public class Robot {
             teamUtil.sleep(100);
         }
 
-        liftSystem.grabAndStow("wide", timeOutTime - System.currentTimeMillis());
+        liftSystem.grabAndStowNoWait("wide", 7000); // return control to driver
+        teamUtil.sleep(1000); // after a short pause to make sure we have picked up the stone
 
     }
 

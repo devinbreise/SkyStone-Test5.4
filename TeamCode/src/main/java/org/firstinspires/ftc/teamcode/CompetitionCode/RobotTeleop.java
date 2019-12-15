@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.CompetitionCode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -11,6 +12,8 @@ import org.firstinspires.ftc.teamcode.basicLibs.TeamGamepad;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 @TeleOp(name = "RobotTeleop")
+@Disabled
+
 public class RobotTeleop extends OpMode {
 
     public static final double SCALE_DOWN_CONSTANT = 0.3;

@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
 import org.firstinspires.ftc.teamcode.basicLibs.TeamGamepad;
 
 @TeleOp(name = "TestGrabber")
+@Disabled
 
 public class TestGrabber extends OpMode {
 

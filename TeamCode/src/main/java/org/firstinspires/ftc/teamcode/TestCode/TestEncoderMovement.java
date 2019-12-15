@@ -9,6 +9,8 @@ import org.firstinspires.ftc.teamcode.basicLibs.Blinkin;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 @Autonomous(name = "TestEncoderMovement")
+//@Disabled
+
 public class TestEncoderMovement extends LinearOpMode {
 
 

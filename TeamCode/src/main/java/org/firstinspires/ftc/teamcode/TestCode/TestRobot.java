@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.TestCode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -7,6 +8,8 @@ import org.firstinspires.ftc.teamcode.Assemblies.Robot;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 @TeleOp(name = "testRobot")
+@Disabled
+
 public class TestRobot extends LinearOpMode {
     private Robot robot;
 

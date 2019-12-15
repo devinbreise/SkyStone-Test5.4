@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.TestCode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -8,7 +9,7 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 
 @TeleOp(name = "findServoPositions")
-//@Disabled
+@Disabled
 public class findServoPositions extends OpMode {
     public static final double MAJOR_INCREMENT = 0.05;
     public static final double MINOR_INCREMENT = 0.01;

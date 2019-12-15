@@ -83,6 +83,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
  */
 
 @TeleOp(name="Test Vuforia Nav Webcam")
+@Disabled
 
 public class TestVuforiaNavigationWebcam extends LinearOpMode {
 

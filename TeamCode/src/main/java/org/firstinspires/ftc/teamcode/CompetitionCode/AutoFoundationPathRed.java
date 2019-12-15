@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.Assemblies.LiftSystem;
 import org.firstinspires.ftc.teamcode.Assemblies.Robot;
 import org.firstinspires.ftc.teamcode.Assemblies.RobotDrive;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
-@Autonomous(name="AutoFoundationPathRed")
+@Autonomous(name="AutoFoundationPathRed", group ="Competition")
 public class AutoFoundationPathRed extends LinearOpMode {
 
     Robot robot;

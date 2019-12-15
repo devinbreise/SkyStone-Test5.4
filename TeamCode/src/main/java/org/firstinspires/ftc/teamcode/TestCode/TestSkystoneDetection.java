@@ -45,6 +45,8 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
  * determine the position of the Skystone game elements.
  */
 @TeleOp(name = "TestSkystoneDetection")
+@Disabled
+
 
 public class TestSkystoneDetection extends LinearOpMode {
     private static final String TFOD_MODEL_ASSET = "Skystone.tflite";
