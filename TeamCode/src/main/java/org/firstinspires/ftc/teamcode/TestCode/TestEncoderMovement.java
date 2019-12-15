@@ -37,19 +37,19 @@ public class TestEncoderMovement extends LinearOpMode {
 
         while (opModeIsActive()) {
             if (gamepad1.dpad_up) {
-                teamUtil.theBlinkin.setSignal(Blinkin.Signals.SIGNAL_1);
+                teamUtil.theBlinkin.setSignal(Blinkin.Signals.CURIOSITY);
                 robot.moveInchesForward(0.5, 30, 9000);
             }
             if (gamepad1.dpad_down) {
-                teamUtil.theBlinkin.setSignal(Blinkin.Signals.SIGNAL_1);
+                teamUtil.theBlinkin.setSignal(Blinkin.Signals.CURIOSITY);
                 robot.moveInchesBackward(0.5, 30, 9000);
             }
             if (gamepad1.dpad_left) {
-                teamUtil.theBlinkin.setSignal(Blinkin.Signals.SIGNAL_2);
+                teamUtil.theBlinkin.setSignal(Blinkin.Signals.CURIOSITY);
                 robot.moveInchesLeft(0.5, 30, 9000);
             }
             if (gamepad1.dpad_right) {
-                teamUtil.theBlinkin.setSignal(Blinkin.Signals.SIGNAL_2);
+                teamUtil.theBlinkin.setSignal(Blinkin.Signals.CURIOSITY);
                 robot.moveInchesRight(0.5, 30, 9000);
             }
             robot.distanceTelemetry();

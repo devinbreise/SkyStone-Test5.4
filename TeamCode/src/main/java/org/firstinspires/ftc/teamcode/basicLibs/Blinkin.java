@@ -16,9 +16,21 @@ public class Blinkin {
     public final double larsonScanner = -0.01;
 
     public enum Signals{
-        SIGNAL_1,
-        SIGNAL_2,
-        SIGNAL_3
+        YELLOW,
+        INIT,
+        READY_TO_START,
+        SIGNAL_3,
+
+
+        LEVEL_0,
+        LEVEL_1,
+        LEVEL_2,
+        LEVEL_3,
+        LEVEL_4,
+        LEVEL_5,
+        LEVEL_6,
+
+        CURIOSITY,
     }
 
     public Blinkin(HardwareMap map, Telemetry aTelemetry ){
@@ -27,19 +39,53 @@ public class Blinkin {
     }
     public void init () {
         blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, "blinkin");
-        blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
+        setSignal(Signals.YELLOW);
     }
 
     public void setSignal(Signals signal){
 
         switch(signal) {
-            case SIGNAL_1 :
+
+            case YELLOW :
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
+                break;
+
+            case INIT :
                 blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.LARSON_SCANNER_RED);
                 break;
-            case SIGNAL_2 :
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.TWINKLES_RAINBOW_PALETTE);
+            case READY_TO_START :
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
                 break;
             case SIGNAL_3:
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+                break;
+
+            case LEVEL_0:
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.VIOLET);
+                break;
+            case LEVEL_1:
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE_VIOLET);
+                break;
+            case LEVEL_2:
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.DARK_BLUE);
+                break;
+            case LEVEL_3:
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
+                break;
+            case LEVEL_4:
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.SKY_BLUE);
+                break;
+            case LEVEL_5:
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.AQUA);
+                break;
+            case LEVEL_6:
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE_GREEN);
+                break;
+
+
+            case CURIOSITY:
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
+                break;
 
         }
     }

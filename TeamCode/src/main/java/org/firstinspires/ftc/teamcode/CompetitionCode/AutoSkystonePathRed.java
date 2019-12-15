@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.CompetitionCode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
@@ -8,7 +9,7 @@ import org.firstinspires.ftc.teamcode.basicLibs.SkystoneDetector;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 @Autonomous(name="AutoSkystonePathRed")
 
-
+@Disabled
 public class AutoSkystonePathRed extends LinearOpMode {
 
     Robot robot;
@@ -46,9 +47,15 @@ public class AutoSkystonePathRed extends LinearOpMode {
             }
             teamUtil.log("path: " + path);
         }
-        detector.shutdownDector();
+
         robot.liftSystem.prepareToGrabNoWait(6000);
-        robot.drive.moveInchesForward(0.5, 18,5000);
+        robot.drive.moveInchesForward(0.5, 12,5000);
+        int detected = detector.detectRed();
+        if (detected > 0) {
+            path = detected;
+        }
+        robot.drive.moveInchesForward(0.5, 6,5000);
+
 
         if (path == 1) {
 
@@ -83,7 +90,7 @@ public class AutoSkystonePathRed extends LinearOpMode {
 
             robot.drive.moveInchesForward(0.5, 5, 3000);
 
-            robot.autoDropOff(9001);
+            robot.autoDropOffLeft(0, 9001);
             teamUtil.sleep(500);
 
             robot.drive.moveInchesBackward(0.5, 8, 4000);
@@ -151,7 +158,7 @@ public class AutoSkystonePathRed extends LinearOpMode {
 
             robot.drive.moveInchesForward(0.5, 5, 3000);
 
-            robot.autoDropOff(9001);
+            robot.autoDropOffLeft(0, 9001);
             teamUtil.sleep(500);
 
             robot.drive.moveInchesBackward(0.5, 8, 4000);
@@ -211,7 +218,7 @@ public class AutoSkystonePathRed extends LinearOpMode {
 
             robot.drive.moveInchesForward(0.5, 5, 3000);
 
-            robot.autoDropOff(9001);
+            robot.autoDropOffLeft(0, 9001);
             teamUtil.sleep(500);
 
             robot.drive.moveInchesBackward(0.5, 8, 4000);

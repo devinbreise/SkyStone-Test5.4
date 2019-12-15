@@ -121,6 +121,7 @@ public class TensorFlowSkyStoneDetectionWebcam extends LinearOpMode {
   //                    int i = 0;
                       for (Recognition recognition : updatedRecognitions) {
                         telemetry.addData("label:", recognition.getLabel());
+                          telemetry.addData("width:", recognition.getWidth());
       //                  telemetry.addData(String.format("  left,top (%d)", i), "%.03f , %.03f",
         //                        recognition.getLeft(), recognition.getTop());
           //              telemetry.addData(String.format("  right,bottom (%d)", i), "%.03f , %.03f",

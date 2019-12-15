@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 
 import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
-import org.firstinspires.ftc.teamcode.Assemblies.Lift;
 import org.firstinspires.ftc.teamcode.Assemblies.LiftSystem;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
@@ -122,14 +121,14 @@ public class TestLift extends LinearOpMode {
                 liftSystem.lift.moveElevatorToBottomNoWait();
             }
             if (gamepad2.left_bumper) {
-                liftSystem.Grab("wide",5000);
+                liftSystem.grab("wide",5000);
                 //while (gamepad2.b) { }
             }
             if (gamepad2.dpad_up) {
                 liftSystem.grabber.openGrabber();
             }
             if (gamepad2.left_bumper) {
-                liftSystem.Grab("wide",5000);
+                liftSystem.grab("wide",5000);
                 //while (gamepad2.b) { }
             }
             if (gamepad2.dpad_down) {

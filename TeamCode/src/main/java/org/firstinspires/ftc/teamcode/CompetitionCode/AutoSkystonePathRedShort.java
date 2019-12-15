@@ -40,19 +40,24 @@ public class AutoSkystonePathRedShort extends LinearOpMode {
         // Start detecting but wait for start of match to move
         while (!opModeIsActive() && !isStopRequested()) {
             sleep(200);
+
             int detected = detector.detectRed();
             if (detected > 0) {
                 path = detected;
             }
-            teamUtil.log("path: " + path);
         }
         detector.shutdownDector();
+
+
         robot.liftSystem.prepareToGrabNoWait(6000);
         robot.drive.moveInchesForward(0.5, 18,5000);
 
+
+
+
         if (path == 1) {
 
-            robot.drive.moveToDistance(robot.drive.frontLeftDistance, 8, Robot.AUTOINTAKE_POWER, 5000);
+            robot.drive.moveToDistance(robot.drive.frontLeftDistance, 9, Robot.AUTOINTAKE_POWER, 5000);
             robot.liftSystem.openGrabber();
 
             robot.drive.rotateToZero();
@@ -68,7 +73,7 @@ public class AutoSkystonePathRedShort extends LinearOpMode {
 
             teamUtil.sleep(1000);
 
-            robot.drive.moveInchesBackward(0.5, 7,5000);
+            robot.drive.moveInchesBackward(0.5, 2.5,5000);
 
 
             robot.drive.rotateToZero();
@@ -77,14 +82,15 @@ public class AutoSkystonePathRedShort extends LinearOpMode {
             robot.liftSystem.grabber.openGrabber();
             teamUtil.sleep(750);
             robot.liftSystem.putAwayLiftSystem(5000);
-            robot.drive.moveInchesLeft(0.5, 7.5, 6000);
+            robot.drive.moveInchesForward(0.5, 2, 3000);
+            robot.drive.moveInchesLeft(0.5, 10, 6000);
 
 
 
 
 
         } else if (path == 2) {
-            robot.drive.moveToDistance(robot.drive.frontLeftDistance, 8, Robot.AUTOINTAKE_POWER, 5000);
+            robot.drive.moveToDistance(robot.drive.frontLeftDistance, 9, Robot.AUTOINTAKE_POWER, 5000);
             robot.liftSystem.openGrabber();
 
             robot.drive.rotateToZero();
@@ -100,10 +106,12 @@ public class AutoSkystonePathRedShort extends LinearOpMode {
 
             teamUtil.sleep(1000);
 
-            robot.drive.moveInchesBackward(0.5, 7,5000);
+            robot.drive.moveInchesBackward(0.5, 3.5,5000);
 
 
             robot.drive.rotateToZero();
+
+            teamUtil.sleep(1000);
 
             robot.drive.moveInchesRight(0.75, 50, 6000);
             robot.liftSystem.hoverOverFoundation(0, Grabber.GrabberRotation.INSIDE, 5000);
@@ -115,7 +123,7 @@ public class AutoSkystonePathRedShort extends LinearOpMode {
 
 
         } else if (path == 3) {
-            robot.drive.moveToDistance(robot.drive.frontLeftDistance, 8, Robot.AUTOINTAKE_POWER, 5000);
+            robot.drive.moveToDistance(robot.drive.frontLeftDistance, 9, Robot.AUTOINTAKE_POWER, 5000);
             robot.liftSystem.openGrabber();
 
             robot.drive.rotateToZero();
@@ -131,16 +139,17 @@ public class AutoSkystonePathRedShort extends LinearOpMode {
 
             teamUtil.sleep(1000);
 
-            robot.drive.moveInchesBackward(0.5, 7,5000);
+            robot.drive.moveInchesBackward(0.5, 3,5000);
 
 
             robot.drive.rotateToZero();
-            robot.drive.moveInchesRight(0.75, 50, 6000);
+            teamUtil.sleep(2000);
+            robot.drive.moveInchesRight(0.75, 43, 6000);
             robot.liftSystem.hoverOverFoundation(0, Grabber.GrabberRotation.INSIDE, 5000);
             robot.liftSystem.grabber.openGrabber();
             teamUtil.sleep(750);
             robot.liftSystem.putAwayLiftSystem(5000);
-            robot.drive.moveInchesLeft(0.5, 7.5, 6000);
+            robot.drive.moveInchesLeft(0.5, 9.5, 6000);
 
 
 

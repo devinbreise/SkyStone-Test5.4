@@ -257,6 +257,32 @@ public class RobotDrive {
 
     }
 
+    public void moveToPickUpDistance(long timeOut) {
+        teamUtil.log("Moving to Distance");
+        long timeOutTime = System.currentTimeMillis() + timeOut;
+        timedOut = false;
+        double currentReading = frontmiddleDistance.getDistance(DistanceUnit.CM);
+
+        // Need to move backwards
+        if (currentReading < 5.46) {
+            while ((frontmiddleDistance.getDistance(DistanceUnit.CM)< 5.46) && teamUtil.keepGoing(timeOutTime)) {
+                driveBackward(0.17);
+            }
+            // need to move forwards
+        } else{
+            while ((frontmiddleDistance.getDistance(DistanceUnit.CM)> 5.46) && teamUtil.keepGoing(timeOutTime)) {
+                driveForward(0.17);
+            }
+        }
+        stopMotors();
+        timedOut = (System.currentTimeMillis() > timeOutTime);
+        if (timedOut) {
+            teamUtil.log("Moving to Distance - TIMED OUT!");
+        }
+        teamUtil.log("Moving to Distance - Finished");
+
+    }
+
     public void driveForward(double power, double timeInMilliseconds) {
         teamUtil.log("Moving Forward Milliseconds: " + timeInMilliseconds);
         ElapsedTime driveTime = new ElapsedTime();

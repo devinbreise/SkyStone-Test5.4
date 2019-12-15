@@ -100,8 +100,12 @@ public class SkystoneDetector {
                             }else{
                                 teamUtil.log("Detect 3 - Finished");
                                 return 3;
+
+
                             }
                         }
+
+
                     }
                     teamUtil.log(logString);
 
@@ -134,8 +138,6 @@ public class SkystoneDetector {
         teamUtil.log("Detect");
 
         if (tfod != null) {
-            // getUpdatedRecognitions() will return null if no new information is available since
-            // the last time that call was made.
             List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
 
             String logString = "Detected:";
@@ -146,17 +148,22 @@ public class SkystoneDetector {
                 for (Recognition recognition : updatedRecognitions) {
                     logString = logString+ recognition.getLabel() + " C:"+ getCenter(recognition) + " / ";
 
+                    // getUpdatedRecognitions() will return null if no new information is available since
+            // the last time that call was made.
+
                     if(recognition.getLabel()== LABEL_SKYSTONE){
                         if(getCenter(recognition)> 350){
                             teamUtil.log("Detect 1 - Finished");
                             return 1;
                         }else if(getCenter(recognition) > 125){
-                            teamUtil.log("Detect 2 - Finished");
-                            return 2;
-                        }else{
-                            teamUtil.log("Detect 3 - Finished");
-                            return 3;
+                            if(recognition.getWidth() < 300) {
+                                teamUtil.log("Detect 2 - Finished");
+                                return 2;
+                            }else {
+                                return 3;
+                            }
                         }
+
                     }
                 }
                 teamUtil.log(logString);

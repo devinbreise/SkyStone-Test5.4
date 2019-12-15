@@ -13,7 +13,7 @@ public class LiftSystem {
     public Lift lift;
     Telemetry telemetry;
     HardwareMap hardwareMap;
-    enum LiftSystemState{
+    public enum LiftSystemState{
         IDLE,
         GRAB, // MOVING TO GRAB
         GRAB_AND_STOW, // MOVING TO GRAB AND STOW
@@ -22,7 +22,7 @@ public class LiftSystem {
         MOVING_TO_HOVER, // moving to a new hover position
         HOVER // ELEVATOR HOVERING (not moving)
     }
-    LiftSystemState state = LiftSystemState.IDLE;
+    public LiftSystemState state = LiftSystemState.IDLE;
     boolean timedOut = false;
     //boolean isStowed = false;
 
@@ -68,7 +68,7 @@ public class LiftSystem {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void prepareToGrab(long timeOut){
         state = LiftSystemState.PREPARE_TO_GRAB;
-        teamUtil.log("Prepare to Grab");
+        teamUtil.log("Prepare to grab");
         long timeOutTime= System.currentTimeMillis()+timeOut;
         timedOut = false;
 
@@ -109,16 +109,16 @@ public class LiftSystem {
         state = LiftSystemState.IDLE;
         timedOut = (System.currentTimeMillis() > timeOutTime);
         if (timedOut) {
-            teamUtil.log("Prepare to Grab - TIMED OUT!");
+            teamUtil.log("Prepare to grab - TIMED OUT!");
         }
-        teamUtil.log("Prepare to Grab - Finished");
+        teamUtil.log("Prepare to grab - Finished");
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void prepareToGrabNoWait(final long timeOut) {
         if (!isMoving()) {
             state = LiftSystemState.PREPARE_TO_GRAB;
-            teamUtil.log("Launching Thread to Prepare to Grab");
+            teamUtil.log("Launching Thread to Prepare to grab");
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -130,7 +130,7 @@ public class LiftSystem {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Grab a stone and stow the lift for travel
+    // grab a stone and stow the lift for travel
     public void grabAndStow(String grabberPos, long timeOut){
         if (!lift.liftBaseIsUp()) {
             teamUtil.log("WARNING: grabAndStow called when lift was not up");
@@ -138,7 +138,7 @@ public class LiftSystem {
             return;
         }
         state = LiftSystemState.GRAB_AND_STOW;
-        teamUtil.log("Grab and Stow");
+        teamUtil.log("grab and Stow");
         long timeOutTime= System.currentTimeMillis()+timeOut;
         timedOut = false;
         lift.moveElevatorToBottom();  // dip down for the grab
@@ -150,7 +150,7 @@ public class LiftSystem {
             grabber.closeGrabberWide();
             teamUtil.log("grabbed");
         }else{
-            teamUtil.log("BAD INPUT to Grab and Stow");
+            teamUtil.log("BAD INPUT to grab and Stow");
             state = LiftSystemState.IDLE;
             return;
         }
@@ -169,16 +169,16 @@ public class LiftSystem {
         state = LiftSystemState.IDLE;
         timedOut = (System.currentTimeMillis() > timeOutTime);
         if (timedOut) {
-            teamUtil.log("Grab and Stow - TIMED OUT!");
+            teamUtil.log("grab and Stow - TIMED OUT!");
         }
-        teamUtil.log("Grab and Stow - Finished");
+        teamUtil.log("grab and Stow - Finished");
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void grabAndStowNoWait (final String grabberPos, final long timeOut) {
         if (!isMoving()) {
             state = LiftSystemState.GRAB_AND_STOW;
-            teamUtil.log("Launching Thread to Grab and Stow");
+            teamUtil.log("Launching Thread to grab and Stow");
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -191,11 +191,11 @@ public class LiftSystem {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // dip down, grab a stone and then return to level 0
-    public void Grab(String grabberPos, long timeOut){
+    public void grab(String grabberPos, long timeOut){
         state = LiftSystemState.GRAB;
-        teamUtil.log("Grab");
+        teamUtil.log("grab");
         if (!lift.liftBaseIsUp()) {
-            teamUtil.log("WARNING: Grab called when lift was not up");
+            teamUtil.log("WARNING: grab called when lift was not up");
             state = LiftSystemState.IDLE;
             return;
         }
@@ -209,7 +209,7 @@ public class LiftSystem {
             grabber.closeGrabberWide();
             teamUtil.log("grabbed");
         }else{
-            teamUtil.log("BAD INPUT to Grab and Stow");
+            teamUtil.log("BAD INPUT to grab and Stow");
             state = LiftSystemState.IDLE;
             return;
         }
@@ -217,7 +217,7 @@ public class LiftSystem {
         teamUtil.sleep(500);
         lift.moveElevator(lift.HOVER_FOR_GRAB, timeOut); // a little closer to the ground then level 0
         //lift.moveElevatorToLevel(0, timeOut);
-        teamUtil.log("Grab - Finished");
+        teamUtil.log("grab - Finished");
         state = LiftSystemState.IDLE;
     }
 

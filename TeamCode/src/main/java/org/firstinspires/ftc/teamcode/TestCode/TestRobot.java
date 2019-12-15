@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.TestCode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Assemblies.Robot;
@@ -27,7 +26,7 @@ public class TestRobot extends LinearOpMode {
                 robot.autoIntake(8000);
             }
             if(gamepad1.left_bumper){
-                robot.autoDropOff(8000);
+                robot.autoDropOffLeft(0, 8000);
             }
             if(gamepad2.x){
                 robot.drive.moveInchesRight(0.5, 36, 15000);
@@ -37,6 +36,9 @@ public class TestRobot extends LinearOpMode {
             }
             if(gamepad2.left_bumper){
                 robot.drive.rotateToHeadingZeroLeft();
+            }
+            if(gamepad1.a){
+                robot.drive.moveToPickUpDistance(5000);
             }
         }
     }
