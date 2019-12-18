@@ -16,6 +16,7 @@ public class Blinkin {
     public final double larsonScanner = -0.01;
 
     public enum Signals{
+        OFF,
         YELLOW,
         INIT,
         READY_TO_START,
@@ -45,6 +46,10 @@ public class Blinkin {
     public void setSignal(Signals signal){
 
         switch(signal) {
+            case OFF :
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
+                break;
+
 
             case YELLOW :
                 blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);

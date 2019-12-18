@@ -133,6 +133,13 @@ public class RobotDrive {
         bLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
+    public void setAllMotorsWithEncoder() {
+        fLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        fRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        bLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        bRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
 
     public void runAllMotorsToPosition() {
         fLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -294,6 +301,31 @@ public class RobotDrive {
         } while (driveTime.milliseconds() < timeInMilliseconds && teamUtil.theOpMode.opModeIsActive());
         stopMotors();
         teamUtil.log("Moving Forward Milliseconds - Finished");
+    }
+
+    // move a specified number of inches (using encoder on front right wheel to measure) with the
+    // provided power/speed values for each of the 4 motors.
+    // This will work in both RUN_USING_ENCODERS and RUN_WITHOUT_ENCODERS but may give very different results...
+    public void moveInches(double distance,  double lfspeed, double rfspeed, double lbspeed, double rbspeed, long timeOut){
+        teamUtil.log("Move Inches: " + distance + " " + fRightMotor.getMode()); // log the distance and motor mode
+        long timeOutTime = System.currentTimeMillis() + timeOut;
+        timedOut = false;
+        setZeroAllDriveMotors();
+        int offset = fRightMotor.getCurrentPosition();
+        int encoderCounts = (int) (COUNTS_PER_INCH * distance);
+        fLeftMotor.setPower(lfspeed);
+        fRightMotor.setPower(rfspeed);
+        bLeftMotor.setPower(lbspeed);
+        bRightMotor.setPower(rbspeed);
+        while ((Math.abs(fRightMotor.getCurrentPosition()-offset) < encoderCounts) && teamUtil.keepGoing(timeOutTime)) {
+            // cruising to our destination  could log encoder positions here if needed
+        }
+        stopMotors();
+        timedOut = (System.currentTimeMillis() > timeOutTime);
+        if (timedOut) {
+            teamUtil.log("Move Inches - TIMED OUT!");
+        }
+        teamUtil.log("Move Inches - Finished");
     }
 
     public void moveInchesForward(double speed, double inches, long timeOut) {
