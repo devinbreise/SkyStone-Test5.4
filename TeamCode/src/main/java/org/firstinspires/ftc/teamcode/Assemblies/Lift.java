@@ -21,7 +21,7 @@ public class Lift {
     private DigitalChannel liftUpMagSwitch1, liftUpMagSwitch2;
 
     // Constants for the base lift (when using the encoder)
-    private final int LIFT_BASE_TOP_LIMIT_ENCODER_CLICKS = 3000;
+    private final int LIFT_BASE_TOP_LIMIT_ENCODER_CLICKS = 2950;
     private final int LIFT_BASE_SAFE_TO_ELEVATE = 2000;
 
     // Constants for the elevator spindles
@@ -276,13 +276,14 @@ public class Lift {
             liftState = LiftState.IDLE;
             return;
         }
+        int mockTarget = (int) (LIFT_BASE_TOP_LIMIT_ENCODER_CLICKS * 1.05);
         liftBase.setPower(0);
-        liftBase.setTargetPosition(LIFT_BASE_TOP_LIMIT_ENCODER_CLICKS);
+        liftBase.setTargetPosition(mockTarget);
         liftBase.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         liftBase.setPower(power);
         // wait for the lift to get close to its final position before we move on
         // Using isBusy() on the liftbase motor takes a LONG time due to the PID slowing down at the end
-        while ((liftBase.getCurrentPosition()<(.95* LIFT_BASE_TOP_LIMIT_ENCODER_CLICKS)) && teamUtil.keepGoing(timeOutTime)){
+        while ((liftBase.getCurrentPosition()<(LIFT_BASE_TOP_LIMIT_ENCODER_CLICKS)) && teamUtil.keepGoing(timeOutTime)){
             teamUtil.log("liftEncoder: " + liftBase.getCurrentPosition());
             if (liftBase.getCurrentPosition() > LIFT_BASE_SAFE_TO_ELEVATE) {
                 safeToElevate = true;
@@ -346,7 +347,8 @@ public class Lift {
         teamUtil.log("Moving Lift Up");
         safeToElevate = false;
 
-        moveBaseUpUsingLimits(power, timeOut);  // OR moveBaseUpUsingEncoders (power, timeOut);
+          // OR moveBaseUpUsingLimits(power, timeOut);
+        moveBaseUpUsingEncoders (power, timeOut);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////

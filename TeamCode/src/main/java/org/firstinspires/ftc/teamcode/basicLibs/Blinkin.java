@@ -40,7 +40,7 @@ public class Blinkin {
     }
     public void init () {
         blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, "blinkin");
-        setSignal(Signals.YELLOW);
+        setSignal(Signals.OFF);
     }
 
     public void setSignal(Signals signal){

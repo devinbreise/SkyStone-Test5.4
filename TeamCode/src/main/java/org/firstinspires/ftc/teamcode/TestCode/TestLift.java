@@ -7,10 +7,11 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
 import org.firstinspires.ftc.teamcode.Assemblies.LiftSystem;
+import org.firstinspires.ftc.teamcode.basicLibs.Blinkin;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 @TeleOp(name = "TestLift")
-@Disabled
+//@Disabled
 
 public class TestLift extends LinearOpMode {
 
@@ -22,8 +23,11 @@ public class TestLift extends LinearOpMode {
 
     public void initialize() {
         teamUtil.init(this);
+        teamUtil.theBlinkin.setSignal(Blinkin.Signals.INIT);
         liftSystem = new LiftSystem(hardwareMap, telemetry);
         liftSystem.initLiftSystem();
+        teamUtil.theBlinkin.setSignal(Blinkin.Signals.OFF);
+
     }
 
     @Override

@@ -104,9 +104,11 @@ public class TestEncoderMovement extends LinearOpMode {
             } else if (gamepad1.left_trigger> .5) {
                 robot.setAllMotorsWithoutEncoder();
                 withEncoders = false;
+                sleep(500);
             } else if (gamepad1.right_trigger> .5) {
                 robot.setAllMotorsWithEncoder();
                 withEncoders = true;
+                sleep(500);
             }else if (gamepad1.dpad_up) {
                 robot.moveInches(distance, -lfspeed, rfspeed, -lbspeed, rbspeed, 9000);
             } else if (gamepad1.dpad_down) {
