@@ -13,14 +13,20 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 public class TestEncoderMovement extends LinearOpMode {
 
-
+ //left powers:
+    //fl: 0.65
+    //fr: 0.65 => 0.625
+    //bl: 0.55
+    //br: 0.60  => 0.575
     RobotDrive robot;
-    double lfspeed = 0.5;
-    double rfspeed = 0.5;
-    double lbspeed = 0.5;
-    double rbspeed = 0.5;
-    double speedIncrement = .05;
-    double distance = 30;
+    double lfspeed = 0.65;
+    double rfspeed = 0.625;
+    double lbspeed = 0.55;
+    double rbspeed = 0.575;
+    double testSpeed = 0.5;
+    double testInches = 0.5;
+    double speedIncrement = .025;
+    double distance = 48;
     double distanceIncrement = 1;
     boolean withEncoders = false;
 
@@ -118,7 +124,31 @@ public class TestEncoderMovement extends LinearOpMode {
             } else if (gamepad1.dpad_right) {
                 robot.moveInches(distance, -lfspeed, -rfspeed, lbspeed, rbspeed, 9000);
             }
+
+            if(gamepad2.a){
+                robot.moveInchesBackward(testSpeed, distance, 5000);
+            } else if(gamepad2.x){
+                robot.moveInchesLeft(testSpeed, distance, 5000);
+            } else if(gamepad2.b){
+                robot.moveInchesRight(testSpeed, distance, 5000);
+            } else if(gamepad2.y){
+                robot.moveInchesForward(testSpeed, distance, 5000);
+            } else if(gamepad2.dpad_up){
+                testSpeed+=speedIncrement;
+            } else if(gamepad2.dpad_down){
+                testSpeed-=speedIncrement;
+            } else if(gamepad2.dpad_right){
+                distance+=distanceIncrement;
+            } else if(gamepad2.dpad_left) {
+                distance-=distanceIncrement;
+            } else if(gamepad2.right_bumper){
+                robot.accelerateInchesRight(1, 48, 123456789);
+            }
+
+
+
             telemetry.addLine("Distance: "+ distance);
+            telemetry.addLine("TestSpeed: " + testSpeed);
             telemetry.addLine("Power LF: "+ lfspeed+" RF: "+ rfspeed+" LB: "+ lbspeed+" RB: "+ rbspeed);
             telemetry.addLine("Encoders:" + withEncoders);
             robot.distanceTelemetry();

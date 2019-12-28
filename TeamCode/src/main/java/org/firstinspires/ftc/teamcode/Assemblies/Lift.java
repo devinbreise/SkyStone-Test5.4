@@ -26,7 +26,7 @@ public class Lift {
 
     // Constants for the elevator spindles
     public final int BOTTOM = 0;
-    public final int HOVER_FOR_GRAB = 50; // Not Tested
+    public final int HOVER_FOR_GRAB = 0; // Not Tested
     private final int LEVEL_0 = 370; //was 430
     private final int LEVEL_INCREMENT = 560;
     public final int SAFE_TO_ROTATE = LEVEL_0 + LEVEL_INCREMENT;

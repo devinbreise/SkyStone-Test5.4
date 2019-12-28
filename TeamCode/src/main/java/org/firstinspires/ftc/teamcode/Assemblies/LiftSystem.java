@@ -97,7 +97,7 @@ public class LiftSystem {
             grabber.rotate(Grabber.GrabberRotation.INSIDE);
             teamUtil.sleep(500);
         }
-        grabber.grabberPickup();
+        grabber.openGrabber();
         // start the elevator when we can
         while (!lift.isSafeToElevate() && teamUtil.keepGoing(timeOutTime)) {
             teamUtil.sleep(100);
@@ -132,11 +132,11 @@ public class LiftSystem {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // grab a stone and stow the lift for travel
     public void grabAndStow(String grabberPos, long timeOut){
-        if (!lift.liftBaseIsUp()) {
-            teamUtil.log("WARNING: grabAndStow called when lift was not up");
-            state = LiftSystemState.IDLE;
-            return;
-        }
+//        if (!lift.liftBaseIsUp()) {
+//            teamUtil.log("WARNING: grabAndStow called when lift was not up");
+//            state = LiftSystemState.IDLE;
+//            return;
+//        }
         state = LiftSystemState.GRAB_AND_STOW;
         teamUtil.log("grab and Stow");
         long timeOutTime= System.currentTimeMillis()+timeOut;

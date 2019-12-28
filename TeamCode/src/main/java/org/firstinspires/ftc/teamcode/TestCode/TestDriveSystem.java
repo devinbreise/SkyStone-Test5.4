@@ -10,22 +10,19 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamColorSensor;
 
 
 @TeleOp(name = "TestDriveSystem")
-@Disabled
 
     public class TestDriveSystem extends OpMode {
 
         // lift system code - should be in its own assembly class...
 
         public static double MAX_POWER = 1;
-        public static double DRIVE_POWER;
+        public double DRIVE_POWER = 0.5;
         RobotDrive robot;
-        teamColorSensor colorSensor;
 
 
         @Override
         public void init() {
             robot = new RobotDrive(hardwareMap, telemetry);
-            colorSensor = new teamColorSensor(telemetry, hardwareMap.get(ColorSensor.class, "colorSensor"));
             robot.initDriveMotors();
             robot.initImu();
             robot.initSensors();
@@ -40,31 +37,19 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamColorSensor;
 
             telemetry.addData("heading:", robot.getHeading());
             robot.distanceTelemetry();
-            telemetry.addData("ColorSensor: ", colorSensor.getReading());
-            telemetry.addData("Is Skystone?", colorSensor.isSkystone(colorSensor.getReading()));
+            telemetry.addData("ColorSensor: ", robot.bottomColor.getReading());
+            telemetry.addData("ColorSensor BlueTape?: ", robot.bottomColor.onBlue());
+            telemetry.addData("ColorSensor RedTape?: ", robot.bottomColor.onRed());
+
+//            telemetry.addData("Is Skystone?", colorSensor.isSkystone(colorSensor.getReading()));
 
 
-            if(gamepad1.left_trigger > 0.1){
-                telemetry.addData("", "REGULAR DRIVE");
-                robot.driveJoyStick(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x,1);
-
-            } else {
-                telemetry.addData("", "IMU DRIVE");
 
                 robot.universalJoystick(gamepad1.left_stick_x,
                         gamepad1.left_stick_y,
                         gamepad1.right_stick_x,1,
                         robot.getHeading());
-            }
-//TESIGN IMU CODE
-//                if(gamepad1.b){
-//                    robot.universalJoystick(0,
-//                            -0.5f,
-//                            gamepad1.right_stick_x,
-//                            45);
-//
-//                } else robot.stopMotors();
-//            }
+
 
 
             if(gamepad1.dpad_up){
@@ -92,6 +77,11 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamColorSensor;
                 robot.rotateLeft(DRIVE_POWER);
             } else if(gamepad1.right_bumper){
                 robot.rotateRight(DRIVE_POWER);
+            }
+
+
+            if(gamepad2.right_bumper){
+                robot.accelerateInchesForward(1, 4, 123456789);
             }
             //add triggers for speed boosts
 

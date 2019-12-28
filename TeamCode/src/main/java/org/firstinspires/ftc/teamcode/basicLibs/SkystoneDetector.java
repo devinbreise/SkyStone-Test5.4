@@ -91,36 +91,19 @@ public class SkystoneDetector {
                          logString = logString+ recognition.getLabel() + " C:"+ getCenter(recognition) + " / ";
 
                         if(recognition.getLabel()== LABEL_SKYSTONE){
-                            if(getCenter(recognition)< SKYSTONE_BOUNDARY_1){
-                                teamUtil.log("Detect 1 - Finished");
-                                return 1;
-                            }else if(getCenter(recognition)< SKYSTONE_BOUNDARY_2){
-                                teamUtil.log("Detect 2 - Finished");
+                            teamUtil.log("Skystone: " + recognition.getLeft() + ":" + recognition.getRight() + ":" + getCenter(recognition));
+                            if(getCenter(recognition)< 150){
+
                                 return 2;
-                            }else{
-                                teamUtil.log("Detect 3 - Finished");
+                            }else {
                                 return 3;
-
-
                             }
+
                         }
 
-
                     }
-                    teamUtil.log(logString);
 
- /*                   if (rightMostIsSkystone(firstObject)) {
-                        teamUtil.log("PATH 1");
-                        return 1;
-                    } else if (leftMostIsSkystone(secondObject)) {
-                        teamUtil.log("PATH 2");
-                        return 2;
-
-                    } else if (!rightMostIsSkystone(firstObject) && !leftMostIsSkystone(secondObject)){
-                        teamUtil.log("PATH 3");
-                        return 3;
-                    }
-*/
+                return 1;
             } else {
                 teamUtil.log("detectRed -- no updated recognitions");
                 return -1;
@@ -130,8 +113,6 @@ public class SkystoneDetector {
             return -1;
         }
 
-        teamUtil.log("Detect - Finished");
-        return -1;
     }
 
     public int detectBlue() {
@@ -198,7 +179,7 @@ public class SkystoneDetector {
         telemetry.addData("path: ", detectRed());
     }
 
-    public void reportStoneInformation() {
+    public boolean reportStoneInformation() {
         if (tfod != null) {
             // getUpdatedRecognitions() will return null if no new information is available since
             // the last time that call was made.
@@ -210,13 +191,17 @@ public class SkystoneDetector {
 //                    telemetry.addData("rightIsSky?: ", rightMostIsSkystone(recognition));
 //                    telemetry.addData("middleIsSky?: ", leftMostIsSkystone(recognition));
 
-                    telemetry.addData("label:", recognition.getLabel());
+                    teamUtil.log("label:" + recognition.getLabel());
 
-                    telemetry.addData("center: ", getCenter(recognition));
+                    teamUtil.log("center: " + getCenter(recognition));
+                    if(recognition.getLabel()==LABEL_SKYSTONE){
+                        return true;
+                    }
 
                 }
             } //else {teamUtil.log("reportStoneInformation -- no updated recognitions");}
         } else {teamUtil.log("reportStoneInformation -- tfod inactivated");}
+        return false;
     }
 
 

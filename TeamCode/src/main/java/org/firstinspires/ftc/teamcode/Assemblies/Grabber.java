@@ -17,14 +17,14 @@ public class Grabber {
     //far from the robot
     public final double GRABBER_ONE_STOW_POS = 0.84; //1
     public final double GRABBER_ONE_PICKUP_POS = 0.5;
-    public final double GRABBER_ONE_OPEN_POS = 0.27;
+    public final double GRABBER_ONE_OPEN_POS = 0.29;
     public final double GRABBER_ONE_WIDE_CLOSED_POS = 0.135;
     public final double GRABBER_ONE_NARROW_CLOSED_POS = 0.03;
     //
     //    //close to the robot
     public final double GRABBER_TWO_STOW_POS = 0.13;
     public final double GRABBER_TWO_PICKUP_POS = 0.5;
-    public final double GRABBER_TWO_OPEN_POS = 0.68;
+    public final double GRABBER_TWO_OPEN_POS = 0.66;
     public final double GRABBER_TWO_WIDE_CLOSED_POS = 0.815;
     public final double GRABBER_TWO_NARROW_CLOSED_POS = 0.93;
 
