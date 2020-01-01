@@ -1,12 +1,9 @@
 package org.firstinspires.ftc.teamcode.TestCode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 
 import org.firstinspires.ftc.teamcode.Assemblies.RobotDrive;
-import org.firstinspires.ftc.teamcode.basicLibs.teamColorSensor;
 
 
 @TeleOp(name = "TestDriveSystem")
@@ -81,7 +78,19 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamColorSensor;
 
 
             if(gamepad2.right_bumper){
-                robot.accelerateInchesForward(1, 4, 123456789);
+                robot.rotateToHeading180Left();
+            }
+
+            if(gamepad2.dpad_up){
+                robot.accelerateInchesForward(1, 40, 7000);
+            }else if(gamepad2.dpad_down){
+                robot.accelerateInchesBackward(1, 40, 7000);
+            }else if(gamepad2.dpad_left){
+                robot.accelerateInchesLeft(1, 40, 7000);
+            }else if(gamepad2.dpad_right){
+                robot.accelerateInchesRight(1, 40, 7000);
+            } else if(gamepad2.a){
+                robot.stopMotors();
             }
             //add triggers for speed boosts
 

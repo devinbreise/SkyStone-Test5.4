@@ -1,10 +1,10 @@
 package org.firstinspires.ftc.teamcode.CompetitionCode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
 import org.firstinspires.ftc.teamcode.Assemblies.Robot;
+import org.firstinspires.ftc.teamcode.basicLibs.Blinkin;
 import org.firstinspires.ftc.teamcode.basicLibs.SkystoneDetector;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 @Autonomous(name="AutoSkystonePathRed", group ="Competition")
@@ -20,8 +20,12 @@ public class AutoSkystonePathRed extends LinearOpMode {
 
     public void initialize() {
         teamUtil.init(this);
+        teamUtil.theBlinkin.setSignal(Blinkin.Signals.INIT);
+
         robot = new Robot(this);
         robot.init();
+        teamUtil.theBlinkin.setSignal(Blinkin.Signals.RED_AUTO);
+
     }
 
 
@@ -50,25 +54,50 @@ public class AutoSkystonePathRed extends LinearOpMode {
             teamUtil.log("path: " + path);
         }
 
+        detector.shutdownDector();
 
         if (path == 3){
             robot.liftSystem.prepareToGrabNoWait(4000);
             robot.drive.accelerateInchesForward(0.75, 20, 3400);
             robot.drive.moveInchesForward(0.3, 3, 1000);
-            robot.liftSystem.grabAndStowNoWait("wide", 4500);
+            robot.liftSystem.grabAndStowNoWait(4500);
             teamUtil.sleep(750);
-            robot.drive.accelerateInchesBackward(0.6, 7, 2500);
-            teamUtil.sleep(1500);
-
+            robot.drive.accelerateInchesBackward(0.6, 7.8, 2500);
+            teamUtil.sleep(1000);
+            robot.drive.accelerateToSpeedRight(0, 0.75);
             while(!robot.drive.bottomColor.isOnTape()){
-                robot.drive.driveRight(0.50);
+                robot.drive.driveRight(0.75);
             }
-            robot.drive.stopMotors();
             teamUtil.log("found the tape");
+            robot.liftSystem.hoverOverFoundationNoWait(0, Grabber.GrabberRotation.INSIDE, 4000);
+            robot.drive.decelerateInchesRight(0.75, 19);
+            robot.drive.rotateToZero();
+            robot.drive.moveToDistance(robot.drive.frontRightDistance, robot.DISTANCE_TO_FOUNDATION, Robot.AUTOINTAKE_POWER, 5000);
+            robot.drive.moveToDistance(robot.drive.frontRightDistance, robot.DISTANCE_TO_FOUNDATION, Robot.AUTOINTAKE_POWER, 5000);
+
+
+            while((robot.drive.rightDistanceSensor.getDistance()> 17) && (robot.drive.frontRightDistance.getDistance() < robot.MAX_DISTANCE_FOR_AUTO_DROPOFF) && teamUtil.keepGoing(6500 + System.currentTimeMillis()) && teamUtil.theOpMode.opModeIsActive()) {
+                robot.drive.driveRight(0.35);
+                teamUtil.log("FrontLeftDistance: " + robot.drive.frontLeftDistance.getDistance());
+            }
+            robot.drive.moveToDistance(robot.drive.frontRightDistance, robot.DISTANCE_TO_FOUNDATION, Robot.AUTOINTAKE_POWER, 5000);
+            robot.liftSystem.drop();
+            teamUtil.sleep(500);
+            robot.drive.moveInchesBackward(0.5, 7, 4500);
+            robot.liftSystem.putAwayLiftSystemNoWait(5400);
+            robot.drive.rotateTo180();
+            robot.latch.latchMiddle();
+            robot.drive.moveInchesBackward(0.3, 7, 3540);
+            robot.latch.latchDown();
+            robot.liftSystem.grabber.grabberStow();
+            robot.drive.moveInches(20.5,0.75, 0.9, 0.75, 0.9, 4500);
+            robot.drive.moveInches(20.5,0.9, 0.75, 0.9, 0.75, 4500);
+            robot.latch.latchMiddle();
+            teamUtil.sleep(550);
+            robot.drive.accelerateInchesRight(1, 38, 5876);
 
 
         }
-
 
 //        robot.drive.setAllMotorsWithEncoder();
 //        robot.drive.moveInchesForward(0.5, 10, 4500);

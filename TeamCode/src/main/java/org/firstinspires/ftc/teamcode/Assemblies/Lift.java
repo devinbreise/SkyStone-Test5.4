@@ -21,7 +21,7 @@ public class Lift {
     private DigitalChannel liftUpMagSwitch1, liftUpMagSwitch2;
 
     // Constants for the base lift (when using the encoder)
-    private final int LIFT_BASE_TOP_LIMIT_ENCODER_CLICKS = 2950;
+    private final int LIFT_BASE_TOP_LIMIT_ENCODER_CLICKS = 2875;
     private final int LIFT_BASE_SAFE_TO_ELEVATE = 2000;
 
     // Constants for the elevator spindles
@@ -32,7 +32,7 @@ public class Lift {
     public final int SAFE_TO_ROTATE = LEVEL_0 + LEVEL_INCREMENT;
 
     private final double TENSION_POWER = 0.098;
-    private final int MAX_LEVELS = 6;
+    private final int MAX_LEVELS = 10;
 
 
     enum LiftState{
@@ -108,7 +108,9 @@ public class Lift {
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public boolean liftBaseIsUp() {
-        return (!liftUpMagSwitch1.getState()) || (!liftUpMagSwitch2.getState());
+//        return (!liftUpMagSwitch1.getState()) || (!liftUpMagSwitch2.getState());
+        return (liftBase.getCurrentPosition() > (.95 * LIFT_BASE_TOP_LIMIT_ENCODER_CLICKS));
+
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////

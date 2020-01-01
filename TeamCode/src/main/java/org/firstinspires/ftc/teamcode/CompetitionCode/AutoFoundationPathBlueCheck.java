@@ -9,6 +9,7 @@ import org.firstinspires.ftc.teamcode.Assemblies.Lift;
 import org.firstinspires.ftc.teamcode.Assemblies.LiftSystem;
 import org.firstinspires.ftc.teamcode.Assemblies.Robot;
 import org.firstinspires.ftc.teamcode.Assemblies.RobotDrive;
+import org.firstinspires.ftc.teamcode.basicLibs.Blinkin;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 @Autonomous(name="AutoFoundationPathBlueCheck", group ="Competition")
 public class AutoFoundationPathBlueCheck extends LinearOpMode {
@@ -17,8 +18,12 @@ public class AutoFoundationPathBlueCheck extends LinearOpMode {
 
     public void initialize() {
         teamUtil.init(this);
+        teamUtil.theBlinkin.setSignal(Blinkin.Signals.INIT);
+
         robot = new Robot(this);
         robot.init();
+        teamUtil.theBlinkin.setSignal(Blinkin.Signals.BLUE_AUTO);
+
     }
 
     @Override

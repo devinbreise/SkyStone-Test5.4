@@ -116,10 +116,10 @@ public class RobotTeleop extends OpMode {
             liftSystem.prepareToGrabNoWait(9000);
         }
         if(gamepad2.right_trigger>0.5){
-            liftSystem.grabAndStowNoWait("narrow", 7000);
+            liftSystem.grabAndStowNoWait(7000);
         }
         if(gamepad2.right_bumper){
-            liftSystem.grabAndStowNoWait("wide", 5000);
+            liftSystem.grabAndStowNoWait(5000);
         }
         if(gamepad2.right_stick_button){
             liftSystem.drop();

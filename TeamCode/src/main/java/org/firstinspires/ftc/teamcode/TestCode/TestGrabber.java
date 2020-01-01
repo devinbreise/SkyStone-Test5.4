@@ -4,7 +4,6 @@ package org.firstinspires.ftc.teamcode.TestCode;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
 import org.firstinspires.ftc.teamcode.basicLibs.TeamGamepad;
@@ -35,7 +34,7 @@ public class TestGrabber extends OpMode {
             grabber.closeGrabberWide();
         }
         if (gamepad2.a){
-            grabber.closeGrabberNarrow();
+            grabber.grabberRotatePos();
         }
         if(gamepad2.dpad_up){
             grabber.rotate(Grabber.GrabberRotation.OUTSIDE);

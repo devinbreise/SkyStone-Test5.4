@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 
 @TeleOp(name = "findServoPositions")
-@Disabled
+
 public class findServoPositions extends OpMode {
     public static final double MAJOR_INCREMENT = 0.05;
     public static final double MINOR_INCREMENT = 0.01;

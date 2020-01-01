@@ -31,6 +31,9 @@ public class Blinkin {
         LEVEL_5,
         LEVEL_6,
 
+        RED_AUTO,
+        BLUE_AUTO,
+
         CURIOSITY,
     }
 
@@ -66,30 +69,37 @@ public class Blinkin {
                 break;
 
             case LEVEL_0:
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.VIOLET);
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
                 break;
             case LEVEL_1:
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE_VIOLET);
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
                 break;
             case LEVEL_2:
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.DARK_BLUE);
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.ORANGE);
                 break;
             case LEVEL_3:
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
                 break;
             case LEVEL_4:
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.SKY_BLUE);
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
                 break;
             case LEVEL_5:
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.AQUA);
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
                 break;
             case LEVEL_6:
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE_GREEN);
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.VIOLET);
                 break;
 
+            case RED_AUTO:
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.SINELON_LAVA_PALETTE);
+                break;
+
+            case BLUE_AUTO:
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.SINELON_OCEAN_PALETTE);
+                break;
 
             case CURIOSITY:
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.FIRE_LARGE);
                 break;
 
         }

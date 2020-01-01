@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
 import org.firstinspires.ftc.teamcode.Assemblies.Robot;
+import org.firstinspires.ftc.teamcode.basicLibs.Blinkin;
 import org.firstinspires.ftc.teamcode.basicLibs.SkystoneDetector;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 @Autonomous(name="AutoSkystonePathBlueShort", group ="Competition")
@@ -18,8 +19,12 @@ public class AutoSkystonePathBlueShort extends LinearOpMode {
 
     public void initialize() {
         teamUtil.init(this);
+        teamUtil.theBlinkin.setSignal(Blinkin.Signals.INIT);
+
         robot = new Robot(this);
         robot.init();
+        teamUtil.theBlinkin.setSignal(Blinkin.Signals.BLUE_AUTO);
+
     }
 
 
@@ -68,7 +73,7 @@ public class AutoSkystonePathBlueShort extends LinearOpMode {
 
             robot.drive.moveInchesForward(0.25, 8, 5000);
             robot.drive.moveInchesBackward(0.25, 1.125, 3000);
-            robot.liftSystem.grabAndStowNoWait("wide", 7000);
+            robot.liftSystem.grabAndStowNoWait(7000);
 
             teamUtil.sleep(1000);
 
@@ -100,7 +105,7 @@ public class AutoSkystonePathBlueShort extends LinearOpMode {
 
             robot.drive.moveInchesForward(0.25, 8, 5000);
             robot.drive.moveInchesBackward(0.25, 1.125, 3000);
-            robot.liftSystem.grabAndStowNoWait("wide", 7000);
+            robot.liftSystem.grabAndStowNoWait(7000);
 
             teamUtil.sleep(1000);
 
@@ -133,7 +138,7 @@ public class AutoSkystonePathBlueShort extends LinearOpMode {
 
             robot.drive.moveInchesForward(0.25, 8, 5000);
             robot.drive.moveInchesBackward(0.25, 1.125, 3000);
-            robot.liftSystem.grabAndStowNoWait("wide", 7000);
+            robot.liftSystem.grabAndStowNoWait(7000);
 
             teamUtil.sleep(1000);
 

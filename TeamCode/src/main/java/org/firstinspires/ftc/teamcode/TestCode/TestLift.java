@@ -119,7 +119,7 @@ public class TestLift extends LinearOpMode {
                 liftSystem.prepareToGrabNoWait(7000);
             }
             if (gamepad2.b) {
-                liftSystem.grabAndStowNoWait("wide", 7000);
+                liftSystem.grabAndStowNoWait(7000);
             }
             if (gamepad2.x) {
                 liftSystem.hoverOverFoundationNoWait(targetLevel, Grabber.GrabberRotation.INSIDE, 7000);
@@ -128,14 +128,14 @@ public class TestLift extends LinearOpMode {
                 liftSystem.lift.moveElevatorToBottomNoWait();
             }
             if (gamepad2.left_bumper) {
-                liftSystem.grab("wide",5000);
+                liftSystem.grab(5000);
                 //while (gamepad2.b) { }
             }
             if (gamepad2.dpad_up) {
                 liftSystem.grabber.openGrabber();
             }
             if (gamepad2.left_bumper) {
-                liftSystem.grab("wide",5000);
+                liftSystem.grab(5000);
                 //while (gamepad2.b) { }
             }
             if (gamepad2.dpad_down) {

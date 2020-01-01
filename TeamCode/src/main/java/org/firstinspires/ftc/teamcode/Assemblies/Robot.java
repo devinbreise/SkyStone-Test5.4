@@ -5,6 +5,7 @@ package org.firstinspires.ftc.teamcode.Assemblies;
         import com.qualcomm.robotcore.hardware.HardwareMap;
 
         import org.firstinspires.ftc.robotcore.external.Telemetry;
+        import org.firstinspires.ftc.teamcode.basicLibs.Blinkin;
         import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 // A class to encapsulate the entire robot.
@@ -23,8 +24,8 @@ public class Robot {
     Telemetry telemetry;
     boolean timedOut = false;
 
-    private final int MIN_DISTANCE_FOR_AUTO_PICKUP = 10;
-    private final int MAX_DISTANCE_FOR_AUTO_DROPOFF = 10;
+    public final int MIN_DISTANCE_FOR_AUTO_PICKUP = 0;
+    public final int MAX_DISTANCE_FOR_AUTO_DROPOFF = 10;
 
     public Robot(LinearOpMode opMode){
         teamUtil.log ("Constructing Robot");
@@ -95,7 +96,7 @@ public class Robot {
             teamUtil.sleep(100);
         }
 
-        liftSystem.grabAndStowNoWait("wide", 7000); // return control to driver
+        liftSystem.grabAndStowNoWait(7000); // return control to driver
         teamUtil.sleep(1000); // after a short pause to make sure we have picked up the stone
 
     }
@@ -124,7 +125,6 @@ public class Robot {
             drive.moveInchesLeft(AUTOINTAKE_SIDEWAYS_POWER, 1, 8000);
             //drive.moveInchesLeft(AUTOINTAKE_SIDEWAYS_POWER, 5, timeOutTime - System.currentTimeMillis());
 
-            liftSystem.drop();
             // line up using the front right sensor
         }
 
@@ -156,7 +156,6 @@ public class Robot {
         drive.moveInchesRight(AUTOINTAKE_SIDEWAYS_POWER, 1, 8000);
         //drive.moveInchesLeft(AUTOINTAKE_SIDEWAYS_POWER, 5, timeOutTime - System.currentTimeMillis());
 
-        liftSystem.drop();
         // line up using the front right sensor
     }
     }

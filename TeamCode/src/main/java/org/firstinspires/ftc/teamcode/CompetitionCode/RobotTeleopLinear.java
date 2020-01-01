@@ -21,13 +21,16 @@ public class RobotTeleopLinear extends LinearOpMode {
     Robot robot;
 
     public void initialize() {
+
         teamUtil.init(this);
         teamUtil.theBlinkin.setSignal(Blinkin.Signals.INIT);
+
         robot = new Robot(this);
 
         teamGamePad = new TeamGamepad(this);
 
         robot.init();
+        robot.latch.latchUp();
         teamUtil.theBlinkin.setSignal(Blinkin.Signals.READY_TO_START);
         teamUtil.initPerf();
 
@@ -82,11 +85,11 @@ public class RobotTeleopLinear extends LinearOpMode {
             }
 
             if (gamepad1.right_bumper && gamepad1.right_trigger > 0.5) {
-                robot.liftSystem.grab("wide", 4000);
+                robot.liftSystem.grab( 4000);
             }
 
             if (gamepad1.left_bumper && gamepad1.right_trigger > 0.5) {
-                robot.liftSystem.grabAndStowNoWait("wide", 4000);
+                robot.liftSystem.grabAndStowNoWait(4000);
             }
 
             if(gamepad1.x){
@@ -98,9 +101,6 @@ public class RobotTeleopLinear extends LinearOpMode {
                 robot.drive.moveInchesForward(0.15, 0.5, 2000);
             }
 
-            if(gamepad1.a){
-                robot.liftSystem.grab("narrow", 4000);
-            }
 
 /////////////////////////////////////////////////////////////////////////
             //this code is for the foundation latch
@@ -111,8 +111,12 @@ public class RobotTeleopLinear extends LinearOpMode {
                 robot.latch.latchUp();
             }
 
-            if (gamepad1.dpad_left || gamepad1.dpad_right) {
+            if (gamepad1.dpad_left) {
                 robot.latch.latchMiddle();
+            }
+
+            if (gamepad1.dpad_right) {
+                robot.latch.latchPushbot();
             }
 /////////////////////////////////////////////////////////////////////
             //this code is for the lift system assembly
@@ -182,24 +186,24 @@ public class RobotTeleopLinear extends LinearOpMode {
             // teamUtil.trackPerf();
 
             if (level == 0) {
-                teamUtil.theBlinkin.setSignal(Blinkin.Signals.CURIOSITY);
-            } else if (level == 1) {
                 teamUtil.theBlinkin.setSignal(Blinkin.Signals.LEVEL_0);
-
-            } else if (level == 2) {
+            } else if (level == 1) {
                 teamUtil.theBlinkin.setSignal(Blinkin.Signals.LEVEL_1);
 
-            } else if (level == 3) {
+            } else if (level == 2) {
                 teamUtil.theBlinkin.setSignal(Blinkin.Signals.LEVEL_2);
 
-            } else if (level == 4) {
+            } else if (level == 3) {
                 teamUtil.theBlinkin.setSignal(Blinkin.Signals.LEVEL_3);
 
-            } else if (level == 5) {
+            } else if (level == 4) {
                 teamUtil.theBlinkin.setSignal(Blinkin.Signals.LEVEL_4);
 
-            } else if (level == 6) {
+            } else if (level == 5) {
                 teamUtil.theBlinkin.setSignal(Blinkin.Signals.LEVEL_5);
+
+            } else if (level == 6) {
+                teamUtil.theBlinkin.setSignal(Blinkin.Signals.LEVEL_6);
 
             }
 

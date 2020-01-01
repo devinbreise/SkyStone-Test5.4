@@ -46,7 +46,7 @@ public class LiftSystem {
         lift.initLift();
         if (!lift.liftBaseIsDown()) {
             //move the grabber to a set position where it is out of the way for the lift base to go down
-            grabber.closeGrabberNarrow();
+            grabber.grabberRotatePos();
             teamUtil.sleep(750);
         }
         // move the lift down
@@ -131,7 +131,7 @@ public class LiftSystem {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // grab a stone and stow the lift for travel
-    public void grabAndStow(String grabberPos, long timeOut){
+    public void grabAndStow(long timeOut){
 //        if (!lift.liftBaseIsUp()) {
 //            teamUtil.log("WARNING: grabAndStow called when lift was not up");
 //            state = LiftSystemState.IDLE;
@@ -142,18 +142,9 @@ public class LiftSystem {
         long timeOutTime= System.currentTimeMillis()+timeOut;
         timedOut = false;
         lift.moveElevatorToBottom();  // dip down for the grab
-        if(grabberPos.equals("narrow")){
-            grabber.closeGrabberNarrow();
-            teamUtil.log("grabbed");
 
-        }else if(grabberPos.equals("wide")){
-            grabber.closeGrabberWide();
-            teamUtil.log("grabbed");
-        }else{
-            teamUtil.log("BAD INPUT to grab and Stow");
-            state = LiftSystemState.IDLE;
-            return;
-        }
+        grabber.closeGrabberWide();
+
         // Give the servos enough time to grab the stone
         teamUtil.sleep(750);
         lift.moveLiftBaseDownNoWait(0.5, timeOutTime - System.currentTimeMillis());
@@ -175,14 +166,14 @@ public class LiftSystem {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public void grabAndStowNoWait (final String grabberPos, final long timeOut) {
+    public void grabAndStowNoWait (final long timeOut) {
         if (!isMoving()) {
             state = LiftSystemState.GRAB_AND_STOW;
             teamUtil.log("Launching Thread to grab and Stow");
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    grabAndStow(grabberPos, timeOut);
+                    grabAndStow(timeOut);
                 }
             });
             thread.start();
@@ -191,7 +182,7 @@ public class LiftSystem {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // dip down, grab a stone and then return to level 0
-    public void grab(String grabberPos, long timeOut){
+    public void grab(long timeOut){
         state = LiftSystemState.GRAB;
         teamUtil.log("grab");
         if (!lift.liftBaseIsUp()) {
@@ -202,17 +193,9 @@ public class LiftSystem {
         long timeOutTime= System.currentTimeMillis()+timeOut;
         timedOut = false;
         lift.moveElevatorToBottom();  // dip down for the grab
-        if(grabberPos.equals("narrow")){
-            grabber.closeGrabberNarrow();
-            teamUtil.log("grabbed");
-        }else if(grabberPos.equals("wide")){
-            grabber.closeGrabberWide();
-            teamUtil.log("grabbed");
-        }else{
-            teamUtil.log("BAD INPUT to grab and Stow");
-            state = LiftSystemState.IDLE;
-            return;
-        }
+
+        grabber.closeGrabberWide();
+
         // Give the servos enough time to grab the stone
         teamUtil.sleep(500);
         lift.moveElevator(lift.HOVER_FOR_GRAB, timeOut); // a little closer to the ground then level 0

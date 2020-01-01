@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.Assemblies.Latch;
 import org.firstinspires.ftc.teamcode.Assemblies.LiftSystem;
 import org.firstinspires.ftc.teamcode.Assemblies.Robot;
 import org.firstinspires.ftc.teamcode.Assemblies.RobotDrive;
+import org.firstinspires.ftc.teamcode.basicLibs.Blinkin;
 import org.firstinspires.ftc.teamcode.basicLibs.SkystoneDetector;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 @Autonomous(name="AutoSkystonePathBlue", group ="Competition")
@@ -22,8 +23,12 @@ public class AutoSkystonePathBlue extends LinearOpMode {
 
     public void initialize() {
         teamUtil.init(this);
+        teamUtil.theBlinkin.setSignal(Blinkin.Signals.INIT);
+
         robot = new Robot(this);
         robot.init();
+        teamUtil.theBlinkin.setSignal(Blinkin.Signals.BLUE_AUTO);
+
     }
 
 
@@ -55,7 +60,7 @@ public class AutoSkystonePathBlue extends LinearOpMode {
 
             robot.drive.rotateToHeading(0);
             robot.drive.moveInchesForward(0.5, 8,5000);
-            robot.liftSystem.grabAndStow("wide", 7000);
+            robot.liftSystem.grabAndStow(7000);
             robot.drive.moveInchesBackward(0.5, 7,5000);
 
 

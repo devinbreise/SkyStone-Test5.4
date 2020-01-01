@@ -12,10 +12,12 @@ public class Latch {
     //NEED TO INTRODUCE STATE MACHINE(MAKE SURE GRABBER ONE WORKS, THEN COPY-PASTE
 
     public static final double LATCH_ONE_UP = 0.3;
+    public static final double LATCH_ONE_PUSHBOT = 0.53;
     public static final double LATCH_ONE_MIDDLE = 0.64;
     public static final double LATCH_ONE_DOWN = 0.72;
 
     public static final double LATCH_TWO_UP = 0.73;
+    public static final double LATCH_TWO_PUSHBOT = 0.42;
     public static final double LATCH_TWO_MIDDLE = 0.31;
     public static final double LATCH_TWO_DOWN = 0.18;
 
@@ -32,7 +34,6 @@ public class Latch {
     public Latch(HardwareMap theHardwareMap, Telemetry theTelemetry) {
         hardwareMap = theHardwareMap;
         telemetry = theTelemetry;
-
     }
 
     public void initLatch() {
@@ -40,8 +41,6 @@ public class Latch {
         latchTwo = hardwareMap.servo.get("latchTwo");
         latchMiddle();
         latchIsUp = true;
-
-
     }
 
     public void toggleLatch() {
@@ -52,14 +51,12 @@ public class Latch {
             latchUp();
             latchIsUp = true;
         }
-
     }
 
     public void latchUp() {
         latchOne.setPosition(LATCH_ONE_UP);
         latchTwo.setPosition(LATCH_TWO_UP);
         telemetry.addData("latch is up", "");
-
     }
 
 
@@ -67,14 +64,20 @@ public class Latch {
         latchOne.setPosition(LATCH_ONE_DOWN);
         latchTwo.setPosition(LATCH_TWO_DOWN);
         telemetry.addData("latch is down", "");
-
     }
+
     public void latchMiddle() {
         latchOne.setPosition(LATCH_ONE_MIDDLE);
         latchTwo.setPosition(LATCH_TWO_MIDDLE);
         telemetry.addData("latch is in middle position", "");
-
     }
+
+    public void latchPushbot() {
+        latchOne.setPosition(LATCH_ONE_PUSHBOT);
+        latchTwo.setPosition(LATCH_TWO_PUSHBOT);
+        telemetry.addData("latch is in pushbot position", "");
+    }
+
     public void latchTelemetry() {
         telemetry.addData("latchOne: ", latchOne.getPosition());
         telemetry.addData("latchTwo: ", latchTwo.getPosition());

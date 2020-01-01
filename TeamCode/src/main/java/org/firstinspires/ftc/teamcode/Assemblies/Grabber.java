@@ -4,7 +4,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.basicLibs.HiTecServo;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 
@@ -19,14 +18,15 @@ public class Grabber {
     public final double GRABBER_ONE_PICKUP_POS = 0.5;
     public final double GRABBER_ONE_OPEN_POS = 0.29;
     public final double GRABBER_ONE_WIDE_CLOSED_POS = 0.135;
-    public final double GRABBER_ONE_NARROW_CLOSED_POS = 0.03;
+    public final double GRABBER_ONE_ROTATE_POS = 0.09;
     //
     //    //close to the robot
+    public final double GRABBER_ONE_CAPSTONE_RELEASE = 0.07;
     public final double GRABBER_TWO_STOW_POS = 0.13;
     public final double GRABBER_TWO_PICKUP_POS = 0.5;
     public final double GRABBER_TWO_OPEN_POS = 0.66;
     public final double GRABBER_TWO_WIDE_CLOSED_POS = 0.815;
-    public final double GRABBER_TWO_NARROW_CLOSED_POS = 0.93;
+    public final double GRABBER_TWO_ROTATE_POS = 0.7;
 
     public final double rotate_outside = 0.79;
     public final double rotate_narrow = 0.476;
@@ -41,7 +41,7 @@ public class Grabber {
         GRABBER_NARROW_DROP,
         GRABBER_OPEN,
         GRABBER_CLOSED_WIDE,
-        GRABBER_CLOSED_NARROW,
+        GRABBER_ROTATE_POS,
         GRABBER_PICKUP,
         GRABBER_UNKNOWN
     }
@@ -107,23 +107,23 @@ public class Grabber {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public void closeGrabberNarrow() {
-        grabberOne.setPosition(GRABBER_ONE_NARROW_CLOSED_POS);
-        grabberTwo.setPosition(GRABBER_TWO_NARROW_CLOSED_POS);
-        grabberState = GrabberState.GRABBER_CLOSED_NARROW;
+    public void grabberRotatePos() {
+        grabberOne.setPosition(GRABBER_ONE_ROTATE_POS);
+        grabberTwo.setPosition(GRABBER_TWO_ROTATE_POS);
+        grabberState = GrabberState.GRABBER_ROTATE_POS;
 
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public void closeGrabberToggle() {
-        if (grabberState == GrabberState.GRABBER_OPEN) {
-            closeGrabberWide();
-        } else if (grabberState == GrabberState.GRABBER_CLOSED_WIDE) {
-            closeGrabberNarrow();
-        } else if (grabberState == GrabberState.GRABBER_CLOSED_NARROW) {
-            closeGrabberWide();
-        }
-    }
+//    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//    public void closeGrabberToggle() {
+//        if (grabberState == GrabberState.GRABBER_OPEN) {
+//            closeGrabberWide();
+//        } else if (grabberState == GrabberState.GRABBER_CLOSED_WIDE) {
+//            grabberRotatePos();
+//        } else if (grabberState == GrabberState.GRABBER_ROTATE_POS) {
+//            closeGrabberWide();
+//        }
+//    }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void narrowDrop(){
@@ -145,7 +145,7 @@ public class Grabber {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public boolean isSafeToRotate() {
-        return grabberState == GrabberState.GRABBER_CLOSED_WIDE || grabberState == GrabberState.GRABBER_CLOSED_NARROW;
+        return grabberState == GrabberState.GRABBER_CLOSED_WIDE || grabberState == GrabberState.GRABBER_ROTATE_POS;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
