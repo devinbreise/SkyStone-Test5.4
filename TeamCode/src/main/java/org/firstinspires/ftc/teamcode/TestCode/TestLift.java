@@ -84,29 +84,19 @@ public class TestLift extends LinearOpMode {
             }
             if (gamepad1.y) {
                 liftSystem.lift.moveElevatorToLevel(targetLevel, 2000);
-                //while (gamepad2.x) { }
 
-    /*            telemetry.addData("lifting to level 0", 0);
-                telemetry.update();
-                rSpindle.setTargetPosition(LEVEL_0);
-                lSpindle.setTargetPosition(LEVEL_0);
-                telemetry.addData("L Target:", lSpindle.getTargetPosition());
-                telemetry.addData("R Target:", rSpindle.getTargetPosition());
-                rSpindle.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                lSpindle.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                telemetry.update();
-                //while (gamepad2.x){};
-
-                rSpindle.setPower(.99);
-                lSpindle.setPower(.99);
-                while(lSpindle.isBusy()){
-                    telemetry.addData("lifting L:", lSpindle.getCurrentPosition());
-                    telemetry.addData("lifting R:", rSpindle.getCurrentPosition());
-                    telemetry.update();
-                    teamUtil.log("lSpindle:"+lSpindle.getCurrentPosition());
-               }
-    */
             }
+            if (gamepad1.left_stick_y < -0.5) {
+                liftSystem.lift.moveElevatorUpSlowly();
+            } else  if (gamepad1.left_stick_y > 0.5) {
+                liftSystem.lift.moveElevatorDownSlowly();
+            } else {
+                liftSystem.lift.holdElevator(); // this will stop any other elevator movement dead in its tracks...
+            }
+
+
+
+
             if (gamepad2.dpad_left) {
                 targetLevel--;
                 teamUtil.sleep(500);

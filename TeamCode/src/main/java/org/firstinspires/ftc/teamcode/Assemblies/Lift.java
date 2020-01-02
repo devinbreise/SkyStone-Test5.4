@@ -26,7 +26,8 @@ public class Lift {
 
     // Constants for the elevator spindles
     public final int BOTTOM = 0;
-    public final int HOVER_FOR_GRAB = 0; // Not Tested
+    private final int TOP = 2000;
+    public final int HOVER_FOR_GRAB = 0; // this is about 1" up from bottom
     private final int LEVEL_0 = 370; //was 430
     private final int LEVEL_INCREMENT = 560;
     public final int SAFE_TO_ROTATE = LEVEL_0 + LEVEL_INCREMENT;
@@ -440,6 +441,23 @@ public class Lift {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Stop the elevator wherever it is and hold
+    public void holdElevator() {
+        // if we are not moving, nothing to do
+        if (elevatorState == ElevatorState.HOLDING || elevatorState == ElevatorState.IDLE) {
+            return;
+        }
+        rSpindle.setTargetPosition(rSpindle.getCurrentPosition());
+        lSpindle.setTargetPosition(lSpindle.getCurrentPosition());
+        rSpindle.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        lSpindle.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rSpindle.setPower(.99);
+        lSpindle.setPower(.99);
+        elevatorState = ElevatorState.HOLDING;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Move up to a specific position as fast as possible
     // This will only work if you are moving the elevator up...
     private void moveElevatorUp (int position, long timeOut) {
         if(!isSafeToElevate()) {
@@ -481,7 +499,31 @@ public class Lift {
 
     }
 
+    // start the elevator moving up slowly, presumably under manual control
+    // This expects to be called over and over while a control is being pressed so
+    // that we can stop if we are too high!
+    public void moveElevatorUpSlowly() {
+        if(!isSafeToElevate()) {
+            teamUtil.log("ERROR: called moveElevatorUpSlowly while not safe to elevate");
+            return;
+        }
+        // Don't go beyond the top or we will break the strings
+        if (lSpindle.getCurrentPosition() >= TOP || rSpindle.getCurrentPosition() >= TOP) {
+            holdElevator();
+            return;
+        }
+
+        elevatorState = ElevatorState.MOVING_UP;
+        teamUtil.log("Moving Elevator UP slowly: ");
+        teamUtil.log("firstSpindlePosition: " + rSpindle.getCurrentPosition());
+        rSpindle.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lSpindle.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rSpindle.setPower(.2);
+        lSpindle.setPower(.2);
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Move down to a specific position quickly
     private void moveElevatorDown(int position, long timeOut) {
         if(!isSafeToElevate()) {
             teamUtil.log("ERROR: called moveElevator while not safe to elevate");
@@ -534,6 +576,30 @@ public class Lift {
         } else {
             teamUtil.log("Moving Elevator DOWN - Finished");
         }
+    }
+
+    // start the elevator moving down slowly, presumably under manual control
+    // This expects to be called over and over while a control is being pressed so
+    // that we can stop if we reach the bottom!
+    public void moveElevatorDownSlowly() {
+        if(!isSafeToElevate()) {
+            teamUtil.log("ERROR: called moveElevatorDownSlowly while not safe to elevate");
+            return;
+        }
+        if (lSpindle.getCurrentPosition() <= BOTTOM || rSpindle.getCurrentPosition() <= BOTTOM) {
+            rSpindle.setPower(0);
+            lSpindle.setPower(0);
+            elevatorState = ElevatorState.IDLE;
+            return;
+        }
+
+        elevatorState = ElevatorState.MOVING_DOWN;
+        teamUtil.log("Moving Elevator DOWN slowly: ");
+        teamUtil.log("firstSpindlePosition: " + rSpindle.getCurrentPosition());
+        rSpindle.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lSpindle.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rSpindle.setPower(-.2);
+        lSpindle.setPower(-.2);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
