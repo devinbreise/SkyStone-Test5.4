@@ -15,11 +15,11 @@ public class goBuildAServo2000 {
 
     public void goTo (int degrees){
         if (theServo == null){
-            telemetry.addData("ERROR", "you have not initialized");
+            teamUtil.telemetry.addData("ERROR", "you have not initialized");
             return;
         }
         if (degrees < 0 || degrees > 250){
-            telemetry.addData("ERROR", "Servo degrees out of range");
+            teamUtil.telemetry.addData("ERROR", "Servo degrees out of range");
             return;
         }
         theServo.setPosition(0.004 * degrees);

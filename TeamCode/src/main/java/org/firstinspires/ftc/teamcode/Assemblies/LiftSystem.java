@@ -204,6 +204,33 @@ public class LiftSystem {
         state = LiftSystemState.IDLE;
     }
 
+    public void capAndGrab(long timeOut){
+        state = LiftSystemState.GRAB;
+        teamUtil.log("cap & grab");
+        if (!lift.liftBaseIsUp()) {
+            teamUtil.log("WARNING: cap & grab called when lift was not up");
+            state = LiftSystemState.IDLE;
+            return;
+        }
+        long timeOutTime= System.currentTimeMillis()+timeOut;
+        timedOut = false;
+        lift.moveElevatorToBottom();  // dip down for the grab
+
+        // Give the servos enough time to grab the stone
+        grabber.closeGrabberWide();
+        teamUtil.sleep(500);
+        grabber.dropCapstone();
+        // Give the servos enough time to cap
+        teamUtil.sleep(1250);
+        grabber.closeGrabberWide();
+        // Give the servos enough time to grab the stone
+        teamUtil.sleep(1250);
+        lift.moveElevator(lift.HOVER_FOR_GRAB, timeOut); // a little closer to the ground then level 0
+        //lift.moveElevatorToLevel(0, timeOut);
+        teamUtil.log("cap & grab - Finished");
+        state = LiftSystemState.IDLE;
+    }
+
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // get ready to drop a stone (presumbably being held when this is called) at the specified level
@@ -270,7 +297,7 @@ public class LiftSystem {
 
         // this is a bit dangerous...we are trusting that the liftsystem is in a position where we can do these
         //  two servo movements...
-        grabber.openGrabber();
+        grabber.grabberRotatePos();
         teamUtil.sleep(750);
         grabber.rotate(Grabber.GrabberRotation.INSIDE);
         lift.moveElevatorToBottom();
@@ -295,11 +322,11 @@ public class LiftSystem {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // TODO maybe dip just an inch or so before dropping?
     public void drop(){
-        grabber.openGrabber();
+        grabber.grabberPickup();
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public void liftDown(){
+    public void elevatorDown(){
         lift.moveElevatorToBottomNoWait();
     }
 

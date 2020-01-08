@@ -21,12 +21,12 @@ public class Lift {
     private DigitalChannel liftUpMagSwitch1, liftUpMagSwitch2;
 
     // Constants for the base lift (when using the encoder)
-    private final int LIFT_BASE_TOP_LIMIT_ENCODER_CLICKS = 2875;
+    private final int LIFT_BASE_TOP_LIMIT_ENCODER_CLICKS = 2725;
     private final int LIFT_BASE_SAFE_TO_ELEVATE = 2000;
 
     // Constants for the elevator spindles
     public final int BOTTOM = 0;
-    private final int TOP = 2000;
+    private final int TOP = 5970;
     public final int HOVER_FOR_GRAB = 0; // this is about 1" up from bottom
     private final int LEVEL_0 = 370; //was 430
     private final int LEVEL_INCREMENT = 560;
@@ -36,18 +36,21 @@ public class Lift {
     private final int MAX_LEVELS = 10;
 
 
-    enum LiftState{
+    enum LiftState {
         IDLE,
         MOVING_UP,
         MOVING_DOWN,
     }
 
-    enum ElevatorState{
+    enum ElevatorState {
         IDLE, // bottom
         MOVING_UP,
         HOLDING,
         MOVING_DOWN,
+        MANUAL_UP,
+        MANUAL_DOWN
     }
+
     private LiftState liftState = LiftState.IDLE;
     private ElevatorState elevatorState = ElevatorState.IDLE;
 
@@ -57,14 +60,14 @@ public class Lift {
     boolean timedOut = false;
 
 
-    public Lift(HardwareMap theHardwareMap, Telemetry theTelmetry){
-        teamUtil.log ("Constructing Lift");
+    public Lift(HardwareMap theHardwareMap, Telemetry theTelmetry) {
+        teamUtil.log("Constructing Lift");
         hardwareMap = theHardwareMap;
         telemetry = theTelmetry;
     }
 
-    public void initLift(){
-        teamUtil.log ("Initializing Lift");
+    public void initLift() {
+        teamUtil.log("Initializing Lift");
         spindlesCalibrated = false;
         baseCalibrated = false;
         safeToElevate = false;
@@ -93,7 +96,7 @@ public class Lift {
 
     // call after initialization to calibrate the base lift and spindles.
     // This may move the liftbase to the bottom
-    public void calibrate () {
+    public void calibrate() {
         //TODO
     }
 
@@ -107,6 +110,7 @@ public class Lift {
     public boolean liftBaseIsDown() {
         return liftDownLimit.isPressed();
     }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public boolean liftBaseIsUp() {
 //        return (!liftUpMagSwitch1.getState()) || (!liftUpMagSwitch2.getState());
@@ -115,13 +119,13 @@ public class Lift {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public boolean isSafeToElevate () {
+    public boolean isSafeToElevate() {
         return safeToElevate || (baseCalibrated && spindlesCalibrated && liftBaseIsUp());
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // true if the lift is in a position that supports rotation...the paddle positions might still be a problem.
-    public boolean isSafeToRotate () {
+    public boolean isSafeToRotate() {
         if (liftBaseIsDown()) {
             return true;
         } else if (liftBaseIsUp()) {
@@ -141,12 +145,13 @@ public class Lift {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public void shutDownLiftBase(){
+    public void shutDownLiftBase() {
         liftBase.setPower(0);
     }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public void liftBaseDown(){
-        if(liftDownLimit.isPressed()){
+    public void liftBaseDown() {
+        if (liftDownLimit.isPressed()) {
             shutDownLiftBase();
             liftBase.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             safeToElevate = false;
@@ -159,18 +164,18 @@ public class Lift {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public double getBasePosition(){
+    public double getBasePosition() {
         return liftBase.getCurrentPosition();
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    private void moveBaseDownOriginal(double power, long timeOut){
-        long timeOutTime= System.currentTimeMillis()+timeOut;
+    private void moveBaseDownOriginal(double power, long timeOut) {
+        long timeOutTime = System.currentTimeMillis() + timeOut;
         timedOut = false;
-        teamUtil.log("Limit Switch:"+liftDownLimit.isPressed());
+        teamUtil.log("Limit Switch:" + liftDownLimit.isPressed());
 
-        while(!liftDownLimit.isPressed() && teamUtil.keepGoing(timeOutTime)){
-            teamUtil.log("Lift Base Encoder:"+liftBase.getCurrentPosition());
+        while (!liftDownLimit.isPressed() && teamUtil.keepGoing(timeOutTime)) {
+            teamUtil.log("Lift Base Encoder:" + liftBase.getCurrentPosition());
             liftBaseDown();
         }
         shutDownLiftBase();
@@ -191,22 +196,22 @@ public class Lift {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    private void moveBaseDownFaster(double power, long timeOut){
+    private void moveBaseDownFaster(double power, long timeOut) {
         if (!liftBaseIsUp()) { // should not be called if we are not at the top
             teamUtil.log("ERROR: moveBaseDownFaster called when base not at top");
             liftState = LiftState.IDLE;
             return;
         }
-        long timeOutTime= System.currentTimeMillis()+timeOut;
+        long timeOutTime = System.currentTimeMillis() + timeOut;
         timedOut = false;
 
-        teamUtil.log("Limit Switch:"+liftDownLimit.isPressed());
+        teamUtil.log("Limit Switch:" + liftDownLimit.isPressed());
         liftBasePower = .75;
         liftBaseDown();
         teamUtil.sleep(1000);
         liftBasePower = .4;
         liftBaseDown();
-        while(!liftDownLimit.isPressed() && teamUtil.keepGoing(timeOutTime)){
+        while (!liftDownLimit.isPressed() && teamUtil.keepGoing(timeOutTime)) {
             //teamUtil.log("Lift Base Encoder:"+liftBase.getCurrentPosition());
             liftBaseDown();
         }
@@ -227,16 +232,16 @@ public class Lift {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public void moveLiftBaseDown(double power, long timeOut){
+    public void moveLiftBaseDown(double power, long timeOut) {
         if (liftBaseIsDown()) { // already down, do nothing...
             teamUtil.log("WARNING: moveLiftBaseDown called when lift was already down");
             liftState = LiftState.IDLE;
-            baseCalibrated =true;
+            baseCalibrated = true;
             safeToElevate = false;
             liftBase.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             return;
         }
-        if (elevatorState!=ElevatorState.IDLE) { // elevator must be down
+        if (elevatorState != ElevatorState.IDLE) { // elevator must be down
             teamUtil.log("ERROR: moveLiftBaseDown called when elevator not idle");
             return;
         }
@@ -246,15 +251,15 @@ public class Lift {
         teamUtil.log("Moving Lift Down");
 
         if (liftBaseIsUp()) { // if we are at the top, lets go a little faster
-            moveBaseDownFaster(power,timeOut);
+            moveBaseDownFaster(power, timeOut);
         } else {
             moveBaseDownOriginal(power, timeOut);
         }
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public void moveLiftBaseDownNoWait(final double power, final long timeOut){
-        if(liftState == LiftState.IDLE) {
+    public void moveLiftBaseDownNoWait(final double power, final long timeOut) {
+        if (liftState == LiftState.IDLE) {
             liftState = LiftState.MOVING_DOWN;
             teamUtil.log("Launching Thread to Move Lift Down");
             Thread thread = new Thread(new Runnable() {
@@ -270,8 +275,8 @@ public class Lift {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Lift base must previously have been calibrated (moved to the downPosition) or this will fail
-    private void moveBaseUpUsingEncoders (double power, long timeOut) {
-        long timeOutTime= System.currentTimeMillis()+timeOut;
+    private void moveBaseUpUsingEncoders(double power, long timeOut) {
+        long timeOutTime = System.currentTimeMillis() + timeOut;
         timedOut = false;
 
         if (!baseCalibrated) {
@@ -286,14 +291,14 @@ public class Lift {
         liftBase.setPower(power);
         // wait for the lift to get close to its final position before we move on
         // Using isBusy() on the liftbase motor takes a LONG time due to the PID slowing down at the end
-        while ((liftBase.getCurrentPosition()<(LIFT_BASE_TOP_LIMIT_ENCODER_CLICKS)) && teamUtil.keepGoing(timeOutTime)){
+        while ((liftBase.getCurrentPosition() < (LIFT_BASE_TOP_LIMIT_ENCODER_CLICKS)) && teamUtil.keepGoing(timeOutTime)) {
             teamUtil.log("liftEncoder: " + liftBase.getCurrentPosition());
             if (liftBase.getCurrentPosition() > LIFT_BASE_SAFE_TO_ELEVATE) {
                 safeToElevate = true;
             }
         }
         shutDownLiftBase();
-        teamUtil.log("LiftBase is Up" );
+        teamUtil.log("LiftBase is Up");
         teamUtil.log("LiftBaseEncoder: " + liftBase.getCurrentPosition());
         liftState = LiftState.IDLE;
         safeToElevate = true;
@@ -305,12 +310,12 @@ public class Lift {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    private void moveBaseUpUsingLimits (double power, long timeOut) {
+    private void moveBaseUpUsingLimits(double power, long timeOut) {
         // This is a hack until we get the base lift encoder working again
         // It ignores the passed in power since the power and timing settings in here
         // are dependent on each other.
         teamUtil.log("Moving Lift Up Using Limit Switches");
-        long timeOutTime= System.currentTimeMillis()+timeOut;
+        long timeOutTime = System.currentTimeMillis() + timeOut;
         timedOut = false;
 
         liftBase.setPower(0);
@@ -328,7 +333,7 @@ public class Lift {
         //teamUtil.sleep(300);
         liftBase.setPower(0); // stop
 
-        teamUtil.log("LiftBase is Up" );
+        teamUtil.log("LiftBase is Up");
         teamUtil.log("LiftBaseEncoder: " + liftBase.getCurrentPosition());
         liftState = LiftState.IDLE;
         timedOut = (System.currentTimeMillis() > timeOutTime);
@@ -340,7 +345,7 @@ public class Lift {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Moves the lift to the up position and returns when finished
-    public void moveLiftBaseUp(double power, long timeOut){
+    public void moveLiftBaseUp(double power, long timeOut) {
         if (liftBaseIsUp()) { // already up, do nothing...
             teamUtil.log("WARNING: moveLiftBaseUp called when lift was already Up");
             liftState = LiftState.IDLE;
@@ -350,13 +355,13 @@ public class Lift {
         teamUtil.log("Moving Lift Up");
         safeToElevate = false;
 
-          // OR moveBaseUpUsingLimits(power, timeOut);
-        moveBaseUpUsingEncoders (power, timeOut);
+        // OR moveBaseUpUsingLimits(power, timeOut);
+        moveBaseUpUsingEncoders(power, timeOut);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public void moveLiftBaseUpNoWait(final double power, final long timeOut){
-        if(liftState == LiftState.IDLE) {
+    public void moveLiftBaseUpNoWait(final double power, final long timeOut) {
+        if (liftState == LiftState.IDLE) {
             liftState = LiftState.MOVING_UP;
             teamUtil.log("Launching Thread to Move Lift Up");
             Thread thread = new Thread(new Runnable() {
@@ -372,7 +377,6 @@ public class Lift {
     }
 
 
-
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //
@@ -383,7 +387,7 @@ public class Lift {
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public void forceTensionLiftString(long msecs){
+    public void forceTensionLiftString(long msecs) {
         rSpindle.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lSpindle.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rSpindle.setPower(TENSION_POWER);
@@ -398,7 +402,7 @@ public class Lift {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public void tensionLiftStringContinuous(){
+    public void tensionLiftStringContinuous() {
         rSpindle.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lSpindle.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rSpindle.setPower(TENSION_POWER);
@@ -407,7 +411,7 @@ public class Lift {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // call this method during init while the liftbase is down to calibrate the spindles
-    public void calibrateSpindles () {
+    public void calibrateSpindles() {
         teamUtil.log("Calibrating Spindles");
         if (!liftBaseIsDown()) {
             teamUtil.log("ERROR: calibrateSpindles called while lift base wasn't down");
@@ -421,9 +425,9 @@ public class Lift {
         do {
             long lastLeft = lSpindle.getCurrentPosition();
             long lastRight = rSpindle.getCurrentPosition();
-            teamUtil.sleep (250);
+            teamUtil.sleep(250);
             // if things aren't moving, we have stalled
-            if ((lSpindle.getCurrentPosition() == lastLeft ) && (rSpindle.getCurrentPosition() == lastRight)) {
+            if ((lSpindle.getCurrentPosition() == lastLeft) && (rSpindle.getCurrentPosition() == lastRight)) {
                 rSpindle.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 lSpindle.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 rSpindle.setPower(0);
@@ -435,16 +439,16 @@ public class Lift {
 
                 return;
             }
-            teamUtil.log("Spindle Encoders:" + lastLeft + " "+ lastRight);
+            teamUtil.log("Spindle Encoders:" + lastLeft + " " + lastRight);
 
         } while (true);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Stop the elevator wherever it is and hold
-    public void holdElevator() {
+    public void manualHoldElevator() {
         // if we are not moving, nothing to do
-        if (elevatorState == ElevatorState.HOLDING || elevatorState == ElevatorState.IDLE) {
+        if (elevatorState != ElevatorState.MANUAL_UP && elevatorState != ElevatorState.MANUAL_DOWN) {
             return;
         }
         rSpindle.setTargetPosition(rSpindle.getCurrentPosition());
@@ -459,8 +463,8 @@ public class Lift {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Move up to a specific position as fast as possible
     // This will only work if you are moving the elevator up...
-    private void moveElevatorUp (int position, long timeOut) {
-        if(!isSafeToElevate()) {
+    private void moveElevatorUp(int position, long timeOut) {
+        if (!isSafeToElevate()) {
             teamUtil.log("ERROR: called moveElevatorUp while not safe to elevate");
             return;
         }
@@ -485,7 +489,7 @@ public class Lift {
         while (lSpindle.getCurrentPosition() < position && rSpindle.getCurrentPosition() < position && teamUtil.keepGoing(timeOutTime)) {
             //teamUtil.log("Spindles: " + lSpindle.getCurrentPosition()+" : "+rSpindle.getCurrentPosition()); // uncomment for play by play...
         }
-         // set the new target for the FTC code to the actual target to hold there
+        // set the new target for the FTC code to the actual target to hold there
         lSpindle.setTargetPosition(position);
         rSpindle.setTargetPosition(position);
         elevatorState = ElevatorState.HOLDING;
@@ -503,32 +507,39 @@ public class Lift {
     // This expects to be called over and over while a control is being pressed so
     // that we can stop if we are too high!
     public void moveElevatorUpSlowly() {
-        if(!isSafeToElevate()) {
+        if (!isSafeToElevate()) {
             teamUtil.log("ERROR: called moveElevatorUpSlowly while not safe to elevate");
             return;
         }
-        // Don't go beyond the top or we will break the strings
-        if (lSpindle.getCurrentPosition() >= TOP || rSpindle.getCurrentPosition() >= TOP) {
-            holdElevator();
+        if (elevatorState != ElevatorState.IDLE && elevatorState != ElevatorState.HOLDING) {
             return;
         }
 
-        elevatorState = ElevatorState.MOVING_UP;
+
+        // Don't go beyond the top or we will break the strings
+        if (lSpindle.getCurrentPosition() >= TOP || rSpindle.getCurrentPosition() >= TOP) {
+            manualHoldElevator();
+            return;
+        }
+
+        elevatorState = ElevatorState.MANUAL_UP;
         teamUtil.log("Moving Elevator UP slowly: ");
-        teamUtil.log("firstSpindlePosition: " + rSpindle.getCurrentPosition());
+        teamUtil.log("SpindlePosition: " + lSpindle.getCurrentPosition() + ":" + rSpindle.getCurrentPosition());
         rSpindle.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lSpindle.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rSpindle.setPower(.2);
         lSpindle.setPower(.2);
     }
 
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Move down to a specific position quickly
     private void moveElevatorDown(int position, long timeOut) {
-        if(!isSafeToElevate()) {
+        if (!isSafeToElevate()) {
             teamUtil.log("ERROR: called moveElevator while not safe to elevate");
             return;
         }
+
         if (lSpindle.getCurrentPosition() < position || rSpindle.getCurrentPosition() < position) {
             teamUtil.log("ERROR: called moveElevatorDown with a target position above current position");
             return;
@@ -545,17 +556,17 @@ public class Lift {
         int slowDownPoint = position + 100;
         rSpindle.setPower(-.5);
         lSpindle.setPower(-.5);
-        while ((rSpindle.getCurrentPosition()>slowDownPoint) && (lSpindle.getCurrentPosition()>slowDownPoint) && teamUtil.keepGoing(timeOutTime)) {
+        while ((rSpindle.getCurrentPosition() > slowDownPoint) && (lSpindle.getCurrentPosition() > slowDownPoint) && teamUtil.keepGoing(timeOutTime)) {
             // wait for it to get close to the target
-            teamUtil.log("Spindles: " + lSpindle.getCurrentPosition()+" : "+rSpindle.getCurrentPosition()); // uncomment for play by play...
+            teamUtil.log("Spindles: " + lSpindle.getCurrentPosition() + " : " + rSpindle.getCurrentPosition()); // uncomment for play by play...
 
         }
         // slow down for the last bit
         rSpindle.setPower(-.3);
         lSpindle.setPower(-.3);
-        while ((rSpindle.getCurrentPosition()>position) && (lSpindle.getCurrentPosition()>position) && teamUtil.keepGoing(timeOutTime)) {
+        while ((rSpindle.getCurrentPosition() > position) && (lSpindle.getCurrentPosition() > position) && teamUtil.keepGoing(timeOutTime)) {
             // wait for it to get to the target
-            teamUtil.log("Spindles: " + lSpindle.getCurrentPosition()+" : "+rSpindle.getCurrentPosition()); // uncomment for play by play...
+            teamUtil.log("Spindles: " + lSpindle.getCurrentPosition() + " : " + rSpindle.getCurrentPosition()); // uncomment for play by play...
         }
 
         // bounce back up if needed and hold position
@@ -578,14 +589,20 @@ public class Lift {
         }
     }
 
+
     // start the elevator moving down slowly, presumably under manual control
     // This expects to be called over and over while a control is being pressed so
     // that we can stop if we reach the bottom!
+    // TODO: after moving up, when you try to go back down, sometimes it jumps...RUN_TO_POSITION leftovers from holding?  Moved calls to adjust power before calls to change mode to see is that fixes it...still need to test
     public void moveElevatorDownSlowly() {
-        if(!isSafeToElevate()) {
+        if (!isSafeToElevate()) {
             teamUtil.log("ERROR: called moveElevatorDownSlowly while not safe to elevate");
             return;
         }
+        if (elevatorState != ElevatorState.IDLE && elevatorState != ElevatorState.HOLDING) {
+            return;
+        }
+
         if (lSpindle.getCurrentPosition() <= BOTTOM || rSpindle.getCurrentPosition() <= BOTTOM) {
             rSpindle.setPower(0);
             lSpindle.setPower(0);
@@ -593,26 +610,28 @@ public class Lift {
             return;
         }
 
-        elevatorState = ElevatorState.MOVING_DOWN;
+        elevatorState = ElevatorState.MANUAL_DOWN;
         teamUtil.log("Moving Elevator DOWN slowly: ");
-        teamUtil.log("firstSpindlePosition: " + rSpindle.getCurrentPosition());
+        teamUtil.log("SpindlePosition: " + lSpindle.getCurrentPosition() + ":" + rSpindle.getCurrentPosition());
+        //TODO: switched the order of these subsequent commands
         rSpindle.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lSpindle.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rSpindle.setPower(-.2);
-        lSpindle.setPower(-.2);
+        rSpindle.setPower(-.1);
+        lSpindle.setPower(-.1);
+
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void moveElevator(int position, long timeOut) {
         if (lSpindle.getCurrentPosition() < position) {
-            moveElevatorUp(position,timeOut);
+            moveElevatorUp(position, timeOut);
         } else {
-            moveElevatorDown(position,timeOut);
+            moveElevatorDown(position, timeOut);
         }
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public void moveElevatorNoWait(final int position, final long timeOut){
+    public void moveElevatorNoWait(final int position, final long timeOut) {
         if (elevatorState == ElevatorState.IDLE) {
             elevatorState = ElevatorState.MOVING_UP;
             teamUtil.log("Launching Thread to Move Elevator");
@@ -630,8 +649,8 @@ public class Lift {
     // Move the elevator up to the specified level
     public void moveElevatorToLevel(int level, long timeOut) {
         elevatorState = ElevatorState.MOVING_UP;
-        if(level>MAX_LEVELS) {
-            teamUtil.log("ERROR: called GoToLevel with level="+level);
+        if (level > MAX_LEVELS) {
+            teamUtil.log("ERROR: called GoToLevel with level=" + level);
             level = MAX_LEVELS;
         }
         int target = LEVEL_0 + (LEVEL_INCREMENT * level);
@@ -639,7 +658,7 @@ public class Lift {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public void moveElevatorToLevelNoWait(final int level, final long timeOut){
+    public void moveElevatorToLevelNoWait(final int level, final long timeOut) {
         if (elevatorState == ElevatorState.IDLE) {
             elevatorState = ElevatorState.MOVING_UP;
             teamUtil.log("Launching Thread to Go To Level");
@@ -656,19 +675,20 @@ public class Lift {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Drop the elevator to its lowest point
     private void moveElevatorToBottomActive() {
-       rSpindle.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        teamUtil.log("started moveElevatorToBottomActive");
+        rSpindle.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lSpindle.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Go down fast
         rSpindle.setPower(-.5);
         lSpindle.setPower(-.5);
-        while ((rSpindle.getCurrentPosition()>LEVEL_0) && (lSpindle.getCurrentPosition()>LEVEL_0)) {
+        while ((rSpindle.getCurrentPosition() > LEVEL_0) && (lSpindle.getCurrentPosition() > LEVEL_0)) {
             // wait for it to get close to bottom
         }
         // slow down for the last bit
         rSpindle.setPower(-.3);
         lSpindle.setPower(-.3);
-        while ((rSpindle.getCurrentPosition()>BOTTOM) && (lSpindle.getCurrentPosition()>BOTTOM)) {
+        while ((rSpindle.getCurrentPosition() > BOTTOM) && (lSpindle.getCurrentPosition() > BOTTOM)) {
             // wait for it to get  to bottom
         }
 
@@ -700,7 +720,7 @@ public class Lift {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void moveElevatorToBottom() {
         teamUtil.log("Moving Elevator to Bottom");
-        if(!isSafeToElevate()) {
+        if (!isSafeToElevate()) {
             teamUtil.log("ERROR: called moveElevatorToBottom while not safe to elevate");
             return;
         }
@@ -716,9 +736,9 @@ public class Lift {
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public void moveElevatorToBottomNoWait(){
+    public void moveElevatorToBottomNoWait() {
         teamUtil.log("elevatorstate is " + elevatorState);
-        if ((elevatorState == ElevatorState.HOLDING)){
+        if ((elevatorState == ElevatorState.HOLDING)) {
             elevatorState = ElevatorState.MOVING_DOWN;
             teamUtil.log("Launching Thread to Move Elevator to Bottom");
             Thread thread = new Thread(new Runnable() {
@@ -732,25 +752,25 @@ public class Lift {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public void liftTelemetry(){
-        telemetry.addData("liftState:", liftState);
-        telemetry.addData("elevator State:", elevatorState);
+    public void liftTelemetry() {
+        teamUtil.telemetry.addData("liftState:", liftState);
+        teamUtil.telemetry.addData("elevator State:", elevatorState);
         if (liftBaseIsDown()) {
-            telemetry.addLine("Lift Base is DOWN");
+            teamUtil.telemetry.addLine("Lift Base is DOWN");
         } else if (liftBaseIsUp()) {
-            telemetry.addLine("Lift Base is UP");
+            teamUtil.telemetry.addLine("Lift Base is UP");
         } else {
-            telemetry.addLine("Lift Base lift position UNKNOWN");
+            teamUtil.telemetry.addLine("Lift Base lift position UNKNOWN");
         }
-        telemetry.addData("Lift Motor Power:", liftBasePower);
-        telemetry.addData("Lift Base Encoder:", liftBase.getCurrentPosition());
-        telemetry.addData("liftDownLimit:", liftDownLimit.isPressed());
-        telemetry.addData("liftUpMag1:", !liftUpMagSwitch1.getState());
-        telemetry.addData("liftUpMag2:", !liftUpMagSwitch2.getState());
-        telemetry.addData("lSpindle:", lSpindle.getCurrentPosition());
-        telemetry.addData("rSpindle:", rSpindle.getCurrentPosition());
-        telemetry.addData("spindlesCalibrated:", spindlesCalibrated);
-        telemetry.addData("baseCalibrated:", baseCalibrated);
+        teamUtil.telemetry.addData("Lift Motor Power:", liftBasePower);
+        teamUtil.telemetry.addData("Lift Base Encoder:", liftBase.getCurrentPosition());
+        teamUtil.telemetry.addData("liftDownLimit:", liftDownLimit.isPressed());
+        teamUtil.telemetry.addData("liftUpMag1:", !liftUpMagSwitch1.getState());
+        teamUtil.telemetry.addData("liftUpMag2:", !liftUpMagSwitch2.getState());
+        teamUtil.telemetry.addData("lSpindle:", lSpindle.getCurrentPosition());
+        teamUtil.telemetry.addData("rSpindle:", rSpindle.getCurrentPosition());
+        teamUtil.telemetry.addData("spindlesCalibrated:", spindlesCalibrated);
+        teamUtil.telemetry.addData("baseCalibrated:", baseCalibrated);
     }
 
 
@@ -763,25 +783,24 @@ public class Lift {
     private double liftBasePower = .5;
 
 
-    public void increaseLiftBasePower(){
+    public void increaseLiftBasePower() {
         // If enough time has passed since we last updated the power
-        if (System.currentTimeMillis() > nextControlUpdate)
-        {
+        if (System.currentTimeMillis() > nextControlUpdate) {
             liftBasePower = liftBasePower + 0.1;
             nextControlUpdate = System.currentTimeMillis() + CONTROL_INTERVAL;
         }
     }
-    public void decreaseLiftBasePower(){
+
+    public void decreaseLiftBasePower() {
         // If enough time has passed since we last updated the power
-        if (System.currentTimeMillis() > nextControlUpdate)
-        {
+        if (System.currentTimeMillis() > nextControlUpdate) {
             liftBasePower = liftBasePower - 0.1;
             nextControlUpdate = System.currentTimeMillis() + CONTROL_INTERVAL;
         }
     }
 
-    public void liftBaseUp(){
-        if(liftBase.getCurrentPosition()< LIFT_BASE_TOP_LIMIT_ENCODER_CLICKS){
+    public void liftBaseUp() {
+        if (liftBase.getCurrentPosition() < LIFT_BASE_TOP_LIMIT_ENCODER_CLICKS) {
             liftBase.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             liftBase.setPower(liftBasePower);
         }

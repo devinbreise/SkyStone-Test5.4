@@ -13,9 +13,9 @@ public class RightToLine extends LinearOpMode {
 
     public void initialize() {
         teamUtil.init(this);
-        teamUtil.theBlinkin.setSignal(Blinkin.Signals.INIT);
+        teamUtil.theBlinkin.setSignal(Blinkin.Signals.INIT_RED);
         robot = new Robot(this);
-        robot.init();
+        robot.init(true);
         teamUtil.theBlinkin.setSignal(Blinkin.Signals.READY_TO_START);
 
     }
@@ -23,18 +23,18 @@ public class RightToLine extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        telemetry.addLine("Initializing Op Mode");
-        telemetry.update();
+        teamUtil.telemetry.addLine("Initializing Op Mode");
+        teamUtil.telemetry.update();
         initialize();
         robot.latch.latchUp();
 
-        telemetry.addLine("Ready to Start");
-        telemetry.update();
+        teamUtil.telemetry.addLine("Ready to Start");
+        teamUtil.telemetry.update();
         waitForStart();
 
 
-        telemetry.addLine("Ready to Start");
-        telemetry.update();
+        teamUtil.telemetry.addLine("Ready to Start");
+        teamUtil.telemetry.update();
         waitForStart();
 
         while(!robot.drive.bottomColor.isOnTape()){

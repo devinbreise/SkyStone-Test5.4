@@ -3,6 +3,9 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.RobotLog;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Assemblies.Robot;
+
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -15,6 +18,10 @@ public class teamUtil {
     public static LinearOpMode theOpMode;
     public static boolean inInitialization = true;
     public static Blinkin theBlinkin =null;
+    private static Robot robot;
+    public static Telemetry telemetry;
+
+
     /**
      * This method puts the current thread to sleep for the given time in msec.
      * It handles InterruptException where it recalculates the remaining time
@@ -25,6 +32,7 @@ public class teamUtil {
 
     public static void init (LinearOpMode opMode) {
         theOpMode = opMode;
+        telemetry = theOpMode.telemetry;
         inInitialization = true;
         theBlinkin = new Blinkin(opMode.hardwareMap, opMode.telemetry);
         theBlinkin.init();
@@ -39,6 +47,24 @@ public class teamUtil {
             sleepTime=wakeupTime- System.currentTimeMillis();
         }
     }   //sleep
+
+
+//    public static Robot getRobot(){
+//        if(robot == null){
+//            robot = new Robot(theOpMode);
+//            teamUtil.log("created new robot");
+//        } else{
+//            teamUtil.log("recycling robot");        }
+//
+//        teamUtil.log("here's a robot");
+//        return robot;
+//    }
+
+
+//    public static void nukeRobot(){
+//        robot = null;
+//    }
+
 
     // log something so we can filter out the FTC robot log info
     // 3 -> 0 = getStackTrace, 1 = teamUtil.log, 3 = whoever called us

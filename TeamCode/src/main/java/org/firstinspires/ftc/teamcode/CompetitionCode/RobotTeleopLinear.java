@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
-import org.firstinspires.ftc.teamcode.Assemblies.LiftSystem;
 import org.firstinspires.ftc.teamcode.Assemblies.Robot;
 import org.firstinspires.ftc.teamcode.basicLibs.Blinkin;
 import org.firstinspires.ftc.teamcode.basicLibs.TeamGamepad;
@@ -23,13 +22,15 @@ public class RobotTeleopLinear extends LinearOpMode {
     public void initialize() {
 
         teamUtil.init(this);
+        teamUtil.telemetry.addLine("Initializing Op Mode...please wait");
+        teamUtil.telemetry.update();
         teamUtil.theBlinkin.setSignal(Blinkin.Signals.INIT);
 
         robot = new Robot(this);
 
         teamGamePad = new TeamGamepad(this);
 
-        robot.init();
+        robot.init(false);
         robot.latch.latchUp();
         teamUtil.theBlinkin.setSignal(Blinkin.Signals.READY_TO_START);
         teamUtil.initPerf();
@@ -39,21 +40,18 @@ public class RobotTeleopLinear extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-
-        telemetry.addLine("Initializing Op Mode...please wait");
-        telemetry.update();
         initialize();
         grabberRotation = Grabber.GrabberRotation.INSIDE;
 
-        telemetry.addLine("Ready to Stack :D");
-        telemetry.update();
+        teamUtil.telemetry.addLine("Ready to Stack :D");
+        teamUtil.telemetry.update();
         waitForStart();
         robot.latch.latchUp(); // move latches up at start of teleop
 
         while (opModeIsActive()) {
 
             //robot.scaleMovement(MAX_POWER, DRIVE_POWER);
-            telemetry.addData("Heading:", robot.drive.getHeading());
+            teamUtil.telemetry.addData("Heading:", robot.drive.getHeading());
 ///////////////////////////////////////////////////////////////////////
             teamGamePad.gamepadLoop();
 
@@ -80,25 +78,16 @@ public class RobotTeleopLinear extends LinearOpMode {
             }
 /////////////////////////////////////////////////////////////////////////
 
-            if (gamepad1.right_bumper  && gamepad1.right_trigger < 0.5) {
-                robot.autoIntake(6500);
-            }
 
-            if (gamepad1.right_bumper && gamepad1.right_trigger > 0.5) {
+            if (gamepad1.right_bumper) {
                 robot.liftSystem.grab( 4000);
             }
+            if(gamepad1.y){
+                robot.liftSystem.capAndGrab(5000);
+            }
 
-            if (gamepad1.left_bumper && gamepad1.right_trigger > 0.5) {
+            if (gamepad1.left_bumper) {
                 robot.liftSystem.grabAndStowNoWait(4000);
-            }
-
-            if(gamepad1.x){
-                robot.drive.moveToPickUpDistance(4000);
-            }
-
-            if(gamepad1.b){
-                robot.drive.moveToPickUpDistance(4000);
-                robot.drive.moveInchesForward(0.15, 0.5, 2000);
             }
 
 
@@ -129,59 +118,54 @@ public class RobotTeleopLinear extends LinearOpMode {
                 level -= 1;
                 teamUtil.log("Level decreased :C");
             }
-            if (robot.liftSystem.state == LiftSystem.LiftSystemState.HOVER) {
-                robot.liftSystem.lift.moveElevatorToLevelNoWait(level, 4500);
-            }
 
-
-//            if (gamepad2.y) {
-//                grabberRotation = Grabber.GrabberRotation.OUTSIDE;
-//            }
-//            if (gamepad2.b) {
-//                grabberRotation = Grabber.GrabberRotation.MIDDLE;
-//            }
-//            if (gamepad2.a) {
-//                grabberRotation = Grabber.GrabberRotation.INSIDE;
-//            }
 
             if (gamepad2.right_bumper && gamepad2.right_trigger > 0.5) {
-                robot.autoDropOffRight(level, 7000);
+                robot.liftSystem.putAwayLiftSystemNoWait(5000);
             }
 
-            if (gamepad2.left_bumper && gamepad2.right_trigger > 0.5) {
-                robot.autoDropOffLeft(level, 7000);
-            }
 
 
             if (gamepad2.right_bumper && gamepad2.right_trigger < 0.5) {
-                robot.liftSystem.hoverOverFoundation(level, grabberRotation, 7000);
+                robot.liftSystem.hoverOverFoundationNoWait(level, grabberRotation, 7000);
                 teamUtil.log("tried to deploy");
                 teamUtil.log("level: " + level);
             }
 
-            if (gamepad2.left_bumper && gamepad2.right_trigger < 0.5) {
+            if (gamepad2.left_bumper && gamepad2.left_trigger > 0.5) {
                 robot.liftSystem.prepareToGrabNoWait(9000);
             }
             if (gamepad2.right_stick_button) {
                 robot.liftSystem.drop();
             }
-            if (teamGamePad.gamepad2XBounced()) {
+            if (teamGamePad.gamepad2ABounced()) {
+                robot.liftSystem.elevatorDown();
+            }
+            if (gamepad2.y) {
+                robot.liftSystem.grabber.dropCapstone();
+            }
+            if(gamepad2.b){
+                robot.liftSystem.hoverOverFoundationNoWait(level, Grabber.GrabberRotation.MIDDLE, 7000);
+            }
 
-                robot.liftSystem.liftDown();
+            if (gamepad2.left_stick_y < -0.8) {
+                robot.liftSystem.lift.moveElevatorUpSlowly();
+            } else  if (gamepad2.left_stick_y > 0.8) {
+                robot.liftSystem.lift.moveElevatorDownSlowly();
+            } else {
+                robot.liftSystem.lift.manualHoldElevator(); // this will stop any other elevator movement dead in its tracks...
             }
-            if (gamepad2.a) {
-                robot.liftSystem.putAwayLiftSystemNoWait(5000);
-            }
+
 
 
 /////////////////////////////////////////////////////////////////////
             //this code is the telemetry
 //        latch.latchTelemetry();
 //        robot.driveTelemetry();
-            telemetry.addData("level:", level);
-            telemetry.addData("grabber rotation", grabberRotation);
-            telemetry.addData("frontMiddleDistance", robot.drive.frontmiddleDistance.getDistance(DistanceUnit.CM));
-            telemetry.update();
+            teamUtil.telemetry.addData("level:", level);
+            teamUtil.telemetry.addData("grabber rotation", grabberRotation);
+//            teamUtil.telemetry.addData("frontMiddleDistance", robot.drive.frontmiddleDistance.getDistance(DistanceUnit.CM));
+            teamUtil.telemetry.update();
 
             // teamUtil.trackPerf();
 

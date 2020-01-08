@@ -3,25 +3,20 @@ package org.firstinspires.ftc.teamcode.CompetitionCode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
-import org.firstinspires.ftc.teamcode.Assemblies.Latch;
-import org.firstinspires.ftc.teamcode.Assemblies.Lift;
-import org.firstinspires.ftc.teamcode.Assemblies.LiftSystem;
 import org.firstinspires.ftc.teamcode.Assemblies.Robot;
-import org.firstinspires.ftc.teamcode.Assemblies.RobotDrive;
 import org.firstinspires.ftc.teamcode.basicLibs.Blinkin;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
-@Autonomous(name="AutoFoundationPathBlue", group ="Competition")
+@Autonomous(name="AutoFoundationPathBlue", group ="Blue")
 public class AutoFoundationPathBlue extends LinearOpMode {
 
     Robot robot;
 
     public void initialize() {
         teamUtil.init(this);
-        teamUtil.theBlinkin.setSignal(Blinkin.Signals.INIT);
+        teamUtil.theBlinkin.setSignal(Blinkin.Signals.INIT_BLUE);
 
         robot = new Robot(this);
-        robot.init();
+        robot.init(true);
         teamUtil.theBlinkin.setSignal(Blinkin.Signals.BLUE_AUTO);
 
     }
@@ -29,19 +24,19 @@ public class AutoFoundationPathBlue extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        telemetry.addLine("Initializing Op Mode");
-        telemetry.update();
+        teamUtil.telemetry.addLine("Initializing Op Mode");
+        teamUtil.telemetry.update();
         initialize();
         robot.latch.latchUp();
 
-        telemetry.addLine("Ready to Start");
-        telemetry.update();
+        teamUtil.telemetry.addLine("Ready to Start");
+        teamUtil.telemetry.update();
         waitForStart();
 
 
 
-        telemetry.addLine("Ready to Start");
-        telemetry.update();
+        teamUtil.telemetry.addLine("Ready to Start");
+        teamUtil.telemetry.update();
         waitForStart();
 
 
@@ -50,15 +45,18 @@ public class AutoFoundationPathBlue extends LinearOpMode {
         robot.latch.latchDown();
         teamUtil.sleep(750);
 
-        robot.drive.moveInchesForward(0.5,37,6000);
+        robot.foundationBlue();
+
         robot.latch.latchUp();
         teamUtil.sleep(1000);
 
-        robot.drive.moveInchesLeft(0.5, 12,5000);
-        robot.drive.moveInchesBackward(0.5,0.25,2000);
-
-        robot.drive.moveInchesLeft(0.5, 38,5000);
-
+        while(!robot.drive.bottomColor.isOnTape()){
+            robot.drive.driveLeft(0.6);
+//            if(robot.drive.rightDistanceSensor.getDistance() < 4 && robot.drive.rightDistanceSensor.getDistance() > 0){
+//                robot.drive.accelerateInchesBackward(.6, 15, 3500);
+//                teamUtil.log("saw the robot");
+//            }
+        }
 
 //        robot.drive.moveInchesBackward(0.5,20,5000);
 //        robot.drive.moveInchesRight(0.5, 24,5000);

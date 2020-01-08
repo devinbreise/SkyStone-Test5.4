@@ -18,15 +18,17 @@ public class Grabber {
     public final double GRABBER_ONE_PICKUP_POS = 0.5;
     public final double GRABBER_ONE_OPEN_POS = 0.29;
     public final double GRABBER_ONE_WIDE_CLOSED_POS = 0.135;
-    public final double GRABBER_ONE_ROTATE_POS = 0.09;
+    public final double GRABBER_ONE_SLIGHTLY_OPEN = 0.19;
+    public final double GRABBER_ONE_SAFE_ROTATE_POS = 0.09;
     //
     //    //close to the robot
-    public final double GRABBER_ONE_CAPSTONE_RELEASE = 0.07;
+    public final double GRABBER_TWO_CAPSTONE_RELEASE = 0.04;
     public final double GRABBER_TWO_STOW_POS = 0.13;
     public final double GRABBER_TWO_PICKUP_POS = 0.5;
     public final double GRABBER_TWO_OPEN_POS = 0.66;
     public final double GRABBER_TWO_WIDE_CLOSED_POS = 0.815;
-    public final double GRABBER_TWO_ROTATE_POS = 0.7;
+    public final double GRABBER_TWO_SLIGHTLY_OPEN = 0.76;
+    public final double GRABBER_TWO_SAFE_ROTATE_POS = 0.7;
 
     public final double rotate_outside = 0.79;
     public final double rotate_narrow = 0.476;
@@ -43,6 +45,7 @@ public class Grabber {
         GRABBER_CLOSED_WIDE,
         GRABBER_ROTATE_POS,
         GRABBER_PICKUP,
+        GRABBER_CAPSTONE,
         GRABBER_UNKNOWN
     }
 
@@ -92,10 +95,23 @@ public class Grabber {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public void slightlyOpenGrabber() {
+        grabberOne.setPosition(GRABBER_ONE_SLIGHTLY_OPEN);
+        grabberTwo.setPosition(GRABBER_TWO_SLIGHTLY_OPEN);
+        grabberState = GrabberState.GRABBER_OPEN;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void grabberPickup(){
         grabberOne.setPosition(GRABBER_ONE_PICKUP_POS);
         grabberTwo.setPosition(GRABBER_TWO_PICKUP_POS);
         grabberState = GrabberState.GRABBER_PICKUP;
+    }
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public void dropCapstone(){
+        //grabberOne.setPosition(GRABBER_ONE_STOW_POS);
+        grabberTwo.setPosition(GRABBER_TWO_CAPSTONE_RELEASE);
+        grabberState = GrabberState.GRABBER_CAPSTONE;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -108,8 +124,8 @@ public class Grabber {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void grabberRotatePos() {
-        grabberOne.setPosition(GRABBER_ONE_ROTATE_POS);
-        grabberTwo.setPosition(GRABBER_TWO_ROTATE_POS);
+        grabberOne.setPosition(GRABBER_ONE_SAFE_ROTATE_POS);
+        grabberTwo.setPosition(GRABBER_TWO_SAFE_ROTATE_POS);
         grabberState = GrabberState.GRABBER_ROTATE_POS;
 
     }
@@ -187,11 +203,11 @@ public class Grabber {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void grabberTelemetry() {
-        telemetry.addData("Grabber State: ", grabberState);
-        telemetry.addData("Grabber Rotation: ", rotation);
-        telemetry.addData("GrabberOne: ", grabberOne.getPosition());
-        telemetry.addData("GrabberTwo: ", grabberTwo.getPosition());
-        telemetry.addData("RotateServo: ", rotateServo.getPosition());
+        teamUtil.telemetry.addData("Grabber State: ", grabberState);
+        teamUtil.telemetry.addData("Grabber Rotation: ", rotation);
+        teamUtil.telemetry.addData("GrabberOne: ", grabberOne.getPosition());
+        teamUtil.telemetry.addData("GrabberTwo: ", grabberTwo.getPosition());
+        teamUtil.telemetry.addData("RotateServo: ", rotateServo.getPosition());
     }
 
 }

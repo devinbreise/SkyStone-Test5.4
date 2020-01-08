@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.basicLibs;
 
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -19,6 +18,8 @@ public class Blinkin {
         OFF,
         YELLOW,
         INIT,
+        INIT_RED,
+        INIT_BLUE,
         READY_TO_START,
         SIGNAL_3,
 
@@ -57,12 +58,17 @@ public class Blinkin {
             case YELLOW :
                 blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
                 break;
-
-            case INIT :
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.LARSON_SCANNER_RED);
+            case INIT:
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.SINELON_FOREST_PALETTE);
                 break;
             case READY_TO_START :
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.COLOR_WAVES_FOREST_PALETTE);
+                break;
+            case INIT_RED:
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.LARSON_SCANNER_RED);
+                break;
+            case INIT_BLUE :
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.SINELON_OCEAN_PALETTE);
                 break;
             case SIGNAL_3:
                 blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
@@ -91,11 +97,11 @@ public class Blinkin {
                 break;
 
             case RED_AUTO:
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.SINELON_LAVA_PALETTE);
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.COLOR_WAVES_LAVA_PALETTE);
                 break;
 
             case BLUE_AUTO:
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.SINELON_OCEAN_PALETTE);
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.COLOR_WAVES_OCEAN_PALETTE);
                 break;
 
             case CURIOSITY:

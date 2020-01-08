@@ -1,18 +1,12 @@
 package org.firstinspires.ftc.teamcode.CompetitionCode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
-import org.firstinspires.ftc.teamcode.Assemblies.Latch;
-import org.firstinspires.ftc.teamcode.Assemblies.Lift;
-import org.firstinspires.ftc.teamcode.Assemblies.LiftSystem;
 import org.firstinspires.ftc.teamcode.Assemblies.Robot;
-import org.firstinspires.ftc.teamcode.Assemblies.RobotDrive;
 import org.firstinspires.ftc.teamcode.basicLibs.Blinkin;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
-@Autonomous(name="AutoFoundationPathRed", group ="Competition")
+@Autonomous(name="AutoFoundationPathRed", group ="Red")
 
 public class AutoFoundationPathRed extends LinearOpMode {
 
@@ -20,42 +14,46 @@ public class AutoFoundationPathRed extends LinearOpMode {
 
     public void initialize() {
         teamUtil.init(this);
-        teamUtil.theBlinkin.setSignal(Blinkin.Signals.INIT);
+        teamUtil.theBlinkin.setSignal(Blinkin.Signals.INIT_RED);
 
         robot = new Robot(this);
-        robot.init();
+        robot.init(true);
         teamUtil.theBlinkin.setSignal(Blinkin.Signals.RED_AUTO);
 
     }
 
     @Override
     public void runOpMode() throws InterruptedException {
-        telemetry.addLine("Initializing Op Mode");
-        telemetry.update();
+        teamUtil.telemetry.addLine("Initializing Op Mode");
+        teamUtil.telemetry.update();
         initialize();
         robot.latch.latchUp();
 
-        telemetry.addLine("Ready to Start");
-        telemetry.update();
+        teamUtil.telemetry.addLine("Ready to Start");
+        teamUtil.telemetry.update();
         waitForStart();
 
 
 
         robot.drive.moveInchesLeft(0.5, 11, 4000);
 
-            robot.drive.moveInchesBackward(0.5,32,5000);
+            robot.drive.moveInchesBackward(0.5,28,5000);
             robot.latch.latchDown();
             teamUtil.sleep(750);
-            robot.drive.moveInchesForward(0.5,37,6000);
+            robot.foundationRed();
             robot.latch.latchUp();
         teamUtil.sleep(1000);
-
-        robot.drive.moveInchesRight(0.5, 12,5000);
-            robot.drive.moveInchesBackward(0.5,0.25, 2000);
-            robot.drive.moveInchesRight(0.5, 38,5000);
+        robot.drive.moveInchesRight(0.5, 10, 2300);
+        while(!robot.drive.bottomColor.isOnTape()){
+            robot.drive.driveRight(0.6);
+//            if(robot.drive.rightDistanceSensor.getDistance() < 4 && robot.drive.rightDistanceSensor.getDistance() > 0){
+//                robot.drive.accelerateInchesBackward(.6, 15, 3500);
+//                teamUtil.log("saw the robot");
+//            }
+        }
+        robot.drive.stopMotors();
 
 //TODO: added code
-            robot.drive.moveInchesForward(0.5, 7, 3000);
 
 
 

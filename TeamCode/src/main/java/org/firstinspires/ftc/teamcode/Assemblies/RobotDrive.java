@@ -28,7 +28,7 @@ public class RobotDrive {
     public static final double FULL_POWER = 1;
     public static final double DEAD_ZONE_THRESHOLD = 0.03;
     public static final double TRIGGER_DIALATION = 0.6;
-    public static final double MIN_ROTATING_POWER = 0.3;
+    public static final double MIN_ROTATING_POWER = 0.25;
     public static final double TEST_POWER = 0.25;
     public static final double ROTATIONAL_DRIFT_CORRECTION = 0.94;
 
@@ -106,10 +106,6 @@ public class RobotDrive {
 
         setAllMotorsWithoutEncoder();
 
-        //Wise words of Coach, the enlightened one, from book 1:
-        //"To make this sort of encoder driven movement both fast and consistent,
-        // its usually neccesary to master smooth acceleration and deceleration to minimize wheel slippage.
-        // You might want to start thinking about what that code would look like."
     }
 
 
@@ -124,7 +120,7 @@ public class RobotDrive {
         bottomColorSensor = hardwareMap.get(ColorSensor.class, "bottomColorSensor");
         bottomColor = new teamColorSensor(telemetry, bottomColorSensor);
         bottomColor.calibrate();
-        frontRightDistance.setOffset((float)(-1.5));
+        //frontRightDistance.setOffset((float)(-3.0));
     }
 
 
@@ -232,13 +228,13 @@ public class RobotDrive {
 
 
     public void distanceTelemetry() {
-        telemetry.addData("frontLeftDistance", getDistanceInches(frontLeftDistance));
-        telemetry.addData("frontMiddleDistance", frontmiddleDistance.getDistance(DistanceUnit.CM));
-        telemetry.addData("frontRightDistance", getDistanceInches(frontRightDistance));
-        telemetry.addData("leftDistance", getDistanceInches(leftDistanceSensor));
-        telemetry.addData("rightDistance", getDistanceInches(rightDistanceSensor));
-        telemetry.addData("backDistance", getDistanceInches(backDistanceSensor));
-        telemetry.addLine("front color"+frontmiddleColor.alpha()+":" +frontmiddleColor.red()+":" +frontmiddleColor.green()+":" +frontmiddleColor.blue());
+        teamUtil.telemetry.addData("frontLeftDistance", getDistanceInches(frontLeftDistance));
+        teamUtil.telemetry.addData("frontMiddleDistance", frontmiddleDistance.getDistance(DistanceUnit.CM));
+        teamUtil.telemetry.addData("frontRightDistance", getDistanceInches(frontRightDistance));
+        teamUtil.telemetry.addData("leftDistance", getDistanceInches(leftDistanceSensor));
+        teamUtil.telemetry.addData("rightDistance", getDistanceInches(rightDistanceSensor));
+        teamUtil.telemetry.addData("backDistance", getDistanceInches(backDistanceSensor));
+        teamUtil.telemetry.addLine("front color"+frontmiddleColor.alpha()+":" +frontmiddleColor.red()+":" +frontmiddleColor.green()+":" +frontmiddleColor.blue());
 
     }
 
@@ -257,6 +253,34 @@ public class RobotDrive {
             // need to move forwards
         } else if (currentReading > desiredDistance) {
             while ((getDistanceInches(sensor) > desiredDistance) && teamUtil.keepGoing(timeOutTime)) {
+                driveForward(power);
+            }
+        }
+        stopMotors();
+        timedOut = (System.currentTimeMillis() > timeOutTime);
+        if (timedOut) {
+            teamUtil.log("Moving to Distance - TIMED OUT!");
+        }
+        teamUtil.log("Moving to Distance - Finished");
+
+    }
+
+    public void closeToDistanceOr(DistanceSensors frontLeft, DistanceSensors frontRight, double desiredDistance, double power, long timeOut) {
+        teamUtil.log("Moving to Distance");
+        long timeOutTime = System.currentTimeMillis() + timeOut;
+        timedOut = false;
+        double currentReadingLeft = getDistanceInches(frontLeft);
+        double currentReadingRight = getDistanceInches(frontRight);
+
+        // Need to move backwards
+//        if (currentReading < desiredDistance) {
+//            while ((getDistanceInches(sensor) < desiredDistance) && teamUtil.keepGoing(timeOutTime)) {
+//                driveBackward(power);
+//            }
+            // need to move forwards
+//        } else
+        if (currentReadingLeft > desiredDistance && currentReadingRight > desiredDistance) {
+            while (((getDistanceInches(frontLeft) > desiredDistance) && (getDistanceInches(frontRight) > desiredDistance)) && teamUtil.keepGoing(timeOutTime)) {
                 driveForward(power);
             }
         }
@@ -983,6 +1007,49 @@ public class RobotDrive {
 
     }
 
+    public void decelerateInchesLeft(double startSpeed, double inches){
+        final double COUNTS_PER_MOTOR_REV = 1120;    // NeverRest 40 at 1:1
+        final double DRIVE_GEAR_REDUCTION = 1.0;     // This is < 1.0 if geared UP
+        final double WHEEL_DIAMETER_INCHES = 3.93701;     // For figuring circumference
+        final double COUNTS_PER_INCH =
+                (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
+
+        final double MIN_SPEED = 0.35;    // NeverRest 40 at 1:1
+        final double MAX_DECEL_PER_INCH = .05; // max power acceleration per inch without skidding
+
+        int decelerationEncoderCount;
+        double targetPositionRightMotor = inches * COUNTS_PER_INCH;
+
+        double speedChange = startSpeed - MIN_SPEED;
+
+        decelerationEncoderCount = (int) ((speedChange / MAX_DECEL_PER_INCH) * COUNTS_PER_INCH);
+        double decelerationPoint = targetPositionRightMotor - decelerationEncoderCount;
+
+
+        setAllMotorsWithEncoder();
+        resetAllDriveEncoders();
+
+        while (Math.abs(fRightMotor.getCurrentPosition()) < decelerationPoint) {
+            //CRUISING
+            driveLeft(startSpeed);
+            teamUtil.log("Cruising speed: " + startSpeed);
+        }
+
+        teamUtil.log("start decelerating");
+
+        double initialPosition = Math.abs(fRightMotor.getCurrentPosition());
+        while (Math.abs(fRightMotor.getCurrentPosition()) - initialPosition < decelerationEncoderCount) {
+            //DECELERATING
+            double decelSpeed = Range.clip((startSpeed - ((Math.abs(fRightMotor.getCurrentPosition()) - initialPosition) / COUNTS_PER_INCH) * MAX_DECEL_PER_INCH), 0.3, 1);
+            teamUtil.log("Deceleration speed: " + decelSpeed);
+            teamUtil.log("decelDistanceTraveled: " + (Math.abs(fRightMotor.getCurrentPosition()) - initialPosition));
+            teamUtil.log("DecelDistance: " + decelerationEncoderCount);
+
+            driveLeft(decelSpeed);
+        }
+
+    }
+
     public void decelerateToSpeedLeft(double startSpeed){
         final double COUNTS_PER_MOTOR_REV = 1120;    // NeverRest 40 at 1:1
         final double DRIVE_GEAR_REDUCTION = 1.0;     // This is < 1.0 if geared UP
@@ -1011,6 +1078,8 @@ public class RobotDrive {
             driveLeft(accelSpeed);
         }
     }
+
+
     public void decelerateToSpeedForwards(double startSpeed){
         final double COUNTS_PER_MOTOR_REV = 1120;    // NeverRest 40 at 1:1
         final double DRIVE_GEAR_REDUCTION = 1.0;     // This is < 1.0 if geared UP
@@ -1128,11 +1197,11 @@ public class RobotDrive {
 
 
     public void telemetryDriveEncoders() {
-        telemetry.addData("front left:", fLeftMotor.getCurrentPosition());
-        telemetry.addData("front right:", fRightMotor.getCurrentPosition());
+        teamUtil.telemetry.addData("front left:", fLeftMotor.getCurrentPosition());
+        teamUtil.telemetry.addData("front right:", fRightMotor.getCurrentPosition());
 
-        telemetry.addData("back left:", bLeftMotor.getCurrentPosition());
-        telemetry.addData("back right:", bRightMotor.getCurrentPosition());
+        teamUtil.telemetry.addData("back left:", bLeftMotor.getCurrentPosition());
+        teamUtil.telemetry.addData("back right:", bRightMotor.getCurrentPosition());
     }
 
     public double adjustAngle(double angle) {
@@ -1195,17 +1264,17 @@ public class RobotDrive {
                 completedRotating = false;
             } else {
                 completedRotating = true;
-                telemetry.addData("I'm done rotating now", "");
+                teamUtil.telemetry.addData("I'm done rotating now", "");
                 teamUtil.log("done rotating");
             }
 
-//            telemetry.addData("startHeading", startHeading);
-//            telemetry.addData("desiredHeading", desiredHeading);
+//            teamUtil.telemetry.addData("startHeading", startHeading);
+//            teamUtil.telemetry.addData("desiredHeading", desiredHeading);
 //
-//            telemetry.addData("changeInAngle", changeInAngle);
-//            telemetry.addData("rotatingPower", rotatePower);
-//            telemetry.addData("direction", rotateDirection);
-//            telemetry.update();
+//            teamUtil.telemetry.addData("changeInAngle", changeInAngle);
+//            teamUtil.telemetry.addData("rotatingPower", rotatePower);
+//            teamUtil.telemetry.addData("direction", rotateDirection);
+//            teamUtil.telemetry.update();
 
         } while (!completedRotating);
         stopMotors();
@@ -1276,10 +1345,10 @@ public class RobotDrive {
     }
 
     public void rotateToZero(){
-        if(getRelativeHeading(180) < 179){
+        if(getRelativeHeading(180) < 179.5){
             teamUtil.log("ROTATING LEFT");
             rotateToHeadingZeroLeft();
-        } else if(getRelativeHeading(180) > 181){
+        } else if(getRelativeHeading(180) > 180.5){
             teamUtil.log("ROTATING RIGHT");
             rotateToHeadingZeroRight();
         }
@@ -1363,7 +1432,7 @@ public class RobotDrive {
             completedRotating = false;
         } else {
             completedRotating = true;
-            telemetry.addData("I'M DONE ROTATING", "");
+            teamUtil.telemetry.addData("I'M DONE ROTATING", "");
             teamUtil.log("done rotating");
         }
 
@@ -1385,17 +1454,17 @@ public class RobotDrive {
                 completedRotating = false;
             } else {
                 completedRotating = true;
-                telemetry.addData("I'm done rotating now", "");
+                teamUtil.telemetry.addData("I'm done rotating now", "");
                 teamUtil.log("done rotating");
             }
 
-//            telemetry.addData("startHeading", startHeading);
-//            telemetry.addData("desiredHeading", desiredHeading);
+//            teamUtil.telemetry.addData("startHeading", startHeading);
+//            teamUtil.telemetry.addData("desiredHeading", desiredHeading);
 //
-//            telemetry.addData("changeInAngle", changeInAngle);
-//            telemetry.addData("rotatingPower", rotatePower);
-//            telemetry.addData("direction", rotateDirection);
-//            telemetry.update();
+//            teamUtil.telemetry.addData("changeInAngle", changeInAngle);
+//            teamUtil.telemetry.addData("rotatingPower", rotatePower);
+//            teamUtil.telemetry.addData("direction", rotateDirection);
+//            teamUtil.telemetry.update();
 
         } while(!completedRotating && teamUtil.keepGoing(timeOutTime));
         stopMotors();
@@ -1490,12 +1559,12 @@ public class RobotDrive {
         float backRight = (-leftY + leftX - rightX);
         float backLeft = -(leftY + leftX - rightX); //leftY + leftX - rightX(original prior to reverse)
 
-        telemetry.addData("RIGHTX:", rightX);
-        telemetry.addData("LEFTX:", leftX);
-        telemetry.addData("LEFTY:", leftX);
-
-        telemetry.addData("joystickX:", leftJoyStickX);
-        telemetry.addData("joystickY:", leftJoyStickY);
+//        teamUtil.telemetry.addData("RIGHTX:", rightX);
+//        teamUtil.telemetry.addData("LEFTX:", leftX);
+//        teamUtil.telemetry.addData("LEFTY:", leftY);
+//
+//        teamUtil.telemetry.addData("joystickX:", leftJoyStickX);
+//        teamUtil.telemetry.addData("joystickY:", leftJoyStickY);
 
         fLeftMotor.setPower(frontLeft);
         fRightMotor.setPower(frontRight);
@@ -1506,16 +1575,16 @@ public class RobotDrive {
     }
 
     public void driveTelemetry() {
-        telemetry.addData("Front Left Motor:", fLeftMotor.getPower());
-        telemetry.addData("Front Right Motor:", fRightMotor.getPower());
-        telemetry.addData("Back Left Motor:", bLeftMotor.getPower());
-        telemetry.addData("Back Right Motor:", bRightMotor.getPower());
-        telemetry.addData("Heading:", getAbsoluteHeading());
+        teamUtil.telemetry.addData("Front Left Motor:", fLeftMotor.getPower());
+        teamUtil.telemetry.addData("Front Right Motor:", fRightMotor.getPower());
+        teamUtil.telemetry.addData("Back Left Motor:", bLeftMotor.getPower());
+        teamUtil.telemetry.addData("Back Right Motor:", bRightMotor.getPower());
+        teamUtil.telemetry.addData("Heading:", getAbsoluteHeading());
 
     }
 
     public void encoderTelemetry() {
-        telemetry.addData("FL ENCODER POS:", fRightMotor.getCurrentPosition());
+        teamUtil.telemetry.addData("FL ENCODER POS:", fRightMotor.getCurrentPosition());
 
     }
 

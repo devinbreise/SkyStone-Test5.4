@@ -21,11 +21,11 @@ public class lightsOut extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
 
-        telemetry.addLine("Initializing Op Mode...please wait");
-        telemetry.update();
+        teamUtil.telemetry.addLine("Initializing Op Mode...please wait");
+        teamUtil.telemetry.update();
         initialize();
-        telemetry.addLine("Lights Off");
-        telemetry.update();
+        teamUtil.telemetry.addLine("Lights Off");
+        teamUtil.telemetry.update();
         waitForStart();
     }
 }

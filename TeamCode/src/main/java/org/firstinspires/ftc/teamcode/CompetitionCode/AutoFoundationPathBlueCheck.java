@@ -1,27 +1,24 @@
 package org.firstinspires.ftc.teamcode.CompetitionCode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
-import org.firstinspires.ftc.teamcode.Assemblies.Latch;
-import org.firstinspires.ftc.teamcode.Assemblies.Lift;
-import org.firstinspires.ftc.teamcode.Assemblies.LiftSystem;
 import org.firstinspires.ftc.teamcode.Assemblies.Robot;
-import org.firstinspires.ftc.teamcode.Assemblies.RobotDrive;
 import org.firstinspires.ftc.teamcode.basicLibs.Blinkin;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 @Autonomous(name="AutoFoundationPathBlueCheck", group ="Competition")
+@Disabled
 public class AutoFoundationPathBlueCheck extends LinearOpMode {
 
     Robot robot;
 
     public void initialize() {
         teamUtil.init(this);
-        teamUtil.theBlinkin.setSignal(Blinkin.Signals.INIT);
+        teamUtil.theBlinkin.setSignal(Blinkin.Signals.INIT_RED);
 
         robot = new Robot(this);
-        robot.init();
+        robot.init(true);
         teamUtil.theBlinkin.setSignal(Blinkin.Signals.BLUE_AUTO);
 
     }
@@ -29,19 +26,19 @@ public class AutoFoundationPathBlueCheck extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        telemetry.addLine("Initializing Op Mode");
-        telemetry.update();
+        teamUtil.telemetry.addLine("Initializing Op Mode");
+        teamUtil.telemetry.update();
         initialize();
         robot.latch.latchUp();
 
-        telemetry.addLine("Ready to Start");
-        telemetry.update();
+        teamUtil.telemetry.addLine("Ready to Start");
+        teamUtil.telemetry.update();
         waitForStart();
 
 
 
-        telemetry.addLine("Ready to Start");
-        telemetry.update();
+        teamUtil.telemetry.addLine("Ready to Start");
+        teamUtil.telemetry.update();
         waitForStart();
 
 
