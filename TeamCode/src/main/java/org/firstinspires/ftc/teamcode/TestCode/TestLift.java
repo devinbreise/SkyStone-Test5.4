@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.TestCode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -23,7 +22,7 @@ public class TestLift extends LinearOpMode {
 
     public void initialize() {
         teamUtil.init(this);
-        teamUtil.theBlinkin.setSignal(Blinkin.Signals.INIT);
+        teamUtil.theBlinkin.setSignal(Blinkin.Signals.INIT_RED);
         liftSystem = new LiftSystem(hardwareMap, telemetry);
         liftSystem.initLiftSystem();
         teamUtil.theBlinkin.setSignal(Blinkin.Signals.OFF);
@@ -83,7 +82,7 @@ public class TestLift extends LinearOpMode {
                 //while (gamepad2.a) {};
             }
             if (gamepad1.y) {
-                liftSystem.lift.moveElevatorToLevel(targetLevel, 2000);
+                liftSystem.lift.moveElevatorToLevel(targetLevel, 4000);
 
             }
             if (gamepad1.left_stick_y < -0.5) {
@@ -91,10 +90,34 @@ public class TestLift extends LinearOpMode {
             } else  if (gamepad1.left_stick_y > 0.5) {
                 liftSystem.lift.moveElevatorDownSlowly();
             } else {
-                liftSystem.lift.holdElevator(); // this will stop any other elevator movement dead in its tracks...
+                liftSystem.lift.manualHoldElevator(); // this will stop any other elevator movement dead in its tracks...
             }
 
-
+            if (gamepad1.right_trigger > .8) {
+                if (!liftSystem.grabber.isSafeToRotate()) {
+                    liftSystem.grabber.closeGrabberWide();
+                    sleep(1000);
+                }
+                switch ( liftSystem.grabber.rotation) {
+                    case INSIDE:
+                    case MIDDLE:
+                        liftSystem.grabber.rotate(Grabber.GrabberRotation.OUTSIDE);
+                        teamUtil.sleep(500);
+                        break;
+                    case OUTSIDE:
+                        liftSystem.grabber.rotate(Grabber.GrabberRotation.INSIDE);
+                        teamUtil.sleep(500);
+                        break;
+                }
+            }
+            if (gamepad1.left_trigger > .8) {
+                if (!liftSystem.grabber.isSafeToRotate()) {
+                    liftSystem.grabber.closeGrabberWide();
+                    sleep(1000);
+                }
+                liftSystem.grabber.rotate(Grabber.GrabberRotation.MIDDLE);
+                teamUtil.sleep(500);
+            }
 
 
             if (gamepad2.dpad_left) {

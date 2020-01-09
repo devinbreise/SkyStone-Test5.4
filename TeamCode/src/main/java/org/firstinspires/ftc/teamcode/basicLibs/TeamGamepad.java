@@ -9,8 +9,8 @@ public class TeamGamepad {
     private boolean wasBouncedDPD_2 = false;
     private boolean isPressedDPU_2 = false;
     private boolean wasBouncedDPU_2 = false;
-    private boolean isPressedX_2 = false;
-    private boolean wasBouncedX_2 = false;
+    private boolean isPressedA_2 = false;
+    private boolean wasBouncedA_2 = false;
 
 
     public TeamGamepad(OpMode opmode){
@@ -39,11 +39,11 @@ public class TeamGamepad {
             isPressedDPU_2 = false;
         }
 
-        if(theOpMode.gamepad2.x){
-            isPressedX_2 = true;
-        }else if (isPressedX_2 && !theOpMode.gamepad2.x){
-            wasBouncedX_2 = true;
-            isPressedX_2 = false;
+        if(theOpMode.gamepad2.a){
+            isPressedA_2 = true;
+        }else if (isPressedA_2 && !theOpMode.gamepad2.a){
+            wasBouncedA_2 = true;
+            isPressedA_2 = false;
         }
 
 
@@ -77,9 +77,9 @@ public class TeamGamepad {
         }
 
     }
-    public boolean gamepad2XBounced(){
-        if(wasBouncedX_2){
-            wasBouncedX_2 = false;
+    public boolean gamepad2ABounced(){
+        if(wasBouncedA_2){
+            wasBouncedA_2 = false;
             return true;
         } else {
             return false;

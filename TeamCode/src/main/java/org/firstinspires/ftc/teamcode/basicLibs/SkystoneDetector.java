@@ -41,7 +41,7 @@ public class SkystoneDetector {
         if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
             initTfod();
         } else {
-            telemetry.addData("Sorry!", "This device is not compatible with TFOD");
+            teamUtil.telemetry.addData("Sorry!", "This device is not compatible with TFOD");
         }
         teamUtil.log("Initializing Detector - Finished");
     }
@@ -119,6 +119,8 @@ public class SkystoneDetector {
         teamUtil.log("Detect");
 
         if (tfod != null) {
+            // getUpdatedRecognitions() will return null if no new information is available since
+            // the last time that call was made.
             List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
 
             String logString = "Detected:";
@@ -129,54 +131,34 @@ public class SkystoneDetector {
                 for (Recognition recognition : updatedRecognitions) {
                     logString = logString+ recognition.getLabel() + " C:"+ getCenter(recognition) + " / ";
 
-                    // getUpdatedRecognitions() will return null if no new information is available since
-            // the last time that call was made.
-
                     if(recognition.getLabel()== LABEL_SKYSTONE){
-                        if(getCenter(recognition)> 350){
-                            teamUtil.log("Detect 1 - Finished");
-                            return 1;
-                        }else if(getCenter(recognition) > 125){
-                            if(recognition.getWidth() < 300) {
-                                teamUtil.log("Detect 2 - Finished");
-                                return 2;
-                            }else {
-                                return 3;
-                            }
+                        teamUtil.log("Skystone: " + recognition.getLeft() + ":" + recognition.getRight() + ":" + getCenter(recognition));
+                        if(getCenter(recognition)> 450){
+
+                            return 2;
+                        }else {
+                            return 3;
                         }
 
                     }
+
                 }
-                teamUtil.log(logString);
 
- /*                   if (rightMostIsSkystone(firstObject)) {
-                        teamUtil.log("PATH 1");
-                        return 1;
-                    } else if (leftMostIsSkystone(secondObject)) {
-                        teamUtil.log("PATH 2");
-                        return 2;
-
-                    } else if (!rightMostIsSkystone(firstObject) && !leftMostIsSkystone(secondObject)){
-                        teamUtil.log("PATH 3");
-                        return 3;
-                    }
-*/
+                return 1;
             } else {
-                teamUtil.log("detectBlue -- no updated recognitions");
+                teamUtil.log("detectRed -- no updated recognitions");
                 return -1;
             }
         } else {
-            teamUtil.log("detectBlue -- tfod inactivated");
+            teamUtil.log("detectRed -- tfod inactivated");
             return -1;
         }
 
-        teamUtil.log("Detect - Finished");
-        return -1;
     }
 
 
     public void reportPath() {
-        telemetry.addData("path: ", detectRed());
+        teamUtil.telemetry.addData("path: ", detectRed());
     }
 
     public boolean reportStoneInformation() {
@@ -185,11 +167,11 @@ public class SkystoneDetector {
             // the last time that call was made.
             List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
             if (updatedRecognitions != null) {
-                telemetry.addData("# Object Detected", updatedRecognitions.size());
+                teamUtil.telemetry.addData("# Object Detected", updatedRecognitions.size());
 
                 for (Recognition recognition : updatedRecognitions) {
-//                    telemetry.addData("rightIsSky?: ", rightMostIsSkystone(recognition));
-//                    telemetry.addData("middleIsSky?: ", leftMostIsSkystone(recognition));
+//                    teamUtil.telemetry.addData("rightIsSky?: ", rightMostIsSkystone(recognition));
+//                    teamUtil.telemetry.addData("middleIsSky?: ", leftMostIsSkystone(recognition));
 
                     teamUtil.log("label:" + recognition.getLabel());
 

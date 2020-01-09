@@ -49,7 +49,7 @@ public class RobotTeleop extends OpMode {
     public void loop() {
 
         //robot.scaleMovement(MAX_POWER, DRIVE_POWER);
-        telemetry.addData("Heading:", robot.getHeading());
+        teamUtil.telemetry.addData("Heading:", robot.getHeading());
 ///////////////////////////////////////////////////////////////////////
         teamGamePad.gamepadLoop();
 
@@ -125,16 +125,16 @@ public class RobotTeleop extends OpMode {
             liftSystem.drop();
         }
         if(gamepad2.x){
-            liftSystem.liftDown();
+            liftSystem.elevatorDown();
         }
 
 /////////////////////////////////////////////////////////////////////
         //this code is the telemetry
 //        latch.latchTelemetry();
 //        robot.driveTelemetry();
-        telemetry.addData("level:", level);
-        telemetry.addData("grabber rotation", grabberRotation);
-        telemetry.update();
+        teamUtil.telemetry.addData("level:", level);
+        teamUtil.telemetry.addData("grabber rotation", grabberRotation);
+        teamUtil.telemetry.update();
 
         teamUtil.trackPerf();
 

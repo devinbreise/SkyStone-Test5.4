@@ -120,13 +120,13 @@ public class TestEncoderMovement extends LinearOpMode {
                 withEncoders = true;
                 sleep(500);
             } else if (gamepad1.dpad_up) {
-                robot.moveInches(distance, -lfspeed, rfspeed, -lbspeed, rbspeed, 9000);
+                robot.moveInches(distance, lfspeed, rfspeed, lbspeed, rbspeed, 9000);
             } else if (gamepad1.dpad_down) {
-                robot.moveInches(distance, lfspeed, -rfspeed, lbspeed, -rbspeed, 9000);
+                robot.moveInches(distance, -lfspeed, -rfspeed, -lbspeed, -rbspeed, 9000);
             } else if (gamepad1.dpad_left) {
-                robot.moveInches(distance, lfspeed, rfspeed, -lbspeed, -rbspeed, 9000);
+                robot.moveInches(distance, -lfspeed, rfspeed, lbspeed, -rbspeed, 9000);
             } else if (gamepad1.dpad_right) {
-                robot.moveInches(distance, -lfspeed, -rfspeed, lbspeed, rbspeed, 9000);
+                robot.moveInches(distance, lfspeed, -rfspeed, -lbspeed, rbspeed, 9000);
             }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -201,8 +201,8 @@ public class TestEncoderMovement extends LinearOpMode {
 
 
                 telemetry.addLine("Distance: " + distance);
-//            telemetry.addLine("TestSpeed: " + testSpeed);
-//            telemetry.addLine("Power LF: "+ lfspeed+" RF: "+ rfspeed+" LB: "+ lbspeed+" RB: "+ rbspeed);
+            telemetry.addLine("TestSpeed: " + testSpeed);
+            telemetry.addLine("Power LF: "+ lfspeed+" RF: "+ rfspeed+" LB: "+ lbspeed+" RB: "+ rbspeed);
                 telemetry.addLine("LF%:" + lfSpeedPercentage + " RF%: " + rfSpeedPercentage + " LB%: " + lbSpeedPercentage + " RB%: " + rbSpeedPercentage);
                 telemetry.addLine("Encoders:" + withEncoders);
                 robot.distanceTelemetry();

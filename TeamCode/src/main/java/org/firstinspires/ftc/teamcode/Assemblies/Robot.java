@@ -13,9 +13,10 @@ package org.firstinspires.ftc.teamcode.Assemblies;
 public class Robot {
     public static final double DISTANCE_TO_BLOCK = 1.125;
     public static final int MIN_DISTANCE_FOR_AUTO_DROPOFF = 6;
-    public final double DISTANCE_TO_FOUNDATION = 2;
+    public final double DISTANCE_TO_FOUNDATION = 2.5;
     public static final double AUTOINTAKE_POWER = 0.33;
     public static final double AUTOINTAKE_SIDEWAYS_POWER = 0.33;
+    public boolean hasBeenInitialized = false;
 
     public LiftSystem liftSystem;
     public RobotDrive drive;
@@ -25,7 +26,7 @@ public class Robot {
     boolean timedOut = false;
 
     public final int MIN_DISTANCE_FOR_AUTO_PICKUP = 0;
-    public final int MAX_DISTANCE_FOR_AUTO_DROPOFF = 10;
+    public final int MAX_DISTANCE_FOR_AUTO_DROPOFF = 6;
 
     public Robot(LinearOpMode opMode){
         teamUtil.log ("Constructing Robot");
@@ -43,15 +44,17 @@ public class Robot {
     }
 
     // Call this before first use!
-    public void init(){
-        teamUtil.log ("Initializing Robot");
-        liftSystem.initLiftSystem();
-        drive.initImu();
-        drive.initDriveMotors();
-        drive.initSensors();
-        drive.resetHeading();
-        latch.initLatch();
-        teamUtil.log ("Initializing Robot - Finished");
+    public void init(boolean usingDistanceSensors){
+            teamUtil.log ("Initializing Robot");
+            liftSystem.initLiftSystem();
+            drive.initImu();
+            drive.initDriveMotors();
+            if(usingDistanceSensors){
+                drive.initSensors();
+            }
+            drive.resetHeading();
+            latch.initLatch();
+            teamUtil.log ("Initializing Robot - Finished");
     }
 
     ////////////////////////////////////////////////////
@@ -158,6 +161,48 @@ public class Robot {
 
         // line up using the front right sensor
     }
+
+    public void foundationRed(){
+        latch.latchDown();
+        teamUtil.sleep(500);
+        drive.moveInches(44, 0.7, 0.875, 1, 0.575 ,3273);
     }
+
+    public void foundationBlue(){
+        latch.latchDown();
+        teamUtil.sleep(500);
+        drive.moveInches(44, 0.975, 0.6, 0.675, 0.8 ,3273);
+    }
+
+
+    public void positionToFoundation(){
+        liftSystem.hoverOverFoundationNoWait(0, Grabber.GrabberRotation.INSIDE, 5000);
+        drive.closeToDistanceOr(drive.frontLeftDistance, drive.frontRightDistance, 4, 0.3, 4000);
+
+        if((drive.frontRightDistance.getDistance() < MAX_DISTANCE_FOR_AUTO_DROPOFF) && (drive.frontLeftDistance.getDistance() > MAX_DISTANCE_FOR_AUTO_DROPOFF)){
+            drive.moveToDistance(drive.frontRightDistance, DISTANCE_TO_FOUNDATION, AUTOINTAKE_POWER, 5000);
+
+            while((drive.frontRightDistance.getDistance() < MAX_DISTANCE_FOR_AUTO_DROPOFF) && (drive.frontLeftDistance.getDistance() > MAX_DISTANCE_FOR_AUTO_DROPOFF) && teamUtil.keepGoing(6500 + System.currentTimeMillis()) && teamUtil.theOpMode.opModeIsActive()) {
+                drive.driveRight(0.5);
+                teamUtil.log("FrontLeftDistance: " + drive.frontLeftDistance.getDistance());
+            }
+            drive.moveInchesRight(0.6, 7.5, 4500);
+
+        } else if((drive.frontRightDistance.getDistance() > MAX_DISTANCE_FOR_AUTO_DROPOFF) && (drive.frontLeftDistance.getDistance() < MAX_DISTANCE_FOR_AUTO_DROPOFF)){
+            drive.moveToDistance(drive.frontLeftDistance, DISTANCE_TO_FOUNDATION, AUTOINTAKE_POWER, 5000);
+
+            while((drive.frontRightDistance.getDistance() > MAX_DISTANCE_FOR_AUTO_DROPOFF) && (drive.frontLeftDistance.getDistance() < MAX_DISTANCE_FOR_AUTO_DROPOFF) && teamUtil.keepGoing(6500 + System.currentTimeMillis()) && teamUtil.theOpMode.opModeIsActive()) {
+                drive.driveLeft(0.5);
+                teamUtil.log("FrontLeftDistance: " + drive.frontLeftDistance.getDistance());
+            }
+            drive.moveInchesLeft(0.6, 11.5, 4500);
+        } else {
+            teamUtil.log("didn't see anything on distance sensors");
+            return;
+        }
+    }
+
+
+}
 
 

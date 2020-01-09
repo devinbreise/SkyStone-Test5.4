@@ -106,7 +106,7 @@ public class revHubIMUGyro {
 
     public float getHeading(boolean usingOld) {
         if(usingOld){        anglesCurrent = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            telemetry.addData("IMU Heading", anglesCurrent.firstAngle);
+            teamUtil.telemetry.addData("IMU Heading", anglesCurrent.firstAngle);
             // if we were near the cutoff between the positive and negative angles
             // and appear to have turned between the positive and negative sides to the right
             // than see if the last amgle is greater than or equal to 90 and the current angle is less than 0 than do

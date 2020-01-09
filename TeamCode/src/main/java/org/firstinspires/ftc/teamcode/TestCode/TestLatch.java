@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Assemblies.Latch;
 
 @TeleOp(name = "TestLatch")
-@Disabled
+//@Disabled
 
 
 public class TestLatch extends OpMode {

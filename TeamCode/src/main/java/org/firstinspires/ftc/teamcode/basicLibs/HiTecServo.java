@@ -15,16 +15,16 @@ public class HiTecServo {
 
     public void goTo (int degrees){
         if (theServo == null){
-            telemetry.addData("ERROR", "you have not initialized");
+            teamUtil.telemetry.addData("ERROR", "you have not initialized");
             return;
         }
         if (degrees < 0 || degrees > 150){
-            telemetry.addData("ERROR", "Servo degrees out of range");
+            teamUtil.telemetry.addData("ERROR", "Servo degrees out of range");
             return;
         }
         double servoPos = 0.0066666666667 * degrees;
         if(servoPos < 0.3 || servoPos > 0.7){
-            telemetry.addData("ERROR", "Servo degrees out of range");
+            teamUtil.telemetry.addData("ERROR", "Servo degrees out of range");
             return;
         } else theServo.setPosition(servoPos);
 
