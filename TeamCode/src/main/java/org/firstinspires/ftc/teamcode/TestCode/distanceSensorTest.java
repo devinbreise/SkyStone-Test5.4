@@ -53,8 +53,7 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamDistanceSensor;
  * @see <a href="http://revrobotics.com">REV Robotics Web Page</a>
  */
 @TeleOp(name = "Sensor: distanceSensorTest")
-//@Disabled
-
+@Disabled
 public class distanceSensorTest extends LinearOpMode {
 
 

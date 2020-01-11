@@ -8,8 +8,10 @@ import org.firstinspires.ftc.teamcode.Assemblies.Robot;
 import org.firstinspires.ftc.teamcode.basicLibs.Blinkin;
 import org.firstinspires.ftc.teamcode.basicLibs.TeamGamepad;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 @Autonomous(name="Lights Off")
+@Disabled
 public class lightsOut extends LinearOpMode {
 
     public void initialize() {

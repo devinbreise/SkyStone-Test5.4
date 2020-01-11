@@ -61,7 +61,7 @@ public class AutoSkystonePathBlueShort extends LinearOpMode {
         }
 
 
-        robot.drive.accelerateInchesForward(0.75, 20, 3400);
+        robot.drive.accelerateInchesForward(0.5, 20, 3400); //Todo
         robot.drive.moveInchesForward(0.3, 3, 1000);
         robot.liftSystem.grabAndStowNoWait(4500);
 

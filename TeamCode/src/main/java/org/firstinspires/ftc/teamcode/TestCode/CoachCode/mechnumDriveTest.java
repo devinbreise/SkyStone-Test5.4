@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -19,7 +20,7 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamColorSensor;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 @Autonomous(name = "mechnumDriveTest")
-//@Disabled
+@Disabled
 public class mechnumDriveTest extends LinearOpMode {
 
     // Stuff that belongs in a drive class

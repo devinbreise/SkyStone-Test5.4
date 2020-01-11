@@ -67,7 +67,7 @@ public class AutoSkystonePathRed extends LinearOpMode {
         robot.liftSystem.grabAndStowNoWait(4500);
 
         teamUtil.sleep(750);
-        robot.drive.accelerateInchesBackward(0.6, 7.8, 2500);
+        robot.drive.accelerateInchesBackward(0.6, 9.3, 2500); //TODO: changed dis
         robot.drive.rotateToZero();
         robot.drive.accelerateToSpeedRight(0, 0.75);
         while (!robot.drive.bottomColor.isOnTape()) {

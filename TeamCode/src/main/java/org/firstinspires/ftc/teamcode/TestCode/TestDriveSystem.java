@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.TestCode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Assemblies.Robot;
 import org.firstinspires.ftc.teamcode.Assemblies.RobotDrive;
@@ -12,7 +13,7 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 
 @TeleOp(name = "TestDriveSystem")
-
+@Disabled
 public class TestDriveSystem extends LinearOpMode {
 
     // lift system code - should be in its own assembly class...
