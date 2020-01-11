@@ -84,6 +84,9 @@ public class TestDriveSystem extends LinearOpMode {
             if (gamepad2.right_bumper) {
                 robot.drive.rotateToHeading180Left();
             }
+            if(gamepad2.left_bumper){
+                robot.drive.rotateToZero();
+            }
 
             if (gamepad2.dpad_up) {
                 robot.drive.accelerateInchesForward(1, 40, 7000);

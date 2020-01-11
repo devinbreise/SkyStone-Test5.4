@@ -28,8 +28,8 @@ public class mechnumDriveTest extends LinearOpMode {
 
     public static double INITIAL_HEADING;
 
-    HardwareMap hardwareMap;
-    Telemetry telemetry;
+    //HardwareMap hardwareMap;
+    //Telemetry telemetry;
     boolean timedOut = false;
     DcMotor fLeftMotor;
     DcMotor bLeftMotor;
@@ -149,36 +149,110 @@ public class mechnumDriveTest extends LinearOpMode {
 
     public void stopMotors() {
         fRightMotor.setPower(0);
+        fLeftMotor.setPower(0);
         bRightMotor.setPower(0);
         bLeftMotor.setPower(0);
-        fLeftMotor.setPower(0);
     }
 
     public void onForward() {
+        teamUtil.log("Encoders LF:" + fLeftMotor.getCurrentPosition() + " RF:" + fRightMotor.getCurrentPosition() + " LB:" + bLeftMotor.getCurrentPosition() + " RB:" + bRightMotor.getCurrentPosition());
         fRightMotor.setPower(rfspeed);
+        fLeftMotor.setPower(lfspeed);
         bRightMotor.setPower(rbspeed);
         bLeftMotor.setPower(lbspeed);
-        fLeftMotor.setPower(lfspeed);
+        while (gamepad1.dpad_up){
+            teamUtil.log("Encoders LF:" + fLeftMotor.getCurrentPosition() + " RF:" + fRightMotor.getCurrentPosition() + " LB:" + bLeftMotor.getCurrentPosition() + " RB:" + bRightMotor.getCurrentPosition());
+        }
     }
     public void onBackward() {
+        teamUtil.log("Encoders LF:" + fLeftMotor.getCurrentPosition() + " RF:" + fRightMotor.getCurrentPosition() + " LB:" + bLeftMotor.getCurrentPosition() + " RB:" + bRightMotor.getCurrentPosition());
         fRightMotor.setPower(-rfspeed);
+        fLeftMotor.setPower(-lfspeed);
         bRightMotor.setPower(-rbspeed);
         bLeftMotor.setPower(-lbspeed);
-        fLeftMotor.setPower(-lfspeed);
+        while (gamepad1.dpad_down){
+            teamUtil.log("Encoders LF:" + fLeftMotor.getCurrentPosition() + " RF:" + fRightMotor.getCurrentPosition() + " LB:" + bLeftMotor.getCurrentPosition() + " RB:" + bRightMotor.getCurrentPosition());
+        }
     }
     public void onLeft() {
-        fRightMotor.setPower(-rfspeed);
-        bRightMotor.setPower(rbspeed);
-        bLeftMotor.setPower(-lbspeed);
-        fLeftMotor.setPower(lfspeed);
-    }
-    public void onRight() {
+        teamUtil.log("Encoders LF:" + fLeftMotor.getCurrentPosition() + " RF:" + fRightMotor.getCurrentPosition() + " LB:" + bLeftMotor.getCurrentPosition() + " RB:" + bRightMotor.getCurrentPosition());
         fRightMotor.setPower(rfspeed);
+        fLeftMotor.setPower(-lfspeed);
         bRightMotor.setPower(-rbspeed);
         bLeftMotor.setPower(lbspeed);
-        fLeftMotor.setPower(-lfspeed);
+        while (gamepad1.dpad_left) {
+            teamUtil.log("Encoders LF:" + fLeftMotor.getCurrentPosition() + " RF:" + fRightMotor.getCurrentPosition() + " LB:" + bLeftMotor.getCurrentPosition() + " RB:" + bRightMotor.getCurrentPosition());
+        }
+    }
+    public void onRight() {
+        teamUtil.log("Encoders LF:" + fLeftMotor.getCurrentPosition() + " RF:" + fRightMotor.getCurrentPosition() + " LB:" + bLeftMotor.getCurrentPosition() + " RB:" + bRightMotor.getCurrentPosition());
+        fRightMotor.setPower(-rfspeed);
+        fLeftMotor.setPower(lfspeed);
+        bRightMotor.setPower(rbspeed);
+        bLeftMotor.setPower(-lbspeed);
+        while (gamepad1.dpad_right) {
+            teamUtil.log("Encoders LF:" + fLeftMotor.getCurrentPosition() + " RF:" + fRightMotor.getCurrentPosition() + " LB:" + bLeftMotor.getCurrentPosition() + " RB:" + bRightMotor.getCurrentPosition());
+        }
     }
 
+    // Try to match the encoder counts on all 4 wheels to the lf motor by
+    // varying the power to the other 3 proportionally
+    public void pForward(double basePower) {
+        double pfactor = .001;
+        double lfPower = basePower;
+        double rfPower = basePower;
+        double lbPower = basePower;
+        double rbPower = basePower;
+        resetAllDriveEncoders();
+        setAllMotorsWithEncoder();
+        do {
+            fRightMotor.setPower(rfPower);
+            fLeftMotor.setPower(lfPower);
+            bRightMotor.setPower(rbPower);
+            bLeftMotor.setPower(lbPower);
+
+            lfEncoder = fLeftMotor.getCurrentPosition();
+            rfEncoder = fRightMotor.getCurrentPosition();
+            lbEncoder = bLeftMotor.getCurrentPosition();
+            rbEncoder = bRightMotor.getCurrentPosition();
+            rfPower =  basePower - (rfEncoder - lfEncoder) * pfactor;
+            lbPower = basePower - (lbEncoder - lfEncoder) * pfactor;
+            rbPower =  basePower - (rbEncoder - lfEncoder) * pfactor;
+
+            teamUtil.log("Encoders LF:"+ lfEncoder+" RF:" + rfEncoder+" LB:" + lbEncoder+" RB:"+ rbEncoder);
+
+        } while (gamepad1.dpad_up);
+
+        stopMotors();
+    }
+
+    public void closeToDistance (double distance, double initialPower) {
+        double minPower = .1;
+        double decelerateInches = 2;
+        double power = initialPower;
+        double currentDistance  = frontLeftDistance.getDistance();
+        double slope = (initialPower-minPower) / (currentDistance-distance);
+        if (currentDistance > distance) {
+            fRightMotor.setPower(power);
+            fLeftMotor.setPower(power);
+            bRightMotor.setPower(power);
+            bLeftMotor.setPower(power);
+            while (currentDistance > distance + decelerateInches) {
+                teamUtil.log("Distance:" + currentDistance + " Power:" + power);
+                currentDistance = frontLeftDistance.getDistance();
+            }
+            while (currentDistance > distance) {
+                teamUtil.log("Distance:" + currentDistance + " Power:" + power);
+                power = (currentDistance - distance) * slope + minPower;
+                fRightMotor.setPower(power);
+                fLeftMotor.setPower(power);
+                bRightMotor.setPower(power);
+                bLeftMotor.setPower(power);
+                currentDistance = frontLeftDistance.getDistance();
+            }
+        }
+        stopMotors();
+    }
 
     public void distanceTelemetry() {
         telemetry.addData("frontLeftDistance", frontLeftDistance.getDistance());
@@ -202,7 +276,7 @@ public class mechnumDriveTest extends LinearOpMode {
         telemetry.addData("Front Right Motor:", fRightMotor.getPower());
         telemetry.addData("Back Left Motor:", bLeftMotor.getPower());
         telemetry.addData("Back Right Motor:", bRightMotor.getPower());
-        telemetry.addData("Heading:", getAbsoluteHeading());
+        telemetry.addData("Absolute Heading:", getAbsoluteHeading());
 
     }
 
@@ -215,10 +289,6 @@ public class mechnumDriveTest extends LinearOpMode {
     }
 
     public void logEncoderDistances () {
-        lfEncoder = fLeftMotor.getCurrentPosition();
-        rfEncoder = fRightMotor.getCurrentPosition();
-        lbEncoder = bLeftMotor.getCurrentPosition();
-        rbEncoder = bRightMotor.getCurrentPosition();
         teamUtil.log("Encoder Distances LF:"+ (fLeftMotor.getCurrentPosition()-lfEncoder)
                 +" RF:" + (fRightMotor.getCurrentPosition()-rfEncoder)
                 +" LB:" + (bLeftMotor.getCurrentPosition()-lbEncoder)
@@ -236,6 +306,7 @@ public class mechnumDriveTest extends LinearOpMode {
         telemetryDriveEncoders();
         distanceTelemetry();
         telemetry.addData("Heading:", getAbsoluteHeading());
+        telemetry.addData("Waiting to Start:", 0);
         telemetry.update();
 
         waitForStart();
@@ -276,20 +347,25 @@ public class mechnumDriveTest extends LinearOpMode {
             } else if (gamepad1.right_bumper) {
                 if (gamepad1.dpad_up) {
                     rbspeed = rbspeed + speedIncrement;
-                    lfspeed = lfspeed + speedIncrement;
                     lbspeed = lbspeed + speedIncrement;
-                    rbspeed = rbspeed + speedIncrement;
+                    rfspeed = rfspeed + speedIncrement;
+                    lfspeed = lfspeed + speedIncrement;
                     sleep(250);
                 } else if (gamepad1.dpad_down) {
                     rbspeed = rbspeed - speedIncrement;
-                    lfspeed = lfspeed - speedIncrement;
                     lbspeed = lbspeed - speedIncrement;
-                    rbspeed = rbspeed - speedIncrement;
+                    rfspeed = rfspeed - speedIncrement;
+                    lfspeed = lfspeed - speedIncrement;
                     sleep(250);
                 }
             } else {
                 if (gamepad1.dpad_up) {
-                    onForward();
+                    if (gamepad1.left_bumper) {
+                        closeToDistance(1,.3);
+                        //pForward(0.3);
+                    } else {
+                        onForward();
+                    }
                 } else if (gamepad1.dpad_down) {
                     onBackward();
                 } else if (gamepad1.dpad_left) {
@@ -301,8 +377,14 @@ public class mechnumDriveTest extends LinearOpMode {
                 }
                 if (gamepad1.left_trigger > .5) {
                     logEncoders();
+                    sleep(250);
                 } else if (gamepad1.right_trigger > .5) {
                     logEncoderDistances();
+                    sleep(250);
+                }
+                if (gamepad1.left_stick_button) {
+                    resetAllDriveEncoders();
+                    setAllMotorsWithEncoder();
                 }
             }
 

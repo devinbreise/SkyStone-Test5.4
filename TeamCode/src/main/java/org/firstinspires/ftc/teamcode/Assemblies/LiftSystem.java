@@ -23,6 +23,7 @@ public class LiftSystem {
         HOVER // ELEVATOR HOVERING (not moving)
     }
     public LiftSystemState state = LiftSystemState.IDLE;
+    public boolean preparedToGrab = false; // TODO: This is a bit of a hack, this bit of state should be incorporated into the overall state enum for this class
     boolean timedOut = false;
     //boolean isStowed = false;
 
@@ -107,6 +108,7 @@ public class LiftSystem {
         lift.moveElevator(lift.HOVER_FOR_GRAB, 2000); // a little closer to the ground then level 0
         //lift.moveElevatorToLevelNoWait(0, 3000);
         state = LiftSystemState.IDLE;
+        preparedToGrab = true;
         timedOut = (System.currentTimeMillis() > timeOutTime);
         if (timedOut) {
             teamUtil.log("Prepare to grab - TIMED OUT!");
@@ -138,6 +140,7 @@ public class LiftSystem {
 //            return;
 //        }
         state = LiftSystemState.GRAB_AND_STOW;
+        preparedToGrab = false;
         teamUtil.log("grab and Stow");
         long timeOutTime= System.currentTimeMillis()+timeOut;
         timedOut = false;
@@ -184,6 +187,7 @@ public class LiftSystem {
     // dip down, grab a stone and then return to level 0
     public void grab(long timeOut){
         state = LiftSystemState.GRAB;
+        preparedToGrab = false;
         teamUtil.log("grab");
         if (!lift.liftBaseIsUp()) {
             teamUtil.log("WARNING: grab called when lift was not up");
@@ -204,8 +208,26 @@ public class LiftSystem {
         state = LiftSystemState.IDLE;
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public void grabNoWait(final long timeOut) {
+        if (!isMoving()) {
+            state = LiftSystemState.GRAB;
+            teamUtil.log("Launching Thread to Grab");
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    grab(timeOut);
+                }
+            });
+            thread.start();
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // dip down, align a stone, drop capstone on it, grab it, and then return to level 0
     public void capAndGrab(long timeOut){
         state = LiftSystemState.GRAB;
+        preparedToGrab = false;
         teamUtil.log("cap & grab");
         if (!lift.liftBaseIsUp()) {
             teamUtil.log("WARNING: cap & grab called when lift was not up");
@@ -231,6 +253,21 @@ public class LiftSystem {
         state = LiftSystemState.IDLE;
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public void capAndGrabNoWait(final long timeOut) {
+        if (!isMoving()) {
+            state = LiftSystemState.GRAB;
+            teamUtil.log("Launching Thread to Cap and Grab");
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    capAndGrab(timeOut);
+                }
+            });
+            thread.start();
+        }
+    }
+
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // get ready to drop a stone (presumbably being held when this is called) at the specified level
@@ -238,6 +275,7 @@ public class LiftSystem {
     // This will raise the lift if needed and rotate the grabber
     public void hoverOverFoundation(int level, Grabber.GrabberRotation rotation, long timeOut) {
         state = LiftSystemState.MOVING_TO_HOVER;
+        preparedToGrab = false;
         teamUtil.log("Moving to Hover");
         long timeOutTime = System.currentTimeMillis() + timeOut;
         timedOut = false;
@@ -292,17 +330,35 @@ public class LiftSystem {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Drop the lift system without grabbing anything. TODO State management and dealing with rotation stuff...
+    // Drop the lift system without grabbing anything.
     public void putAwayLiftSystem ( long timeOut) {
 
-        // this is a bit dangerous...we are trusting that the liftsystem is in a position where we can do these
-        //  two servo movements...
-        grabber.grabberRotatePos();
-        teamUtil.sleep(750);
-        grabber.rotate(Grabber.GrabberRotation.INSIDE);
+        state = LiftSystemState.LIFT_STOW;
+        // Make sure liftbase is up
+        if (!lift.liftBaseIsUp()) {
+            teamUtil.log("WARNING: putAwayLiftSystem called when lift was not up");
+            state = LiftSystemState.IDLE;
+            return;
+        }
+        // See if we need to rotate the servos
+        if (grabber.rotation != Grabber.GrabberRotation.INSIDE) {
+            // we need to rotate the servos so first we need to make sure our paddles our in a position where it is safe to rotate
+            if (!grabber.isSafeToRotate()) {
+                // we need to adjust the paddle positions to rotate
+                grabber.grabberRotatePos();
+                teamUtil.sleep(1250); // worst case, stowed or capstone release position
+            }
+            grabber.rotate(Grabber.GrabberRotation.INSIDE);
+            teamUtil.sleep(750); // wait for rotation to complete
+        }
+        // put the paddles in a position that is appropriate for stowed if they are not already
+        if (!grabber.isSafeToRotate()) {
+            grabber.grabberRotatePos();
+        }
         lift.moveElevatorToBottom();
         lift.moveLiftBaseDown(.95, timeOut);
         state=LiftSystemState.IDLE;
+        preparedToGrab = false;
     }
 
     public void putAwayLiftSystemNoWait(final long timeOut) {
@@ -320,7 +376,6 @@ public class LiftSystem {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // TODO maybe dip just an inch or so before dropping?
     public void drop(){
         grabber.grabberPickup();
     }

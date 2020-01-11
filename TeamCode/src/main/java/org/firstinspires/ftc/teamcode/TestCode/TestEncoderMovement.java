@@ -199,17 +199,17 @@ public class TestEncoderMovement extends LinearOpMode {
                     robot.moveInches(distance, lfspeed * lfSpeedPercentage, -rfspeed * rfSpeedPercentage, -lbspeed * lbSpeedPercentage, rbspeed * rbSpeedPercentage, 9000);
                 }
 
+            }
 
-                telemetry.addLine("Distance: " + distance);
+            telemetry.addLine("Distance: " + distance);
             telemetry.addLine("TestSpeed: " + testSpeed);
             telemetry.addLine("Power LF: "+ lfspeed+" RF: "+ rfspeed+" LB: "+ lbspeed+" RB: "+ rbspeed);
-                telemetry.addLine("LF%:" + lfSpeedPercentage + " RF%: " + rfSpeedPercentage + " LB%: " + lbSpeedPercentage + " RB%: " + rbSpeedPercentage);
-                telemetry.addLine("Encoders:" + withEncoders);
-                robot.distanceTelemetry();
-                robot.encoderTelemetry();
-                robot.driveTelemetry();
-                telemetry.update();
-            }
+            telemetry.addLine("LF%:" + lfSpeedPercentage + " RF%: " + rfSpeedPercentage + " LB%: " + lbSpeedPercentage + " RB%: " + rbSpeedPercentage);
+            telemetry.addLine("Encoders:" + withEncoders);
+            robot.distanceTelemetry();
+            robot.encoderTelemetry();
+            robot.driveTelemetry();
+            telemetry.update();
 
 
             teamUtil.log("BACKLEFT " + robot.getBackLeftMotorPos());

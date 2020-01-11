@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
+import org.firstinspires.ftc.teamcode.Assemblies.LiftSystem;
 import org.firstinspires.ftc.teamcode.Assemblies.Robot;
 import org.firstinspires.ftc.teamcode.basicLibs.Blinkin;
 import org.firstinspires.ftc.teamcode.basicLibs.TeamGamepad;
@@ -78,18 +79,21 @@ public class RobotTeleopLinear extends LinearOpMode {
             }
 /////////////////////////////////////////////////////////////////////////
 
+            // Disable these 3 commands unless the lift system is in the 'prepare to grab' position
+            // this might keep a critical mistake from happening (e.g. dropping the lift on top of a tower)
+            if ((robot.liftSystem.state == LiftSystem.LiftSystemState.IDLE) || robot.liftSystem.preparedToGrab) {
+                if (gamepad1.right_bumper) {
+                    robot.liftSystem.grabNoWait( 4000);
 
-            if (gamepad1.right_bumper) {
-                robot.liftSystem.grab( 4000);
-            }
-            if(gamepad1.y){
-                robot.liftSystem.capAndGrab(5000);
-            }
+                }
+                if(gamepad1.y){
+                     robot.liftSystem.capAndGrabNoWait(5000);
+                }
 
-            if (gamepad1.left_bumper) {
-                robot.liftSystem.grabAndStowNoWait(4000);
+                if (gamepad1.left_bumper) {
+                    robot.liftSystem.grabAndStowNoWait(4000);
+                }
             }
-
 
 /////////////////////////////////////////////////////////////////////////
             //this code is for the foundation latch

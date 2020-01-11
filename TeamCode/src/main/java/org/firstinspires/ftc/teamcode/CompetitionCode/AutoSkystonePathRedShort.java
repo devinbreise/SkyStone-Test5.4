@@ -31,9 +31,10 @@ public class AutoSkystonePathRedShort extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+
+        initialize();
         teamUtil.telemetry.addLine("Initializing Op Mode");
         teamUtil.telemetry.update();
-        initialize();
         robot.latch.latchUp();
 
         detector = new SkystoneDetector(telemetry, hardwareMap);

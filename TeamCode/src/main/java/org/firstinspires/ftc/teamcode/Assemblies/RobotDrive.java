@@ -43,7 +43,7 @@ public class RobotDrive {
 
 
     HardwareMap hardwareMap;
-    Telemetry telemetry;
+    //Telemetry telemetry;
     boolean timedOut = false;
     DcMotor fLeftMotor;
     DcMotor bLeftMotor;
@@ -67,11 +67,11 @@ public class RobotDrive {
 
     public RobotDrive(HardwareMap theHardwareMap, Telemetry theTelemetry) {
         hardwareMap = theHardwareMap;
-        telemetry = theTelemetry;
+        //telemetry = theTelemetry;
     }
 
     public void initImu() {
-        revImu = new revHubIMUGyro(hardwareMap, telemetry);
+        revImu = new revHubIMUGyro(hardwareMap, teamUtil.telemetry);
 
     }
 
@@ -118,7 +118,7 @@ public class RobotDrive {
         frontmiddleDistance = hardwareMap.get(DistanceSensor.class, "frontColorSensor");
         frontmiddleColor = hardwareMap.get(ColorSensor.class, "frontColorSensor");
         bottomColorSensor = hardwareMap.get(ColorSensor.class, "bottomColorSensor");
-        bottomColor = new teamColorSensor(telemetry, bottomColorSensor);
+        bottomColor = new teamColorSensor(teamUtil.telemetry, bottomColorSensor);
         bottomColor.calibrate();
         //frontRightDistance.setOffset((float)(-3.0));
     }
@@ -219,11 +219,10 @@ public class RobotDrive {
 
 
     public double getDistanceInches(DistanceSensors distanceSensor) {
-        if (distanceSensor.validReading()) {
-            return distanceSensor.getDistance();
-        } else {
-            return -1;
-        }
+        double distance = distanceSensor.getDistance();
+        if(distance > 20){
+            return 1000;
+        } else return distance;
     }
 
 
@@ -965,6 +964,7 @@ public class RobotDrive {
     //deceleration stuff
 
     public void decelerateInchesRight(double startSpeed, double inches){
+        double startingPosition = fRightMotor.getCurrentPosition();
         final double COUNTS_PER_MOTOR_REV = 1120;    // NeverRest 40 at 1:1
         final double DRIVE_GEAR_REDUCTION = 1.0;     // This is < 1.0 if geared UP
         final double WHEEL_DIAMETER_INCHES = 3.93701;     // For figuring circumference
@@ -980,13 +980,14 @@ public class RobotDrive {
         double speedChange = startSpeed - MIN_SPEED;
 
         decelerationEncoderCount = (int) ((speedChange / MAX_DECEL_PER_INCH) * COUNTS_PER_INCH);
-        double decelerationPoint = targetPositionRightMotor - decelerationEncoderCount;
+        double endingPoint = startingPosition - inches * COUNTS_PER_INCH;
+        double decelerationPoint = endingPoint + decelerationEncoderCount;
 
 
         setAllMotorsWithEncoder();
-        resetAllDriveEncoders();
+//        resetAllDriveEncoders();
 
-        while (Math.abs(fRightMotor.getCurrentPosition()) < decelerationPoint) {
+        while (fRightMotor.getCurrentPosition() > decelerationPoint) {
             //CRUISING
             driveRight(startSpeed);
             teamUtil.log("Cruising speed: " + startSpeed);
@@ -994,12 +995,11 @@ public class RobotDrive {
 
         teamUtil.log("start decelerating");
 
-        double initialPosition = Math.abs(fRightMotor.getCurrentPosition());
-        while (Math.abs(fRightMotor.getCurrentPosition()) - initialPosition < decelerationEncoderCount) {
+        while (fRightMotor.getCurrentPosition() > endingPoint) {
             //DECELERATING
-            double decelSpeed = Range.clip((startSpeed - ((Math.abs(fRightMotor.getCurrentPosition()) - initialPosition) / COUNTS_PER_INCH) * MAX_DECEL_PER_INCH), 0.3, 1);
+            double decelSpeed = Range.clip((startSpeed - (Math.abs(fRightMotor.getCurrentPosition() - decelerationPoint) / COUNTS_PER_INCH) * MAX_DECEL_PER_INCH), 0.3, 1);
             teamUtil.log("Deceleration speed: " + decelSpeed);
-            teamUtil.log("decelDistanceTraveled: " + (Math.abs(fRightMotor.getCurrentPosition()) - initialPosition));
+            teamUtil.log("decelDistanceTraveled: " + (Math.abs(fRightMotor.getCurrentPosition() - decelerationPoint)));
             teamUtil.log("DecelDistance: " + decelerationEncoderCount);
 
             driveRight(decelSpeed);
@@ -1008,6 +1008,8 @@ public class RobotDrive {
     }
 
     public void decelerateInchesLeft(double startSpeed, double inches){
+        double startingPosition = fRightMotor.getCurrentPosition();
+
         final double COUNTS_PER_MOTOR_REV = 1120;    // NeverRest 40 at 1:1
         final double DRIVE_GEAR_REDUCTION = 1.0;     // This is < 1.0 if geared UP
         final double WHEEL_DIAMETER_INCHES = 3.93701;     // For figuring circumference
@@ -1018,18 +1020,18 @@ public class RobotDrive {
         final double MAX_DECEL_PER_INCH = .05; // max power acceleration per inch without skidding
 
         int decelerationEncoderCount;
-        double targetPositionRightMotor = inches * COUNTS_PER_INCH;
 
         double speedChange = startSpeed - MIN_SPEED;
 
         decelerationEncoderCount = (int) ((speedChange / MAX_DECEL_PER_INCH) * COUNTS_PER_INCH);
-        double decelerationPoint = targetPositionRightMotor - decelerationEncoderCount;
+        double endingPoint = startingPosition + inches * COUNTS_PER_INCH;
+        double decelerationPoint = endingPoint - decelerationEncoderCount;
 
 
         setAllMotorsWithEncoder();
-        resetAllDriveEncoders();
+//        resetAllDriveEncoders();
 
-        while (Math.abs(fRightMotor.getCurrentPosition()) < decelerationPoint) {
+        while (fRightMotor.getCurrentPosition() < decelerationPoint) {
             //CRUISING
             driveLeft(startSpeed);
             teamUtil.log("Cruising speed: " + startSpeed);
@@ -1037,12 +1039,11 @@ public class RobotDrive {
 
         teamUtil.log("start decelerating");
 
-        double initialPosition = Math.abs(fRightMotor.getCurrentPosition());
-        while (Math.abs(fRightMotor.getCurrentPosition()) - initialPosition < decelerationEncoderCount) {
+        while (fRightMotor.getCurrentPosition() < endingPoint) {
             //DECELERATING
-            double decelSpeed = Range.clip((startSpeed - ((Math.abs(fRightMotor.getCurrentPosition()) - initialPosition) / COUNTS_PER_INCH) * MAX_DECEL_PER_INCH), 0.3, 1);
+            double decelSpeed = Range.clip((startSpeed - ((fRightMotor.getCurrentPosition() - decelerationPoint) / COUNTS_PER_INCH) * MAX_DECEL_PER_INCH), 0.3, 1);
             teamUtil.log("Deceleration speed: " + decelSpeed);
-            teamUtil.log("decelDistanceTraveled: " + (Math.abs(fRightMotor.getCurrentPosition()) - initialPosition));
+            teamUtil.log("decelDistanceTraveled: " + (fRightMotor.getCurrentPosition() - decelerationPoint));
             teamUtil.log("DecelDistance: " + decelerationEncoderCount);
 
             driveLeft(decelSpeed);
@@ -1311,7 +1312,7 @@ public class RobotDrive {
             teamUtil.log("rotatePower: " + rotatePower);
 
 
-        } while(getHeading() < 180);
+        } while(getHeading() < 177.5);
 
         stopMotors();
         teamUtil.log("I'M DONE");
@@ -1368,7 +1369,7 @@ public class RobotDrive {
 
             rotateLeft(rotatePower);
 
-        }while(getRelativeHeading(180) < 180);
+        }while(getRelativeHeading(180) < 177.5);
 
         stopMotors();
         teamUtil.log("I'M DONE");
@@ -1386,7 +1387,7 @@ public class RobotDrive {
 
             rotateRight(rotatePower);
 
-        }while(getRelativeHeading(180) > 180);
+        }while(getRelativeHeading(180) > 182.5);
 
         stopMotors();
         teamUtil.log("I'M DONE");

@@ -29,9 +29,10 @@ public class AutoSkystonePathRed extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+
+        initialize();
         teamUtil.telemetry.addLine("Initializing Op Mode");
         teamUtil.telemetry.update();
-        initialize();
         robot.latch.latchUp();
 
         detector = new SkystoneDetector(telemetry, hardwareMap);
@@ -61,31 +62,30 @@ public class AutoSkystonePathRed extends LinearOpMode {
         }
 
 
-        robot.drive.accelerateInchesForward(0.75, 20, 3400);
+        robot.drive.accelerateInchesForward(0.65, 20, 3400);
         robot.drive.moveInchesForward(0.3, 3, 1000);
         robot.liftSystem.grabAndStowNoWait(4500);
 
         teamUtil.sleep(750);
         robot.drive.accelerateInchesBackward(0.6, 7.8, 2500);
-//        robot.drive.rotateToZero();
+        robot.drive.rotateToZero();
         robot.drive.accelerateToSpeedRight(0, 0.75);
         while (!robot.drive.bottomColor.isOnTape()) {
             robot.drive.driveRight(0.75);
         }
         robot.drive.decelerateInchesRight(0.75, 6);
         robot.liftSystem.grabber.slightlyOpenGrabber();
-//        robot.drive.rotateToZero();
-        robot.drive.stopMotors();
+        robot.drive.rotateToZero();
         teamUtil.sleep(750);
+        robot.drive.accelerateToSpeedLeft(0.35, 1);
         while (!robot.drive.bottomColor.isOnTape()) {
-            robot.drive.driveLeft(0.75);
+            robot.drive.driveLeft(1);
         }
-        robot.drive.stopMotors();
 
         if (path == 3) {
-            robot.drive.decelerateInchesLeft(0.75, 43);
+            robot.drive.decelerateInchesLeft(1, 44);
         } else if (path == 2) {
-            robot.drive.decelerateInchesLeft(0.75, 38);
+            robot.drive.decelerateInchesLeft(1, 50);
         } else if (path == 1) {
             robot.drive.stopMotors();
             teamUtil.log("path 1, stopping motors");
@@ -94,24 +94,29 @@ public class AutoSkystonePathRed extends LinearOpMode {
 
 
         robot.liftSystem.prepareToGrabNoWait(4000);
-//        robot.drive.rotateToZero();
-        robot.drive.accelerateInchesBackward(0.5, 6, 2000);
-        teamUtil.sleep(750);
-        robot.drive.accelerateInchesForward(0.65, 10, 2000);
-        robot.liftSystem.grabAndStow(4500);
+        robot.drive.rotateToZero();
+        robot.drive.moveToDistance(robot.drive.frontLeftDistance, 9, 0.45, 3000);
+        while(!robot.liftSystem.preparedToGrab){
+            teamUtil.sleep(100);
+        }
+        robot.drive.moveToDistance(robot.drive.frontLeftDistance, 6, 0.3, 3000);
+        robot.drive.accelerateInchesForward(0.65, 7, 2000);
+        robot.liftSystem.grabAndStowNoWait(4500);
         teamUtil.sleep(750);
 
-        robot.drive.accelerateInchesBackward(0.6, 4.5, 2500);
-//        robot.drive.rotateToZero();
-        teamUtil.sleep(1000);
-        robot.drive.accelerateToSpeedRight(0, 0.75);
-        while (!robot.drive.bottomColor.isOnTape()) {
-            robot.drive.driveRight(0.75);
+        if(path == 3){
+            robot.drive.moveInchesBackward(0.35, 9, 3000); //TODO: this didn't work on path 3...? --> fixed it, awaiting next download 1/10/19 4:12 PM
+        } else if(path == 2){
+            robot.drive.moveInchesBackward(0.35, 10, 3000);
         }
-        robot.drive.decelerateInchesRight(0.75, 6);
+        robot.drive.rotateToZero();
+        robot.drive.accelerateToSpeedRight(0, 1);
+        while (!robot.drive.bottomColor.isOnTape()) {
+            robot.drive.driveRight(1);
+        }
+        robot.drive.decelerateInchesRight(1, 6);
         robot.liftSystem.grabber.slightlyOpenGrabber();
-//        robot.drive.rotateToZero();
-        teamUtil.sleep(750);
+        robot.drive.rotateToZero();
         while (!robot.drive.bottomColor.isOnTape()) {
             robot.drive.driveLeft(0.75);
         }
