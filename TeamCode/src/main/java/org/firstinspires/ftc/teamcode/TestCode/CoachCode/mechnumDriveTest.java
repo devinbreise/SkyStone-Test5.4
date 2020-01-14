@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -32,10 +33,10 @@ public class mechnumDriveTest extends LinearOpMode {
     //HardwareMap hardwareMap;
     //Telemetry telemetry;
     boolean timedOut = false;
-    DcMotor fLeftMotor;
-    DcMotor bLeftMotor;
-    DcMotor fRightMotor;
-    DcMotor bRightMotor;
+    DcMotorEx fLeftMotor;
+    DcMotorEx bLeftMotor;
+    DcMotorEx fRightMotor;
+    DcMotorEx bRightMotor;
     public DistanceSensors frontLeftDistance;
     public DistanceSensors frontRightDistance;
     public DistanceSensors leftDistanceSensor;
@@ -88,10 +89,10 @@ public class mechnumDriveTest extends LinearOpMode {
     // config file are in one place but the assembly classes do the initialization work...Getting a bit ahead here!
 
     public void initDriveMotors() {
-        fLeftMotor = hardwareMap.dcMotor.get("fLeftMotor");
-        fRightMotor = hardwareMap.dcMotor.get("fRightMotor");
-        bLeftMotor = hardwareMap.dcMotor.get("bLeftMotor");
-        bRightMotor = hardwareMap.dcMotor.get("bRightMotor");
+        fLeftMotor = hardwareMap.get(DcMotorEx.class,"fLeftMotor");
+        fRightMotor = hardwareMap.get(DcMotorEx.class,"fRightMotor");
+        bLeftMotor = hardwareMap.get(DcMotorEx.class,"bLeftMotor");
+        bRightMotor = hardwareMap.get(DcMotorEx.class,"bRightMotor");
         fLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         bLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -155,44 +156,104 @@ public class mechnumDriveTest extends LinearOpMode {
         bLeftMotor.setPower(0);
     }
 
+    public void logMaxVelocity() {
+        double flcurrentVelocity,frcurrentVelocity,blcurrentVelocity,brcurrentVelocity;
+        double flmaxVelocity = 0.0;
+        double frmaxVelocity = 0.0;
+        double blmaxVelocity = 0.0;
+        double brmaxVelocity = 0.0;
+        setAllMotorsWithoutEncoder(); // maximum speed, no pid control
+        fRightMotor.setPower(1);
+        fLeftMotor.setPower(1);
+        bRightMotor.setPower(1);
+        bLeftMotor.setPower(1);
+        while (gamepad2.x) {
+            flcurrentVelocity = fLeftMotor.getVelocity();
+            frcurrentVelocity = fRightMotor.getVelocity();
+            blcurrentVelocity = fLeftMotor.getVelocity();
+            brcurrentVelocity = bRightMotor.getVelocity();
+
+            if (flcurrentVelocity > flmaxVelocity) {
+                flmaxVelocity = flcurrentVelocity;
+            }
+            if (frcurrentVelocity > frmaxVelocity) {
+                frmaxVelocity = frcurrentVelocity;
+            }
+            if (blcurrentVelocity > blmaxVelocity) {
+                blmaxVelocity = blcurrentVelocity;
+            }
+            if (brcurrentVelocity > brmaxVelocity) {
+                brmaxVelocity = brcurrentVelocity;
+            }
+
+            teamUtil.log("MaxVelocity:" + flmaxVelocity + "," + frmaxVelocity + "," + blmaxVelocity + "," + brmaxVelocity);
+        }
+        stopMotors();
+        setAllMotorsWithEncoder(); // all other routines in the class expect this
+    }
+
     public void onForward() {
-        teamUtil.log("Encoders LF:" + fLeftMotor.getCurrentPosition() + " RF:" + fRightMotor.getCurrentPosition() + " LB:" + bLeftMotor.getCurrentPosition() + " RB:" + bRightMotor.getCurrentPosition());
+        teamUtil.log("Encoders:" + fLeftMotor.getCurrentPosition() + "," + fRightMotor.getCurrentPosition() + "," + bLeftMotor.getCurrentPosition() + "," + bRightMotor.getCurrentPosition());
         fRightMotor.setPower(rfspeed);
         fLeftMotor.setPower(lfspeed);
         bRightMotor.setPower(rbspeed);
         bLeftMotor.setPower(lbspeed);
         while (gamepad1.dpad_up){
-            teamUtil.log("Encoders LF:" + fLeftMotor.getCurrentPosition() + " RF:" + fRightMotor.getCurrentPosition() + " LB:" + bLeftMotor.getCurrentPosition() + " RB:" + bRightMotor.getCurrentPosition());
+            teamUtil.log("Encoders:" + fLeftMotor.getCurrentPosition() + "," + fRightMotor.getCurrentPosition() + "," + bLeftMotor.getCurrentPosition() + "," + bRightMotor.getCurrentPosition());
         }
     }
+    public void onForward(double ticsPerSecond) {
+        teamUtil.log("Encoders:" + fLeftMotor.getCurrentPosition() + "," + fRightMotor.getCurrentPosition() + "," + bLeftMotor.getCurrentPosition() + "," + bRightMotor.getCurrentPosition());
+        // Start motors and let them run...don't call setVelocity over and over as it might disrupt the PID accumulated error.
+        fRightMotor.setVelocity(ticsPerSecond);
+        fLeftMotor.setVelocity(ticsPerSecond);
+        bRightMotor.setVelocity(ticsPerSecond);
+        bLeftMotor.setVelocity(ticsPerSecond);
+        while (gamepad1.dpad_up){
+            teamUtil.log("Encoders:" + fLeftMotor.getCurrentPosition() + "," + fRightMotor.getCurrentPosition() + "," + bLeftMotor.getCurrentPosition() + "," + bRightMotor.getCurrentPosition());
+        }
+    }
+
     public void onBackward() {
-        teamUtil.log("Encoders LF:" + fLeftMotor.getCurrentPosition() + " RF:" + fRightMotor.getCurrentPosition() + " LB:" + bLeftMotor.getCurrentPosition() + " RB:" + bRightMotor.getCurrentPosition());
+        teamUtil.log("Encoders:" + fLeftMotor.getCurrentPosition() + "," + fRightMotor.getCurrentPosition() + "," + bLeftMotor.getCurrentPosition() + "," + bRightMotor.getCurrentPosition());
         fRightMotor.setPower(-rfspeed);
         fLeftMotor.setPower(-lfspeed);
         bRightMotor.setPower(-rbspeed);
         bLeftMotor.setPower(-lbspeed);
         while (gamepad1.dpad_down){
-            teamUtil.log("Encoders LF:" + fLeftMotor.getCurrentPosition() + " RF:" + fRightMotor.getCurrentPosition() + " LB:" + bLeftMotor.getCurrentPosition() + " RB:" + bRightMotor.getCurrentPosition());
+            teamUtil.log("Encoders:" + fLeftMotor.getCurrentPosition() + "," + fRightMotor.getCurrentPosition() + "," + bLeftMotor.getCurrentPosition() + "," + bRightMotor.getCurrentPosition());
         }
     }
     public void onLeft() {
-        teamUtil.log("Encoders LF:" + fLeftMotor.getCurrentPosition() + " RF:" + fRightMotor.getCurrentPosition() + " LB:" + bLeftMotor.getCurrentPosition() + " RB:" + bRightMotor.getCurrentPosition());
+        teamUtil.log("Encoders:" + fLeftMotor.getCurrentPosition() + "," + fRightMotor.getCurrentPosition() + "," + bLeftMotor.getCurrentPosition() + "," + bRightMotor.getCurrentPosition());
         fRightMotor.setPower(rfspeed);
         fLeftMotor.setPower(-lfspeed);
         bRightMotor.setPower(-rbspeed);
         bLeftMotor.setPower(lbspeed);
         while (gamepad1.dpad_left) {
-            teamUtil.log("Encoders LF:" + fLeftMotor.getCurrentPosition() + " RF:" + fRightMotor.getCurrentPosition() + " LB:" + bLeftMotor.getCurrentPosition() + " RB:" + bRightMotor.getCurrentPosition());
+            teamUtil.log("Encoders:" + fLeftMotor.getCurrentPosition() + "," + fRightMotor.getCurrentPosition() + "," + bLeftMotor.getCurrentPosition() + "," + bRightMotor.getCurrentPosition());
         }
     }
+    public void onLeft(double ticsPerSecond) {
+        teamUtil.log("Encoders:" + fLeftMotor.getCurrentPosition() + "," + fRightMotor.getCurrentPosition() + "," + bLeftMotor.getCurrentPosition() + "," + bRightMotor.getCurrentPosition());
+        fRightMotor.setVelocity(ticsPerSecond);
+        fLeftMotor.setVelocity(ticsPerSecond);
+        bRightMotor.setVelocity(ticsPerSecond);
+        bLeftMotor.setVelocity(ticsPerSecond);
+        while (gamepad1.dpad_left) {
+            teamUtil.log("Encoders:" + fLeftMotor.getCurrentPosition() + "," + fRightMotor.getCurrentPosition() + "," + bLeftMotor.getCurrentPosition() + "," + bRightMotor.getCurrentPosition());
+        }
+    }
+
+
     public void onRight() {
-        teamUtil.log("Encoders LF:" + fLeftMotor.getCurrentPosition() + " RF:" + fRightMotor.getCurrentPosition() + " LB:" + bLeftMotor.getCurrentPosition() + " RB:" + bRightMotor.getCurrentPosition());
+        teamUtil.log("Encoders:" + fLeftMotor.getCurrentPosition() + "," + fRightMotor.getCurrentPosition() + "," + bLeftMotor.getCurrentPosition() + "," + bRightMotor.getCurrentPosition());
         fRightMotor.setPower(-rfspeed);
         fLeftMotor.setPower(lfspeed);
         bRightMotor.setPower(rbspeed);
         bLeftMotor.setPower(-lbspeed);
         while (gamepad1.dpad_right) {
-            teamUtil.log("Encoders LF:" + fLeftMotor.getCurrentPosition() + " RF:" + fRightMotor.getCurrentPosition() + " LB:" + bLeftMotor.getCurrentPosition() + " RB:" + bRightMotor.getCurrentPosition());
+            teamUtil.log("Encoders:" + fLeftMotor.getCurrentPosition() + "," + fRightMotor.getCurrentPosition() + "," + bLeftMotor.getCurrentPosition() + "," + bRightMotor.getCurrentPosition());
         }
     }
     public void rotateLeft(double rotatingPower) {
@@ -426,6 +487,14 @@ public class mechnumDriveTest extends LinearOpMode {
                 if (gamepad1.right_stick_button) {
                     fastRotateToHeading180Left();
                 }
+                if (gamepad1.left_stick_y<-0.8) {
+                    onForward(100);
+                } else if (gamepad1.left_stick_x>0.8) {
+                    onLeft(100.0);
+                }
+            }
+            if (gamepad2.x) {
+                logMaxVelocity();
             }
 
             telemetry.addLine("Power LF: "+ lfspeed+" RF: "+ rfspeed+" LB: "+ lbspeed+" RB: "+ rbspeed);

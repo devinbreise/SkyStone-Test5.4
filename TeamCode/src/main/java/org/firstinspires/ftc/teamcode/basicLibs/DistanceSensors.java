@@ -17,7 +17,7 @@ public class DistanceSensors {
 
 
     public DistanceSensors(Rev2mDistanceSensor theDistanceSensor) {
-            rev2mDistanceSensor = theDistanceSensor;//This names our distance sensor as theDistanceSensor
+            rev2mDistanceSensor = theDistanceSensor;
     }
 
     public void setOffset(float theOffset){
@@ -32,9 +32,9 @@ public class DistanceSensors {
 
     }//This method check's if the reading is valid and the distance sensor's are detecting a vaild reading under the point where it does not read the correct distance.
     public boolean validReading(){ //find the value that will be mostly used in the autonomous
-        //This see's if the current distance is less than 50
-        //This returns the false value if the number uis greater than 50
-        return getDistance() < 20;//If the current reating is less thean 50 it will return the value as a valid reading
+        //This see's if the current distance is less than 20
+        //This returns the false value if the number uis greater than 20
+        return getDistance() < 20;//If the current reating is less thean 20 it will return the value as a valid reading
 
     }
 
