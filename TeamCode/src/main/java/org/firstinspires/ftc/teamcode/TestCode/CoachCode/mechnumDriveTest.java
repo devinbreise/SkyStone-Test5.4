@@ -20,7 +20,7 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamColorSensor;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 @Autonomous(name = "mechnumDriveTest")
-@Disabled
+//@Disabled
 public class mechnumDriveTest extends LinearOpMode {
 
     // Stuff that belongs in a drive class
@@ -195,6 +195,13 @@ public class mechnumDriveTest extends LinearOpMode {
             teamUtil.log("Encoders LF:" + fLeftMotor.getCurrentPosition() + " RF:" + fRightMotor.getCurrentPosition() + " LB:" + bLeftMotor.getCurrentPosition() + " RB:" + bRightMotor.getCurrentPosition());
         }
     }
+    public void rotateLeft(double rotatingPower) {
+        fLeftMotor.setPower(-rotatingPower);
+        fRightMotor.setPower(rotatingPower);
+        bLeftMotor.setPower(-rotatingPower);
+        bRightMotor.setPower(rotatingPower);
+    }
+
 
     // Try to match the encoder counts on all 4 wheels to the lf motor by
     // varying the power to the other 3 proportionally
@@ -255,6 +262,33 @@ public class mechnumDriveTest extends LinearOpMode {
         stopMotors();
     }
 
+    // This is an attempt to do a very fast and accurate rotation
+    // It assumes the current heading is between 0 and 180
+    public void fastRotateToHeading180Left(){
+        final double decelThreshold = 20;
+        final double maxPower = 1;
+        final double preDriftTarget = 178;
+        double rotatePower = maxPower;
+
+        double startHeading = getHeading();
+        if (startHeading > 180) {
+            teamUtil.log("ERROR: fastRotateToHeading180Left called with initial heading of "+startHeading);
+            return;
+        }
+        // Rotate at max power until we get to deceleration phase
+        while (getHeading()< 180-decelThreshold) {
+            rotateLeft(maxPower);
+        }
+        // rotate a decelerating power as we close to target
+        while (getHeading() < preDriftTarget){
+            rotatePower = Math.pow(preDriftTarget-getHeading(), 2)*0.003; // power curve that tries to decelerate for the last 20 degrees
+            rotateLeft(rotatePower);
+            teamUtil.log("DifferenceInAngle: "+ (180-getHeading()));
+            teamUtil.log("rotatePower: " + rotatePower);        }
+        stopMotors();
+        teamUtil.log("I'M DONE");
+    }
+
     public void distanceTelemetry() {
         telemetry.addData("frontLeftDistance", frontLeftDistance.getDistance());
         telemetry.addData("frontMiddleDistance", frontmiddleDistance.getDistance(DistanceUnit.CM));
@@ -311,6 +345,8 @@ public class mechnumDriveTest extends LinearOpMode {
         telemetry.update();
 
         waitForStart();
+        resetHeading();
+
         while (opModeIsActive()) {
 
             if (gamepad1.x) {
@@ -386,6 +422,9 @@ public class mechnumDriveTest extends LinearOpMode {
                 if (gamepad1.left_stick_button) {
                     resetAllDriveEncoders();
                     setAllMotorsWithEncoder();
+                }
+                if (gamepad1.right_stick_button) {
+                    fastRotateToHeading180Left();
                 }
             }
 
