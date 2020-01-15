@@ -20,6 +20,8 @@ public class teamUtil {
     public static Blinkin theBlinkin =null;
     private static Robot robot;
     public static Telemetry telemetry;
+    public enum Alliance {RED, BLUE};
+    public static Alliance alliance = Alliance.RED;
 
 
     /**
