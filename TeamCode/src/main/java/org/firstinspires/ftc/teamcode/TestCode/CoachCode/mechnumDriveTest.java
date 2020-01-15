@@ -95,6 +95,10 @@ public class mechnumDriveTest extends LinearOpMode {
         bRightMotor = hardwareMap.get(DcMotorEx.class,"bRightMotor");
         fLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         bLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        fLeftMotor.setVelocityPIDFCoefficients(1.5, 0.15,0,14.9);
+        fRightMotor.setVelocityPIDFCoefficients(1.5, 0.15,0,14.9);
+        bLeftMotor.setVelocityPIDFCoefficients(1.5, 0.15,0,14.9);
+        bRightMotor.setVelocityPIDFCoefficients(1.5, 0.15,0,14.9);
 
         setAllMotorsWithEncoder();
         setBrakeAllDriveMotors();
@@ -163,27 +167,27 @@ public class mechnumDriveTest extends LinearOpMode {
         double blmaxVelocity = 0.0;
         double brmaxVelocity = 0.0;
         setAllMotorsWithoutEncoder(); // maximum speed, no pid control
-        fRightMotor.setPower(1);
+        fRightMotor.setPower(-1);
         fLeftMotor.setPower(1);
         bRightMotor.setPower(1);
-        bLeftMotor.setPower(1);
+        bLeftMotor.setPower(-1);
         while (gamepad2.x) {
             flcurrentVelocity = fLeftMotor.getVelocity();
             frcurrentVelocity = fRightMotor.getVelocity();
-            blcurrentVelocity = fLeftMotor.getVelocity();
+            blcurrentVelocity = bLeftMotor.getVelocity();
             brcurrentVelocity = bRightMotor.getVelocity();
 
-            if (flcurrentVelocity > flmaxVelocity) {
-                flmaxVelocity = flcurrentVelocity;
+            if (Math.abs(flcurrentVelocity) > flmaxVelocity) {
+                flmaxVelocity = Math.abs(flcurrentVelocity);
             }
-            if (frcurrentVelocity > frmaxVelocity) {
-                frmaxVelocity = frcurrentVelocity;
+            if (Math.abs(frcurrentVelocity) > frmaxVelocity) {
+                frmaxVelocity = Math.abs(frcurrentVelocity);
             }
-            if (blcurrentVelocity > blmaxVelocity) {
-                blmaxVelocity = blcurrentVelocity;
+            if (Math.abs(blcurrentVelocity) > blmaxVelocity) {
+                blmaxVelocity = Math.abs(blcurrentVelocity);
             }
-            if (brcurrentVelocity > brmaxVelocity) {
-                brmaxVelocity = brcurrentVelocity;
+            if (Math.abs(brcurrentVelocity) > brmaxVelocity) {
+                brmaxVelocity = Math.abs(brcurrentVelocity);
             }
 
             teamUtil.log("MaxVelocity:" + flmaxVelocity + "," + frmaxVelocity + "," + blmaxVelocity + "," + brmaxVelocity);
@@ -203,14 +207,60 @@ public class mechnumDriveTest extends LinearOpMode {
         }
     }
     public void onForward(double ticsPerSecond) {
+        setAllMotorsWithEncoder();
         teamUtil.log("Encoders:" + fLeftMotor.getCurrentPosition() + "," + fRightMotor.getCurrentPosition() + "," + bLeftMotor.getCurrentPosition() + "," + bRightMotor.getCurrentPosition());
         // Start motors and let them run...don't call setVelocity over and over as it might disrupt the PID accumulated error.
-        fRightMotor.setVelocity(ticsPerSecond);
+        fRightMotor.setVelocity(ticsPerSecond*.87);
         fLeftMotor.setVelocity(ticsPerSecond);
-        bRightMotor.setVelocity(ticsPerSecond);
+        bRightMotor.setVelocity(ticsPerSecond*.87);
         bLeftMotor.setVelocity(ticsPerSecond);
-        while (gamepad1.dpad_up){
-            teamUtil.log("Encoders:" + fLeftMotor.getCurrentPosition() + "," + fRightMotor.getCurrentPosition() + "," + bLeftMotor.getCurrentPosition() + "," + bRightMotor.getCurrentPosition());
+        while (gamepad1.left_stick_y<-0.8){
+           // teamUtil.log("Encoders:" + fLeftMotor.getCurrentPosition() + "," + fRightMotor.getCurrentPosition() + "," + bLeftMotor.getCurrentPosition() + "," + bRightMotor.getCurrentPosition()+
+           //         "," + fLeftMotor.getVelocity() + "," + fRightMotor.getVelocity() + "," + bLeftMotor.getVelocity() + "," + bRightMotor.getVelocity());
+        }
+        stopMotors();
+    }
+
+    public double getHeadingError(double targetAngle) {
+
+        double robotError;
+
+        // calculate error in -179 to +180 range  (
+        robotError = targetAngle - getHeading();
+        while (robotError > 180)  robotError -= 360;
+        while (robotError <= -180) robotError += 360;
+        return robotError;
+    }
+
+     public void forwardIMU(double Heading, double ticsPerSecond) {
+            double velocityAdjust = getHeadingError(Heading) * .1 * ticsPerSecond;
+            fRightMotor.setVelocity(ticsPerSecond*.87+velocityAdjust);
+            fLeftMotor.setVelocity(ticsPerSecond-velocityAdjust);
+            bRightMotor.setVelocity(ticsPerSecond*.87+velocityAdjust);
+            bLeftMotor.setVelocity(ticsPerSecond-velocityAdjust);
+            teamUtil.log("targetHeading: " + Heading + " Heading:" + getHeading() + " Adjust" + velocityAdjust);
+    }
+
+    public void onForwardIMU(double ticsPerSecond) {
+        double initialHeading = -2;
+        setAllMotorsWithEncoder();
+        teamUtil.log("Encoders:" + fLeftMotor.getCurrentPosition() + "," + fRightMotor.getCurrentPosition() + "," + bLeftMotor.getCurrentPosition() + "," + bRightMotor.getCurrentPosition());
+        // Start motors and let them run...don't call setVelocity over and over as it might disrupt the PID accumulated error.
+        fRightMotor.setVelocity(ticsPerSecond*.87);
+        fLeftMotor.setVelocity(ticsPerSecond);
+        bRightMotor.setVelocity(ticsPerSecond*.87);
+        bLeftMotor.setVelocity(ticsPerSecond);
+        while (gamepad1.right_stick_y<-0.15){
+            double power = -2200*gamepad1.right_stick_y;
+            double powerAdjust = getHeadingError(initialHeading) * .1 * power;
+            fRightMotor.setVelocity(power*.87+powerAdjust);
+            fLeftMotor.setVelocity(power-powerAdjust);
+            bRightMotor.setVelocity(power*.87+powerAdjust);
+            bLeftMotor.setVelocity(power-powerAdjust);
+            teamUtil.log("initialHeading: " + initialHeading + " Heading:" + getHeading() + " Adjust" + powerAdjust);
+
+            //teamUtil.log("Encoders:" + fLeftMotor.getCurrentPosition() + "," + fRightMotor.getCurrentPosition() + "," + bLeftMotor.getCurrentPosition() + "," + bRightMotor.getCurrentPosition()+
+           //         "," + fLeftMotor.getVelocity() + "," + fRightMotor.getVelocity() + "," + bLeftMotor.getVelocity() + "," + bRightMotor.getVelocity());
         }
     }
 
@@ -240,7 +290,7 @@ public class mechnumDriveTest extends LinearOpMode {
         fLeftMotor.setVelocity(ticsPerSecond);
         bRightMotor.setVelocity(ticsPerSecond);
         bLeftMotor.setVelocity(ticsPerSecond);
-        while (gamepad1.dpad_left) {
+        while (gamepad1.left_stick_x>0.8) {
             teamUtil.log("Encoders:" + fLeftMotor.getCurrentPosition() + "," + fRightMotor.getCurrentPosition() + "," + bLeftMotor.getCurrentPosition() + "," + bRightMotor.getCurrentPosition());
         }
     }
@@ -295,40 +345,48 @@ public class mechnumDriveTest extends LinearOpMode {
         stopMotors();
     }
 
-    public void closeToDistance (double distance, double initialPower) {
-        double minPower = .1;
-        double decelerateInches = 2;
-        double power = initialPower;
-        double currentDistance  = frontLeftDistance.getDistance();
-        double slope = (initialPower-minPower) / (currentDistance-distance);
-        if (currentDistance > distance) {
-            fRightMotor.setPower(power);
-            fLeftMotor.setPower(power);
-            bRightMotor.setPower(power);
-            bLeftMotor.setPower(power);
-            while (currentDistance > distance + decelerateInches) {
-                teamUtil.log("Distance:" + currentDistance + " Power:" + power);
-                currentDistance = frontLeftDistance.getDistance();
-            }
-            while (currentDistance > distance) {
-                teamUtil.log("Distance:" + currentDistance + " Power:" + power);
-                power = (currentDistance - distance) * slope + minPower;
-                fRightMotor.setPower(power);
-                fLeftMotor.setPower(power);
-                bRightMotor.setPower(power);
-                bLeftMotor.setPower(power);
-                currentDistance = frontLeftDistance.getDistance();
-            }
+    public void closeToDistance (double distance, double initialTicsPerSecond) {
+        final double preDriftTarget = distance+.5;
+        final double slowThreshold = distance+5;
+        final double decelThreshold = slowThreshold+10;
+        final double maxPower = initialTicsPerSecond;
+        final double minPower = 350;
+        final double slope = (maxPower-minPower)/(decelThreshold-slowThreshold);
+
+        double velocity = maxPower;
+        double currentDistance  = frontRightDistance.getDistance();
+        // Cruise at max speed
+        while (currentDistance > decelThreshold) {
+            forwardIMU(0, maxPower);
+            teamUtil.log("CRUISING: Distance:"+currentDistance+ " velocity: " + maxPower);
+            currentDistance  = frontRightDistance.getDistance();
+        }
+        // Decelerate to min speed
+        while (currentDistance > slowThreshold) {
+            velocity = (currentDistance - slowThreshold)*slope+minPower; // decelerate proportionally down to min
+            forwardIMU(0, velocity);
+            teamUtil.log("SLOWING: Distance:"+currentDistance+ " velocity: " + velocity);
+            currentDistance  = frontRightDistance.getDistance();
+        }
+        // cruise at minSpeed once we are very close to target
+        while (currentDistance > preDriftTarget){
+            forwardIMU(0, minPower);
+            teamUtil.log("CRAWLING: Distance:"+currentDistance+ " velocity: " + minPower);
+            currentDistance  = frontRightDistance.getDistance();
         }
         stopMotors();
+        teamUtil.log("I'M DONE");
     }
 
     // This is an attempt to do a very fast and accurate rotation
     // It assumes the current heading is between 0 and 180
     public void fastRotateToHeading180Left(){
-        final double decelThreshold = 20;
+        final double decelThreshold = 60;
+        final double slowThreshold = 10;
         final double maxPower = 1;
-        final double preDriftTarget = 178;
+        final double minPower = .15;
+        final double slope = (maxPower-minPower)/(decelThreshold-slowThreshold);
+        final double preDriftTarget = 179;
         double rotatePower = maxPower;
 
         double startHeading = getHeading();
@@ -337,15 +395,26 @@ public class mechnumDriveTest extends LinearOpMode {
             return;
         }
         // Rotate at max power until we get to deceleration phase
+        double currentHeading = getHeading();
+        currentHeading = getHeading();
         while (getHeading()< 180-decelThreshold) {
             rotateLeft(maxPower);
+            teamUtil.log("Heading:"+currentHeading+" DifferenceInAngle: "+ (180-currentHeading)+" RotatePower: " + maxPower);
+            currentHeading = getHeading();
         }
-        // rotate a decelerating power as we close to target
-        while (getHeading() < preDriftTarget){
-            rotatePower = Math.pow(preDriftTarget-getHeading(), 2)*0.003; // power curve that tries to decelerate for the last 20 degrees
+        // rotate at decelerating power as we close to target
+        while (currentHeading < preDriftTarget-slowThreshold){
+            rotatePower = (preDriftTarget-slowThreshold-currentHeading)*slope+minPower; // decelerate proportionally down to min
             rotateLeft(rotatePower);
-            teamUtil.log("DifferenceInAngle: "+ (180-getHeading()));
-            teamUtil.log("rotatePower: " + rotatePower);        }
+            teamUtil.log("Heading:"+currentHeading+" DifferenceInAngle: "+ (180-currentHeading)+" RotatePower: " + rotatePower);
+            currentHeading = getHeading();
+        }
+        // rotate at minSpeed once we are very close to target
+        while (currentHeading < preDriftTarget){
+            rotateLeft(minPower);
+            teamUtil.log("Heading:"+currentHeading+" DifferenceInAngle: "+ (180-currentHeading)+" RotatePower: " + minPower);
+            currentHeading = getHeading();
+        }
         stopMotors();
         teamUtil.log("I'M DONE");
     }
@@ -400,7 +469,7 @@ public class mechnumDriveTest extends LinearOpMode {
         initSensors();
 
         telemetryDriveEncoders();
-        distanceTelemetry();
+        //distanceTelemetry();
         telemetry.addData("Heading:", getAbsoluteHeading());
         telemetry.addData("Waiting to Start:", 0);
         telemetry.update();
@@ -459,7 +528,7 @@ public class mechnumDriveTest extends LinearOpMode {
             } else {
                 if (gamepad1.dpad_up) {
                     if (gamepad1.left_bumper) {
-                        closeToDistance(1,.3);
+                        closeToDistance(1,1500);
                         //pForward(0.3);
                     } else {
                         onForward();
@@ -487,10 +556,13 @@ public class mechnumDriveTest extends LinearOpMode {
                 if (gamepad1.right_stick_button) {
                     fastRotateToHeading180Left();
                 }
-                if (gamepad1.left_stick_y<-0.8) {
-                    onForward(100);
+                if (gamepad1.left_stick_y<-0.2) {
+                    onForward(2200);
+                    //onForwardIMU(-2500*gamepad1.left_stick_y);
+                } else if (gamepad1.right_stick_y<-0.2) {
+                    onForwardIMU(-2200*gamepad1.right_stick_y);
                 } else if (gamepad1.left_stick_x>0.8) {
-                    onLeft(100.0);
+                    onLeft(1500);
                 }
             }
             if (gamepad2.x) {
@@ -500,8 +572,8 @@ public class mechnumDriveTest extends LinearOpMode {
             telemetry.addLine("Power LF: "+ lfspeed+" RF: "+ rfspeed+" LB: "+ lbspeed+" RB: "+ rbspeed);
 
             //telemetryDriveEncoders();
-            //distanceTelemetry();
-            //telemetry.addData("Heading:", getHeading());
+            distanceTelemetry();
+            telemetry.addData("Heading:", getHeading());
             //telemetry.addData("AbsoluteHeading:", getAbsoluteHeading());
             telemetry.update();
 
