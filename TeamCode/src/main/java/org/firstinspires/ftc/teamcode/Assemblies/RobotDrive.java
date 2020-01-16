@@ -1447,6 +1447,119 @@ public class RobotDrive {
         }
     }
 
+    final double NEW_COUNTS_PER_INCH = 90; // encoder counts per inch on fRightMotor when moving forward or backwards
+
+    public int newInchesToEncoderTics (double inches) {
+        return (int) (inches * NEW_COUNTS_PER_INCH);
+    }
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Ramp the motors smoothly from start velocity to end velocity use maximum acceleration/deceleration rates
+    // This will work if both Velocities are positive or negative but not if one is postive and the other negative
+    public void newRampMotors (double startVelocity, double endVelocity, double heading, long timeOut) {
+        teamUtil.log("New Ramp Motors: Start:"+ startVelocity + " End:"+endVelocity+" heading:"+heading);
+        long timeOutTime = System.currentTimeMillis() + timeOut;
+        timedOut = false;
+
+        final double MAX_ACCEL_PER_INCH = 440; // max velocity acceleration per inch without skidding
+        final double MAX_DECEL_PER_INCH = 200; // max power deceleration per inch without skidding
+
+        // Figure out the distance we need to ramp in encoder tics
+        int encoderCount; // always +
+        double speedChange = Math.abs(endVelocity) - Math.abs(startVelocity); // + or -
+        if (endVelocity > startVelocity) {
+            encoderCount = (int) (newInchesToEncoderTics(Math.abs(speedChange) / MAX_ACCEL_PER_INCH));
+        } else {
+            encoderCount = (int) (newInchesToEncoderTics(Math.abs(speedChange) / MAX_DECEL_PER_INCH));
+
+        }
+        double slope = speedChange / encoderCount; // slope for the velocity ramp.  + or -
+
+        setAllMotorsWithEncoder();
+        int initialPosition = fRightMotor.getCurrentPosition();
+
+        // Ramp the motors from one speed to the other
+        int distanceTraveled = Math.abs(fRightMotor.getCurrentPosition() - initialPosition); // Always +
+        while (distanceTraveled < encoderCount && teamUtil.keepGoing(timeOutTime)) {
+            double velocity = slope * distanceTraveled + Math.min(startVelocity, endVelocity);
+            followHeading(velocity, heading);
+            teamUtil.log("Distance Traveled: " + distanceTraveled + "Velocity: " + velocity);
+            distanceTraveled = Math.abs(fRightMotor.getCurrentPosition() - initialPosition); // Always +
+        }
+
+        timedOut = (System.currentTimeMillis() > timeOutTime);
+        if (timedOut) {
+            teamUtil.log("newRampMotors - TIMED OUT!");
+        }
+        teamUtil.log("newRampMotors - Finished");
+
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Attempt to cover the specified distance at up to the specified speed using smooth acceleration at the start and deceleration at the end
+    // this methods assumes the robot is at rest when it starts and will leave the robot at rest. Only works forwards
+    // This version uses setVelocity instead of setPower and also attempts to hold the specified heading
+    public void newAccelerateInchesForward(double maxVelocity, double inches, double heading, long timeOut) {
+        teamUtil.log("newAccelerateForward: velocity:"+ maxVelocity + " Inches:"+inches+" heading:"+heading);
+        long timeOutTime = System.currentTimeMillis() + timeOut;
+        timedOut = false;
+
+        final double MAX_ACCEL_PER_INCH = 440; // max velocity acceleration per inch without skidding (slope with x=inches)
+        final double MAX_DECEL_PER_INCH = 200; // max power deceleration per inch without skidding (slope with x=inches)
+        final double START_SPEED = 440;
+        final double END_SPEED = 300;
+
+        // Figure out the distances for each phase in encoder tics
+        int totalEncoderCount = (int) (inches * NEW_COUNTS_PER_INCH);
+        int accelerationEncoderCount = (int) (newInchesToEncoderTics((maxVelocity-START_SPEED) / MAX_ACCEL_PER_INCH ));
+        int decelerationEncoderCount = (int) (newInchesToEncoderTics((maxVelocity-END_SPEED) / MAX_DECEL_PER_INCH ));
+
+        // figure out slopes for acceleration and deceleration phases
+        double accelerationSlope = (maxVelocity-START_SPEED) / accelerationEncoderCount; // + slope
+        double decelerationSlope = (maxVelocity-END_SPEED) / decelerationEncoderCount * -1; // - slope
+
+        int initialPosition = fRightMotor.getCurrentPosition();
+        int target = initialPosition+totalEncoderCount;
+
+        int cruiseStart, decelerationStart;
+        if (accelerationEncoderCount+decelerationEncoderCount < totalEncoderCount) {
+            // Enough distance to reach maxVelocity
+            cruiseStart = initialPosition+accelerationEncoderCount;
+            decelerationStart = target - decelerationEncoderCount;
+        } else {
+            // we don't have enough space to ramp up to full speed so calculate the actual maximum velocity
+            // by finding the y value of the two ramp lines where they intersect given the maximum distance
+            maxVelocity = (-decelerationSlope*totalEncoderCount * accelerationSlope - START_SPEED * decelerationSlope)/(accelerationSlope - decelerationSlope);
+
+            // recompute shortened ramp phases
+            accelerationEncoderCount = (int) (newInchesToEncoderTics((maxVelocity-START_SPEED) / MAX_ACCEL_PER_INCH ));
+            decelerationEncoderCount = (int) (newInchesToEncoderTics((maxVelocity-END_SPEED) / MAX_DECEL_PER_INCH ));
+            cruiseStart = initialPosition+accelerationEncoderCount;
+            decelerationStart = target - decelerationEncoderCount;
+        }
+
+        // ramp up
+        newRampMotors(START_SPEED, maxVelocity, heading, timeOut);
+
+        // Cruise at Max Velocity
+        int currentPosition = fRightMotor.getCurrentPosition();
+        while (currentPosition < decelerationStart && teamUtil.keepGoing(timeOutTime)) {
+            followHeading(heading, maxVelocity);
+            teamUtil.log("Distance Traveled: " + (currentPosition - initialPosition) + "Velocity: " + maxVelocity);
+            currentPosition = fRightMotor.getCurrentPosition();
+        }
+
+        // ramp down
+        newRampMotors(maxVelocity, END_SPEED, heading, timeOutTime - System.currentTimeMillis());
+
+        stopMotors();
+
+        timedOut = (System.currentTimeMillis() > timeOutTime);
+        if (timedOut) {
+            teamUtil.log("newRampMotors - TIMED OUT!");
+        }
+        teamUtil.log("newRampMotors - Finished");
+
+    }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -17,6 +17,7 @@ public class newTestDrive extends LinearOpMode{
         public double MAX_VELOCITY = 2200; // encoder tics per second
         RobotDrive drive;
         double targetDistance = 1;
+        double travelDistance = 12;
         boolean leftSensor = true;
 
 
@@ -45,7 +46,25 @@ public class newTestDrive extends LinearOpMode{
                         drive.getHeading());
 
 
-                if (gamepad1.x) {
+                if (gamepad1.a) {
+                    if (gamepad1.dpad_up) {
+                        if (travelDistance > 12) {
+                            travelDistance=travelDistance+12;
+                        } else {
+                            travelDistance=travelDistance+1;
+                        }
+                        sleep(250);
+                    } else if (gamepad1.dpad_down) {
+                        if (travelDistance > 12) {
+                            travelDistance=travelDistance-12;
+                        } else {
+                            travelDistance=travelDistance-1;
+                        }
+                        sleep(250);
+                    }
+                } else if (gamepad1.b) {
+                    drive.newAccelerateInchesForward( 2200, travelDistance, drive.getHeading()-2, 5000);
+                }else if (gamepad1.x) {
                     if (gamepad1.dpad_up) {
                         targetDistance = targetDistance+1;
                         sleep(250);
