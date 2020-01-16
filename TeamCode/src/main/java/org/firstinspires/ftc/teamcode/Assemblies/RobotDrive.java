@@ -308,6 +308,13 @@ public class RobotDrive {
         bLeftMotor.setPower(0);
         fLeftMotor.setPower(0);
     }
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public void setMotorPowers(double fl, double fr, double bl, double br) {
+        fLeftMotor.setPower(fl);
+        fRightMotor.setPower(fr);
+        bLeftMotor.setPower(bl);
+        bRightMotor.setPower(br);
+    }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void driveForward(double power) {
@@ -365,6 +372,30 @@ public class RobotDrive {
         fRightMotor.setPower(-power);
         bLeftMotor.setPower(power);
         bRightMotor.setPower(-power);
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // return the difference between the current heading and a target heading.  Returns -180 to 180
+    public double getHeadingError(double targetAngle) {
+
+        double robotError;
+
+        // calculate heading error in -179 to +180 range  (
+        robotError = targetAngle - getHeading();
+        while (robotError > 180)  robotError -= 360;
+        while (robotError <= -180) robotError += 360;
+        return robotError;
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Run the robot forward/or backward maintaining the specified heading by turning proportionally as needed (P = .1)
+    public void followHeading(double Heading, double ticsPerSecond) {
+        double velocityAdjust = getHeadingError(Heading) * .1 * ticsPerSecond;
+        fRightMotor.setVelocity(ticsPerSecond*.87+velocityAdjust);
+        fLeftMotor.setVelocity(ticsPerSecond-velocityAdjust);
+        bRightMotor.setVelocity(ticsPerSecond*.87+velocityAdjust);
+        bLeftMotor.setVelocity(ticsPerSecond-velocityAdjust);
+        teamUtil.log("targetHeading: " + Heading + " Heading:" + getHeading() + " Adjust" + velocityAdjust);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -458,6 +489,78 @@ public class RobotDrive {
 
     }
 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Enhanced multi-stage Move to Distance
+    // Uses a 3 stage deceleration path and the IMU to hold the given heading.  initialTicsPerSecond should always be positive.
+    // robot will move forward or backward as needed to gain the target distance reading on the supplied Distance Sensor
+    // Currently this assumes distance sensors are on the front of the robot and postive power moves the robot forward.
+    // TODO: Enhance to work with distance sensors on front or back
+    public void newMoveToDistance(DistanceSensors sensor, double distance, double initialTicsPerSecond, double heading, long timeOut) {
+        teamUtil.log("Moving to Distance");
+        long timeOutTime = System.currentTimeMillis() + timeOut;
+        timedOut = false;
+        final double maxPower = initialTicsPerSecond;
+        final double minPower = 350; // slow enough to be accurate, fast enough to actually move the robot
+
+        double velocity = maxPower;
+        double currentDistance  = sensor.getDistance();
+
+        if (currentDistance > distance) { // moving forward to target distance
+            final double preDriftTarget = distance+.5;
+            final double slowThreshold = distance+5;
+            final double decelThreshold = slowThreshold+10;
+            final double slope = (maxPower-minPower)/(decelThreshold-slowThreshold); // slope for the decel phase
+            // Cruise at max speed
+            while (currentDistance > decelThreshold && teamUtil.keepGoing(timeOutTime)) {
+                followHeading(heading, maxPower);
+                teamUtil.log("CRUISING: Distance:" + currentDistance + " velocity: " + maxPower);
+                currentDistance = sensor.getDistance();
+            }
+            // Decelerate to min speed
+            while (currentDistance > slowThreshold && teamUtil.keepGoing(timeOutTime)) {
+                velocity = (currentDistance - slowThreshold) * slope + minPower; // decelerate proportionally down to min
+                followHeading(heading, velocity);
+                teamUtil.log("SLOWING: Distance:" + currentDistance + " velocity: " + velocity);
+                currentDistance = sensor.getDistance();
+            }
+            // cruise at minSpeed once we are very close to target
+            while (currentDistance > preDriftTarget && teamUtil.keepGoing(timeOutTime)) {
+                followHeading(heading, minPower);
+                teamUtil.log("CRAWLING: Distance:" + currentDistance + " velocity: " + minPower);
+                currentDistance = sensor.getDistance();
+            }
+        } else { // Moving Backwards to a target distance
+            final double preDriftTarget = distance-.5;
+            final double slowThreshold = distance-5;
+            final double decelThreshold = slowThreshold-10;
+            final double slope = (maxPower-minPower)/(decelThreshold-slowThreshold); // slope for the decel phase
+            // Cruise at max speed
+            while (currentDistance < decelThreshold && teamUtil.keepGoing(timeOutTime)) {
+                followHeading(heading, -maxPower);
+                teamUtil.log("CRUISING: Distance:" + currentDistance + " velocity: " + -maxPower);
+                currentDistance = sensor.getDistance();
+            }
+            // Decelerate to min speed
+            while (currentDistance < slowThreshold && teamUtil.keepGoing(timeOutTime)) {
+                velocity = (slowThreshold - currentDistance) * slope + minPower; // decelerate proportionally down to min
+                followHeading(heading, -velocity);
+                teamUtil.log("SLOWING: Distance:" + currentDistance + " velocity: " + -velocity);
+                currentDistance = sensor.getDistance();
+            }
+            // cruise at minSpeed once we are very close to target
+            while (currentDistance < preDriftTarget && teamUtil.keepGoing(timeOutTime)) {
+                followHeading(heading, -minPower);
+                teamUtil.log("CRAWLING: Distance:" + currentDistance + " velocity: " + -minPower);
+                currentDistance = sensor.getDistance();
+            }
+        }
+        stopMotors();
+        timedOut = (System.currentTimeMillis() > timeOutTime);
+        if (timedOut) {
+            teamUtil.log("Moving to Distance - TIMED OUT!");
+        }
+        teamUtil.log("Finished Move to Distance");
+    }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1671,7 +1774,7 @@ public class RobotDrive {
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Rotate to the desired direction at the maximum speed
-    enum RobotRotation {TOWARDS_FIELD, TOWARDS_DRIVER, TOWARDS_DEPOT, TOWARDS_BUILDING};
+    public enum RobotRotation {TOWARDS_FIELD, TOWARDS_DRIVER, TOWARDS_DEPOT, TOWARDS_BUILDING};
     public void newRotateTo(RobotRotation attitude) {
         switch (attitude) {
             case TOWARDS_FIELD:
@@ -1697,40 +1800,72 @@ public class RobotDrive {
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Rotate to the desired heading at the maximum speed
+    // Rotate to the desired heading at the maximum speed, slowing for accuracy at the end
     public void newRotateTo(double heading) {
+        teamUtil.log("Starting to rotate to " + heading);
+        final double decelThreshold = 60; // start deceleration this many degrees from the target
+        final double slowThreshold = 10; // slow down to a very slow turn this far from the target
+        final double maxPower = 1;
+        final double minPower = .15;
+        final double decelSlope = (maxPower-minPower)/(decelThreshold-slowThreshold);
+        final double driftDegrees = 1; // cut the motors completely when we are within this many degrees of the target to allow for a little drift
+        double leftRotatePower = 1; // Keep track of which way we are rotating
+        double rightRotatePower = 1;
+        double rotatePower = maxPower; // start at full power
+
         double currentHeading = getHeading();
+        double headingOffset = currentHeading; // Stash this so we can make this a "relative" turn from a heading of 0.
+
+        // Determine how many degrees we need to turn from our current position to get to the target
+        double turnDegrees =  Math.abs(heading - headingOffset);
+        if (turnDegrees > 180) { // Normalize for the short way around
+            turnDegrees = 360-turnDegrees;
+        }
+        turnDegrees=turnDegrees-driftDegrees; // stop early to allow for drift
+
+        // Determine which we we are spinning (take the short way around)
         if (currentHeading < heading) {
             if (heading-currentHeading < 180) {
-                newRotateRightTo(heading);
+                rightRotatePower = -1;
             } else {
-                newRotateLeftTo(heading);
+                leftRotatePower = -1;
             }
         } else {
             if (currentHeading-heading < 180) {
-                newRotateRightTo(heading);
+                rightRotatePower = -1;
             } else {
-                newRotateLeftTo(heading);
+                leftRotatePower = -1;
             }
         }
+
+        // Get current heading but make it relative to zero and turn it positive
+        currentHeading = Math.abs(getHeading() - headingOffset);
+
+        // Rotate at max power until we get to deceleration phase
+        while (currentHeading < decelThreshold) {
+            setMotorPowers(maxPower*leftRotatePower, maxPower*rightRotatePower, maxPower*leftRotatePower, maxPower*rightRotatePower);
+            teamUtil.log("Relative Heading:"+currentHeading+" DifferenceInAngle: "+ (turnDegrees-currentHeading)+" RotatePower: " + maxPower);
+            currentHeading = Math.abs(getHeading() - headingOffset);
+        }
+
+        // rotate at decelerating power as we close to target
+        while (currentHeading < slowThreshold){
+            rotatePower = (currentHeading-slowThreshold)*decelSlope+minPower; // decelerate proportionally down to min
+            setMotorPowers(rotatePower*leftRotatePower, rotatePower*rightRotatePower, rotatePower*leftRotatePower, rotatePower*rightRotatePower);
+            teamUtil.log("Relative Heading:"+currentHeading+" DifferenceInAngle: "+ (turnDegrees-currentHeading)+" RotatePower: " + rotatePower);
+            currentHeading = Math.abs(getHeading() - headingOffset);
+        }
+
+        // rotate at minSpeed once we are very close to target
+        while (currentHeading < turnDegrees){
+            setMotorPowers(minPower*leftRotatePower, minPower*rightRotatePower, minPower*leftRotatePower, minPower*rightRotatePower);
+            teamUtil.log("Relative Heading:"+currentHeading+" DifferenceInAngle: "+ (turnDegrees-currentHeading)+" RotatePower: " + minPower);
+            currentHeading = Math.abs(getHeading() - headingOffset);
+        }
+        stopMotors();
+        teamUtil.log("Finished Turning.  Actual Heading: "+ getHeading());
     }
 
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Rotate to the desired heading at the maximum speed
-    public void newRotateLeftTo(double heading) {
-    }
-
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Rotate to the desired heading at the maximum speed
-    public void newRotateRightTo(double heading) {
-    }
-
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Methods for JoyStick Control.  Implements a "Universal Drive" assuming the IMU was "reset" to 0 when the robot is facing away
-    // from the driver.
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public boolean checkJoyStickMovement(float leftJoyStickX, float leftJoyStickY, float rightJoyStickX, float rightJoyStickY) {
