@@ -44,7 +44,7 @@ public class TestEncoderMovement extends LinearOpMode {
         robot = new RobotDrive(hardwareMap, telemetry);
         robot.initDriveMotors();
         robot.initImu();
-        robot.initSensors();
+        robot.initSensors(false);
 
         robot.resetAllDriveEncoders();
         robot.setAllMotorsWithoutEncoder();

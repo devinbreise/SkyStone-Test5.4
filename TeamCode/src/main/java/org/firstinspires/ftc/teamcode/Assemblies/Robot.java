@@ -50,7 +50,7 @@ public class Robot {
             drive.initImu();
             drive.initDriveMotors();
             if(usingDistanceSensors){
-                drive.initSensors();
+                drive.initSensors(false);
             }
             drive.resetHeading();
             latch.initLatch();
