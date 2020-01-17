@@ -1605,6 +1605,89 @@ public class RobotDrive {
 
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Attempt to cover the specified distance at up to the specified speed using smooth acceleration at the start and deceleration at the end
+    // this methods assumes the robot is at rest when it starts and will leave the robot at rest. Works for forward or backwards motion
+    // This version uses setVelocity instead of setPower and also attempts to hold the specified heading
+    public void newAccelerateInchesFB(double maxVelocity, double inches, double heading, long timeOut) {
+        teamUtil.log("newAccelerateForward: velocity:"+ maxVelocity + " Inches:"+inches+" heading:"+heading);
+        long timeOutTime = System.currentTimeMillis() + timeOut;
+        timedOut = false;
+
+        double MAX_ACCEL_PER_INCH = 440; // max velocity acceleration per inch without skidding (slope with x=inches)
+        double MAX_DECEL_PER_INCH = 200; // max power deceleration per inch without skidding (slope with x=inches)
+        double START_SPEED = 440;
+        double END_SPEED = 300;
+        boolean forward = true;
+
+        if (maxVelocity < 0) {
+        //    maxVelocity = maxVelocity *-1;
+        //    forward = false;
+            START_SPEED = START_SPEED * -1;
+            END_SPEED = END_SPEED * -1;
+        }
+
+        // Figure out the distances for each phase in encoder tics.  These are all + numbers
+        int totalEncoderCount = (int) (inches * NEW_COUNTS_PER_INCH);
+        int accelerationEncoderCount = (int) (newInchesToEncoderTics((maxVelocity-START_SPEED) / MAX_ACCEL_PER_INCH ));
+        int decelerationEncoderCount = (int) (newInchesToEncoderTics((maxVelocity-END_SPEED) / MAX_DECEL_PER_INCH ));
+
+        // figure out slopes for acceleration and deceleration phases.  Each could be + or -
+        double accelerationSlope = (maxVelocity-START_SPEED) / accelerationEncoderCount;
+        double decelerationSlope = (maxVelocity-END_SPEED) / decelerationEncoderCount * -1;
+
+        int initialPosition = fRightMotor.getCurrentPosition();
+        int target = initialPosition + ((maxVelocity > 0) ? totalEncoderCount : -totalEncoderCount);
+        int cruiseStart, decelerationStart;
+        if (accelerationEncoderCount+decelerationEncoderCount < totalEncoderCount) {
+            // Enough distance to reach maxVelocity
+            cruiseStart = initialPosition + ((maxVelocity > 0) ? accelerationEncoderCount : -accelerationEncoderCount) ;
+            decelerationStart = target - ((maxVelocity > 0) ? decelerationEncoderCount : -decelerationEncoderCount) ;
+        } else {
+            // we don't have enough space to ramp up to full speed so calculate the actual maximum velocity
+            // by finding the y value of the two ramp lines where they intersect given the maximum distance
+            maxVelocity = (-decelerationSlope*totalEncoderCount * accelerationSlope - START_SPEED * decelerationSlope)/(accelerationSlope - decelerationSlope);
+
+            // recompute shortened ramp phases
+            accelerationEncoderCount = (int) (newInchesToEncoderTics((maxVelocity-START_SPEED) / MAX_ACCEL_PER_INCH ));
+            decelerationEncoderCount = (int) (newInchesToEncoderTics((maxVelocity-END_SPEED) / MAX_DECEL_PER_INCH ));
+            cruiseStart = initialPosition + ((maxVelocity > 0) ? accelerationEncoderCount : -accelerationEncoderCount);
+            decelerationStart = target - ((maxVelocity > 0) ? decelerationEncoderCount : -decelerationEncoderCount);
+        }
+
+        // ramp up
+        newRampMotors(START_SPEED, maxVelocity, heading, timeOut);
+
+        // Cruise at Max Velocity
+        int currentPosition = fRightMotor.getCurrentPosition();
+        if (maxVelocity > 0) { // driving forward
+            while (currentPosition < decelerationStart && teamUtil.keepGoing(timeOutTime)) {
+                followHeading(heading, maxVelocity);
+                teamUtil.log("Distance Traveled: " + (currentPosition - initialPosition) + "Velocity: " + maxVelocity);
+                currentPosition = fRightMotor.getCurrentPosition();
+            }
+        } else {
+            while (currentPosition > decelerationStart && teamUtil.keepGoing(timeOutTime)) {
+                followHeading(heading, maxVelocity);
+                teamUtil.log("Distance Traveled: " + (currentPosition - initialPosition) + "Velocity: " + maxVelocity);
+                currentPosition = fRightMotor.getCurrentPosition();
+            }
+
+        }
+
+        // ramp down
+        newRampMotors(maxVelocity, END_SPEED, heading, timeOutTime - System.currentTimeMillis());
+
+        stopMotors();
+
+        timedOut = (System.currentTimeMillis() > timeOutTime);
+        if (timedOut) {
+            teamUtil.log("newRampMotors - TIMED OUT!");
+        }
+        teamUtil.log("newRampMotors - Finished");
+
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
