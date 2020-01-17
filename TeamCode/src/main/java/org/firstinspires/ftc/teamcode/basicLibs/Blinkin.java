@@ -7,6 +7,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Blinkin {
     public RevBlinkinLedDriver blinkinLedDriver;
+    public RevBlinkinLedDriver.BlinkinPattern current;
     private Telemetry telemetry;
     private HardwareMap hardwareMap;
 
@@ -47,65 +48,99 @@ public class Blinkin {
         setSignal(Signals.OFF);
     }
 
+    private void flashForMsecs(RevBlinkinLedDriver.BlinkinPattern pattern, long msecs) {
+        long stopTime = System.currentTimeMillis() + msecs;
+        blinkinLedDriver.setPattern(pattern);
+        while (System.currentTimeMillis() < stopTime);
+        blinkinLedDriver.setPattern(current);
+    }
+
+    public void flash (final RevBlinkinLedDriver.BlinkinPattern pattern, final long msecss) {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                flashForMsecs(pattern, msecss);
+            }
+        });
+        thread.start();
+    }
+
     public void setSignal(Signals signal){
 
         switch(signal) {
             case OFF :
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
+                current = RevBlinkinLedDriver.BlinkinPattern.BLACK;
+                blinkinLedDriver.setPattern(current);
                 break;
 
 
             case YELLOW :
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
+                current = RevBlinkinLedDriver.BlinkinPattern.YELLOW;
+                blinkinLedDriver.setPattern(current);
                 break;
             case INIT:
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.SINELON_FOREST_PALETTE);
+                current = RevBlinkinLedDriver.BlinkinPattern.SINELON_FOREST_PALETTE;
+                blinkinLedDriver.setPattern(current);
                 break;
             case READY_TO_START :
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.COLOR_WAVES_FOREST_PALETTE);
+                current = RevBlinkinLedDriver.BlinkinPattern.COLOR_WAVES_FOREST_PALETTE;
+                blinkinLedDriver.setPattern(current);
                 break;
             case INIT_RED:
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.LARSON_SCANNER_RED);
+                current = RevBlinkinLedDriver.BlinkinPattern.LARSON_SCANNER_RED;
+                blinkinLedDriver.setPattern(current);
                 break;
             case INIT_BLUE :
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.SINELON_OCEAN_PALETTE);
+                current = RevBlinkinLedDriver.BlinkinPattern.SINELON_OCEAN_PALETTE;
+                blinkinLedDriver.setPattern(current);
                 break;
             case SIGNAL_3:
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+                current = RevBlinkinLedDriver.BlinkinPattern.RED;
+                blinkinLedDriver.setPattern(current);
                 break;
 
             case LEVEL_0:
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
+                current = RevBlinkinLedDriver.BlinkinPattern.BLACK;
+                blinkinLedDriver.setPattern(current);
                 break;
             case LEVEL_1:
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+                current = RevBlinkinLedDriver.BlinkinPattern.RED;
+                blinkinLedDriver.setPattern(current);
                 break;
             case LEVEL_2:
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.ORANGE);
+                current = RevBlinkinLedDriver.BlinkinPattern.ORANGE;
+                blinkinLedDriver.setPattern(current);
                 break;
             case LEVEL_3:
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
+                current = RevBlinkinLedDriver.BlinkinPattern.YELLOW;
+                blinkinLedDriver.setPattern(current);
                 break;
             case LEVEL_4:
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+                current = RevBlinkinLedDriver.BlinkinPattern.GREEN;
+                blinkinLedDriver.setPattern(current);
                 break;
             case LEVEL_5:
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
+                current = RevBlinkinLedDriver.BlinkinPattern.BLUE;
+                blinkinLedDriver.setPattern(current);
                 break;
             case LEVEL_6:
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.VIOLET);
+                current = RevBlinkinLedDriver.BlinkinPattern.VIOLET;
+                blinkinLedDriver.setPattern(current);
                 break;
 
             case RED_AUTO:
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.COLOR_WAVES_LAVA_PALETTE);
+                current = RevBlinkinLedDriver.BlinkinPattern.COLOR_WAVES_LAVA_PALETTE;
+                blinkinLedDriver.setPattern(current);
                 break;
 
             case BLUE_AUTO:
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.COLOR_WAVES_OCEAN_PALETTE);
+                current = RevBlinkinLedDriver.BlinkinPattern.COLOR_WAVES_OCEAN_PALETTE;
+                blinkinLedDriver.setPattern(current);
                 break;
 
             case CURIOSITY:
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.FIRE_LARGE);
+                current = RevBlinkinLedDriver.BlinkinPattern.FIRE_LARGE;
+                blinkinLedDriver.setPattern(current);
                 break;
 
         }

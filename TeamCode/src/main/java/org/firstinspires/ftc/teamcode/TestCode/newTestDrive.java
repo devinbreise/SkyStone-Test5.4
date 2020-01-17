@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.TestCode;
 
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -64,7 +65,11 @@ public class newTestDrive extends LinearOpMode{
                         sleep(250);
                     }
                 } else if (gamepad1.b) {
-                    drive.newAccelerateInchesForward( 2200, travelDistance, drive.getHeading()-2, 5000);
+                    if (gamepad1.right_bumper) {
+                        drive.newAccelerateInchesFB(-2200, travelDistance, drive.getHeading() - 1.5, 5000);
+                    } else {
+                        drive.newAccelerateInchesFB(2200, travelDistance, drive.getHeading() - 2, 5000);
+                    }
                 }else if (gamepad1.x) {
                     if (gamepad1.dpad_up) {
                         targetDistance = targetDistance+1;
@@ -75,7 +80,7 @@ public class newTestDrive extends LinearOpMode{
                     }
                 } else if (gamepad1.y) {
                     drive.newMoveToDistance(leftSensor ? drive.frontLeftDistance : drive.frontRightDistance, targetDistance, 1500, 0, true, 5000);
-                }
+                } else
                 if (gamepad1.dpad_up) {
                     drive.newRotateTo(RobotDrive.RobotRotation.TOWARDS_FIELD);
                     sleep(250);
@@ -97,16 +102,17 @@ public class newTestDrive extends LinearOpMode{
                         teamUtil.alliance = teamUtil.Alliance.BLUE;
                     }
                     sleep(250);
-                }
+                } else
                 if (gamepad1.right_bumper) {
                     leftSensor = !leftSensor;
                     sleep(250);
-                }
+                } else
                 if (gamepad1.left_trigger > 0.8) {
                     demoAutoDrive();
-                }
+                } else
                 if (gamepad1.right_trigger > 0.8) {
-                    drive.newPositionToFoundation(0, 6000);
+                    demoAutoDriveNoSensors();
+                    //drive.newPositionToFoundation(0, 6000);
                 }
 
                 teamUtil.telemetry.addData("heading:", drive.getHeading());
@@ -128,26 +134,49 @@ public class newTestDrive extends LinearOpMode{
 
         // assumes starts in usual spot for skystone auto
         void demoAutoDrive () {
-            drive.newAccelerateInchesForward(1800,25,0,3000);
+            drive.newAccelerateInchesFB(1500,25,0,3000);
             drive.newRotateTo(RobotDrive.RobotRotation.TOWARDS_FIELD);
-            sleep(1000);
+            teamUtil.theBlinkin.flash(RevBlinkinLedDriver.BlinkinPattern.GREEN, 500);
             drive.newRotateTo(RobotDrive.RobotRotation.TOWARDS_BUILDING);
-            drive.newAccelerateInchesForward(2200,62,teamUtil.alliance==teamUtil.Alliance.RED ? 268: 92,5000);
+            drive.newAccelerateInchesFB(2200,62,teamUtil.alliance==teamUtil.Alliance.RED ? 268: 88,5000);
             drive.newRotateTo(RobotDrive.RobotRotation.TOWARDS_FIELD);
             drive.newPositionToFoundation(0, 4000);
-            sleep(1000);
-            drive.moveInchesBackward(0.30, 3, 2000);
+            teamUtil.theBlinkin.flash(RevBlinkinLedDriver.BlinkinPattern.GREEN, 500);
+            drive.newAccelerateInchesFB(-2200,3,0,3000);
             drive.newRotateTo(RobotDrive.RobotRotation.TOWARDS_DEPOT);
-            drive.newAccelerateInchesForward(2200,83,teamUtil.alliance==teamUtil.Alliance.RED ? 88: 272,5000);
+            drive.newAccelerateInchesFB(2200,83,teamUtil.alliance==teamUtil.Alliance.RED ? 88: 268,5000);
             drive.newMoveToDistance(drive.frontRightDistance, 10.5,1500,teamUtil.alliance==teamUtil.Alliance.RED ? 89: 271 , true,4000);
             drive.newRotateTo(RobotDrive.RobotRotation.TOWARDS_FIELD);
             drive.newMoveToDistance(drive.frontLeftDistance, 6,1500,0 , true,4000);
-            sleep(1000);
+            teamUtil.theBlinkin.flash(RevBlinkinLedDriver.BlinkinPattern.GREEN, 500);
             drive.newRotateTo(RobotDrive.RobotRotation.TOWARDS_BUILDING);
-            drive.newAccelerateInchesForward(2200,70,teamUtil.alliance==teamUtil.Alliance.RED ? 269: 91,5000);
-            sleep(1000);
-            drive.moveInchesBackward(0.5, 10, 2000);
+            drive.newAccelerateInchesFB(2200,70,teamUtil.alliance==teamUtil.Alliance.RED ? 269: 89,5000);
+            teamUtil.theBlinkin.flash(RevBlinkinLedDriver.BlinkinPattern.GREEN, 500);
+            drive.newAccelerateInchesFB(-2200,10,teamUtil.alliance==teamUtil.Alliance.RED ? 271: 91,2000);
         }
+
+    void demoAutoDriveNoSensors () {
+        drive.newAccelerateInchesFB(1600,25,0,3000);
+        drive.newRotateTo(RobotDrive.RobotRotation.TOWARDS_FIELD);
+        teamUtil.theBlinkin.flash(RevBlinkinLedDriver.BlinkinPattern.GREEN, 500);
+        drive.newRotateTo(RobotDrive.RobotRotation.TOWARDS_BUILDING);
+        drive.newAccelerateInchesFB(2200,64.5,teamUtil.alliance==teamUtil.Alliance.RED ? 268: 88,5000);
+        drive.newRotateTo(RobotDrive.RobotRotation.TOWARDS_FIELD);
+        drive.newAccelerateInchesFB(2200,3.5,0,3000);
+        teamUtil.theBlinkin.flash(RevBlinkinLedDriver.BlinkinPattern.GREEN, 500);
+        drive.newAccelerateInchesFB(-2200,5,0,3000);
+        drive.newRotateTo(RobotDrive.RobotRotation.TOWARDS_DEPOT);
+        drive.newAccelerateInchesFB(2200,89.5,teamUtil.alliance==teamUtil.Alliance.RED ? 88: 268,5000);
+        drive.newRotateTo(RobotDrive.RobotRotation.TOWARDS_FIELD);
+        drive.newAccelerateInchesFB(2200,6,0,3000);
+        teamUtil.theBlinkin.flash(RevBlinkinLedDriver.BlinkinPattern.GREEN, 500);
+        teamUtil.theBlinkin.flash(RevBlinkinLedDriver.BlinkinPattern.GREEN, 500);
+        drive.newAccelerateInchesFB(-2200,3,0,3000);
+        drive.newRotateTo(RobotDrive.RobotRotation.TOWARDS_BUILDING);
+        drive.newAccelerateInchesFB(2200,70,teamUtil.alliance==teamUtil.Alliance.RED ? 269: 89,5000);
+        teamUtil.theBlinkin.flash(RevBlinkinLedDriver.BlinkinPattern.GREEN, 500);
+        drive.newAccelerateInchesFB(-2200,7,teamUtil.alliance==teamUtil.Alliance.RED ? 271: 91,2000);
     }
+}
 
 

@@ -20,7 +20,8 @@ public class teamUtil {
     public static Blinkin theBlinkin =null;
     private static Robot robot;
     public static Telemetry telemetry;
-    public enum Alliance {RED, BLUE};
+    public enum Alliance {RED, BLUE}
+
     public static Alliance alliance = Alliance.RED;
 
 
@@ -49,6 +50,12 @@ public class teamUtil {
             sleepTime=wakeupTime- System.currentTimeMillis();
         }
     }   //sleep
+
+    public static void pause(long sleepTime) {
+        long wakeupTime= System.currentTimeMillis()+sleepTime;
+        while(System.currentTimeMillis()< wakeupTime){
+        }
+    }
 
 
 //    public static Robot getRobot(){
