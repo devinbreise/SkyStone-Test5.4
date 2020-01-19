@@ -22,6 +22,7 @@ public class Lift {
 
     // Constants for the base lift (when using the encoder)
     private final int LIFT_BASE_TOP_LIMIT_ENCODER_CLICKS = 2725;
+    private final int LIFT_BASE_SLIGHTLY_UP_ENCODER_CLICKS = 2725/9; //10 degrees
     private final int LIFT_BASE_SAFE_TO_ELEVATE = 2000;
 
     // Constants for the elevator spindles
@@ -309,6 +310,39 @@ public class Lift {
         teamUtil.log("Moving Lift Up - Finished");
     }
 
+    public void slightlyMoveLiftBaseUp(double power, long timeOut) {
+        long timeOutTime = System.currentTimeMillis() + timeOut;
+        timedOut = false;
+
+        if (!baseCalibrated) {
+            teamUtil.log("ERROR: Attempt to Move Lift Up before resetting base");
+            liftState = LiftState.IDLE;
+            return;
+        }
+        int mockTarget = LIFT_BASE_SLIGHTLY_UP_ENCODER_CLICKS *2;
+        liftBase.setPower(0);
+        liftBase.setTargetPosition(mockTarget);
+        liftBase.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        liftBase.setPower(power);
+        // wait for the lift to get close to its final position before we move on
+        // Using isBusy() on the liftbase motor takes a LONG time due to the PID slowing down at the end
+        while ((liftBase.getCurrentPosition() < (LIFT_BASE_SLIGHTLY_UP_ENCODER_CLICKS)) && teamUtil.keepGoing(timeOutTime)) {
+            teamUtil.log("liftEncoder: " + liftBase.getCurrentPosition());
+            if (liftBase.getCurrentPosition() > LIFT_BASE_SAFE_TO_ELEVATE) {
+                safeToElevate = true;
+            }
+        }
+        shutDownLiftBase();
+        teamUtil.log("LiftBase is slightly ip");
+        teamUtil.log("LiftBaseEncoder: " + liftBase.getCurrentPosition());
+        liftState = LiftState.IDLE;
+        timedOut = (System.currentTimeMillis() > timeOutTime);
+        if (timedOut) {
+            teamUtil.log("Moving Lift Slightly Up - TIMED OUT!");
+        }
+        teamUtil.log("Moving Lift Slightly Up - Finished");
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private void moveBaseUpUsingLimits(double power, long timeOut) {
         // This is a hack until we get the base lift encoder working again
@@ -358,6 +392,8 @@ public class Lift {
         // OR moveBaseUpUsingLimits(power, timeOut);
         moveBaseUpUsingEncoders(power, timeOut);
     }
+
+
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void moveLiftBaseUpNoWait(final double power, final long timeOut) {

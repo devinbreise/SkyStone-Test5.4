@@ -22,13 +22,13 @@ public class Grabber {
     public final double GRABBER_ONE_SAFE_ROTATE_POS = 0.09;
     //
     //    //close to the robot
-    public final double GRABBER_TWO_CAPSTONE_RELEASE = 0.04;
-    public final double GRABBER_TWO_STOW_POS = 0.13;
-    public final double GRABBER_TWO_PICKUP_POS = 0.5;
-    public final double GRABBER_TWO_OPEN_POS = 0.66;
-    public final double GRABBER_TWO_WIDE_CLOSED_POS = 0.815;
-    public final double GRABBER_TWO_SLIGHTLY_OPEN = 0.76;
-    public final double GRABBER_TWO_SAFE_ROTATE_POS = 0.7;
+    public final double GRABBER_TWO_CAPSTONE_RELEASE = 0.04-0.05;
+    public final double GRABBER_TWO_STOW_POS = 0.13-0.03;
+    public final double GRABBER_TWO_PICKUP_POS = 0.5-0.05;
+    public final double GRABBER_TWO_OPEN_POS = 0.66-0.05;
+    public final double GRABBER_TWO_WIDE_CLOSED_POS = 0.815-0.05;
+    public final double GRABBER_TWO_SLIGHTLY_OPEN = 0.76-0.05;
+    public final double GRABBER_TWO_SAFE_ROTATE_POS = 0.7-0.05;
 
     public final double rotate_outside = 0.79;
     public final double rotate_narrow = 0.476;

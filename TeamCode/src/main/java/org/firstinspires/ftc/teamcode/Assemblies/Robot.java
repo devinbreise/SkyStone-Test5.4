@@ -1,14 +1,13 @@
 package org.firstinspires.ftc.teamcode.Assemblies;
 
-        import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
         import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
         import com.qualcomm.robotcore.hardware.HardwareMap;
 
         import org.firstinspires.ftc.robotcore.external.Telemetry;
-        import org.firstinspires.ftc.teamcode.basicLibs.Blinkin;
+        import org.firstinspires.ftc.teamcode.basicLibs.SkystoneDetector;
         import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
-// A class to encapsulate the entire robot.
+// A class to encapsulate the entire 
 // This class is designed to be used ONLY in a linearOpMode (for Auto OR Teleop)
 public class Robot {
     public static final double DISTANCE_TO_BLOCK = 1.125;
@@ -16,6 +15,7 @@ public class Robot {
     public final double DISTANCE_TO_FOUNDATION = 2.5;
     public static final double AUTOINTAKE_POWER = 0.33;
     public static final double AUTOINTAKE_SIDEWAYS_POWER = 0.33;
+    int path;
     public boolean hasBeenInitialized = false;
 
     public LiftSystem liftSystem;
@@ -23,6 +23,7 @@ public class Robot {
     public Latch latch;
     HardwareMap hardwareMap;
     Telemetry telemetry;
+    SkystoneDetector detector;
     boolean timedOut = false;
 
     public final int MIN_DISTANCE_FOR_AUTO_PICKUP = 0;
@@ -200,6 +201,247 @@ public class Robot {
             teamUtil.log("didn't see anything on distance sensors");
             return;
         }
+    }
+    
+    public void doubleSkystone(){
+
+        boolean RED = (teamUtil.alliance == teamUtil.Alliance.RED);
+        boolean useDistanceSensorsALot = false;
+        double distance = 0;
+        detector = new SkystoneDetector(telemetry, hardwareMap);
+        detector.initDetector();
+        detector.activateDetector();
+
+        teamUtil.telemetry.addLine("Ready to Start");
+        teamUtil.telemetry.update();
+
+        // Start detecting but wait for start of match to move
+        while (!teamUtil.theOpMode.opModeIsActive() && !teamUtil.theOpMode.isStopRequested()) {
+            teamUtil.sleep(200);
+
+            int detected = (RED ? detector.detectRed() : detector.detectBlue());
+            if (detected > 0) {
+                path = detected;
+            }
+        }
+
+        detector.shutdownDector();
+
+        if(teamUtil.theOpMode.isStopRequested()){
+            return;
+        }
+
+        /////////////////////////////////////////////////////////
+        // Move to the first Skystone and grab it
+        liftSystem.prepareToGrabNoWait(4000);
+        switch (path) {
+            case 3 :
+                // move straight forward
+                break;
+            case 2 :
+                if (RED)
+                    drive.moveInchesLeft(0.35, 7, 2300);
+                else
+                    drive.moveInchesRight(0.35, 7, 2300);
+
+                //TODO: FIX FOR BLUE
+                break;
+            case 1 :
+                if (RED)
+                    drive.moveInchesLeft(0.35, 15, 2300);
+                else
+                    drive.moveInchesRight(0.35, 15, 2300);
+                //TODO: FIX FOR BLUE
+        }
+        // TODO: will the strafes to the left/right above effect the location of the robot relative to the wall (and later the skybridge)?
+        // TODO: If so, perhaps the rear distance sensor could come in handy here to normalize that distance before we move forward
+        drive.newAccelerateInchesFB(1100, 32, 0, 3000);
+        liftSystem.grabAndStowNoWait(4500);
+        teamUtil.sleep(750);
+
+        /////////////////////////////////////////////////////////
+        // Deliver the first stone to the building side of the field
+        drive.newAccelerateInchesFB(-2200, (RED ? 5 : 8/*TODO*/), 0, 3000);
+        drive.newRotateTo(RobotDrive.RobotRotation.TOWARDS_BUILDING);
+        switch (path) { // TODO: OR, we could go back to finding the tape line as we cross it and moving a set distance from there...
+            case 3 : distance = (RED ? 44.5  :44.5/*TODO*/); break;
+            case 2 : distance = (RED ? 52.5  :52.5/*TODO*/); break;// TODO RED + 8?
+            case 1 : distance = (RED ? 60.5  :60.5/*TODO*/); break;// TODO RED + 8?
+        }
+        drive.newAccelerateInchesFB(2200,distance,RED ? 268: 88,5000);
+        drive.newRotateTo(RobotDrive.RobotRotation.TOWARDS_FIELD);
+
+        //If Blue, move forward a little 'cause long strafe will be towards center of field
+        if(!RED){
+            drive.newAccelerateInchesFB(2200, 4, 0, 2000);
+        }
+        //lift base up a teensy bit and drop off stone
+        liftSystem.lift.slightlyMoveLiftBaseUp(1, 2000);
+        liftSystem.grabber.slightlyOpenGrabber();
+        teamUtil.sleep(750);
+
+        /////////////////////////////////////////////////////////
+        // drive back and position for the second stone
+        liftSystem.lift.moveLiftBaseDownNoWait(0.5, 3000);
+
+        //if it's path 1, we give up on double skystone ¯\_(ツ)_/¯
+        if(path == 1){
+            while (!drive.bottomColor.isOnTape()) {
+                if (RED) {
+                    drive.driveLeft(0.75);
+                } else {
+                    drive.driveRight(0.75);
+                }
+            }
+            drive.stopMotors();
+            return;
+        }
+        //if RED, move backward a little to avoid collision with skybridge
+        if(RED){
+            drive.newAccelerateInchesFB(-2200,3,0,5000);
+        }
+
+        drive.newRotateTo(RobotDrive.RobotRotation.TOWARDS_DEPOT);
+        liftSystem.prepareToGrabNoWaitWithDelay(1000, 4500);
+        switch (path) { // TODO: OR, we could go back to finding the tape line as we cross it and moving a set distance from there...
+            case 3 :
+            case 2 : distance = (RED ? 60  :60/*TODO*/); break;// TODO RED + 8?
+//            case 1 : distance = (RED ? 60  :60/*TODO*/); break;// TODO Need to think about this case carefully!
+        }
+        drive.newAccelerateInchesFB(2200,distance, RED ? 89: 265.5,5000); // TODO: It would be nice to combine this movement with the close to distance...it might just work...
+        switch (path) {
+            case 3 :
+            case 2 : distance = (RED ? 13.5  :13.5/*TODO*/); break; // TODO RED - 8?
+//            case 1 : distance = (RED ? 10.5  :0/*TODO*/); break; // TODO Need to think about this case carefully!
+        }
+        drive.newMoveToDistance(drive.frontRightDistance, distance,1500, RED ? 89: 271 , true,4000);
+        drive.newRotateTo(RobotDrive.RobotRotation.TOWARDS_FIELD);
+        //strafe a tad if we're doing path 2 to line up to the stone
+        if(path == 2){
+            if(RED){
+                drive.moveInchesLeft(0.35, 7, 2300);
+            }else{
+                drive.moveInchesRight(0.35, 7, 2300);
+            }
+        }
+
+        /////////////////////////////////////////////////////////
+        // Grab the second stone
+
+        if(useDistanceSensorsALot){
+            drive.newMoveToDistance(drive.frontLeftDistance, 5,1500,0 , true,4000);
+            drive.newAccelerateInchesFB(2200,7,0,5000);
+            liftSystem.grabAndStowNoWait(4500);
+            teamUtil.sleep(750);
+            drive.newAccelerateInchesFB(-2200,(RED ? 5 : 5/*TODO*/),0,5000);
+
+        } else {
+            drive.newAccelerateInchesFB(2200,11,0,5000);
+            liftSystem.grabAndStowNoWait(4500);
+            teamUtil.sleep(750);
+            drive.newAccelerateInchesFB(-2200,(RED ? 7 : 7/*TODO*/),0,5000);
+        }
+
+        //strafe a tad to avoid collision with the wall when rotating towards building site
+        if(path == 2){
+            if(RED){
+                drive.moveInchesRight(0.5, 4, 2000);
+            } else {
+                drive.moveInchesLeft(0.5, 4, 2000);
+            }
+        }
+        drive.newRotateTo(RobotDrive.RobotRotation.TOWARDS_BUILDING);
+
+        /////////////////////////////////////////////////////////
+        // Deliver the second stone
+        switch (path) { // TODO: OR, we could go back to finding the tape line as we cross it and moving a set distance from there...
+            case 3 : distance = (RED ? 66.5  :66.5/*TODO*/); break;
+            case 2 : distance = (RED ? 70.5  :70.5/*TODO*/); break;// TODO RED + 8?
+            case 1 : distance = (RED ? 60.5  :60.5/*TODO*/); break;// TODO RED + 8?
+        }
+        drive.newAccelerateInchesFB(2200,distance, RED ? 268: 92,5000);
+
+        liftSystem.lift.slightlyMoveLiftBaseUp(1, 2000);
+        liftSystem.grabber.slightlyOpenGrabber();
+        teamUtil.sleep(750);
+        liftSystem.lift.moveLiftBaseDownNoWait(0.5, 3000);
+        teamUtil.sleep(500);
+        while (!drive.bottomColor.isOnTape()) {
+            drive.driveBackward(0.75);
+        }
+        drive.stopMotors();
+        /////////////////////////////////////////////////////////
+        // Park
+
+
+
+
+
+
+
+
+
+
+
+
+/*        drive.accelerateToSpeedRight(0, 0.75);
+        while (!drive.bottomColor.isOnTape()) {
+            drive.driveRight(0.75);
+        }
+        drive.decelerateInchesRight(0.75, 6);
+        liftSystem.grabber.slightlyOpenGrabber();
+        drive.rotateToZero();
+        teamUtil.sleep(750);
+        drive.accelerateToSpeedLeft(0.35, 1);
+        while (!drive.bottomColor.isOnTape()) {
+            drive.driveLeft(1);
+        }
+
+        if (path == 3) {
+            drive.decelerateInchesLeft(1, 44);
+        } else if (path == 2) {
+            drive.decelerateInchesLeft(1, 50);
+        } else if (path == 1) {
+            drive.stopMotors();
+            teamUtil.log("path 1, stopping motors");
+            return;
+        }
+
+
+        liftSystem.prepareToGrabNoWait(4000);
+        drive.rotateToZero();
+        drive.moveToDistance(drive.frontLeftDistance, 9, 0.45, 3000);
+        while(!liftSystem.preparedToGrab){
+            teamUtil.sleep(100);
+        }
+        drive.moveToDistance(drive.frontLeftDistance, 6, 0.3, 3000);
+        drive.accelerateInchesForward(0.65, 7, 2000);
+        liftSystem.grabAndStowNoWait(4500);
+        teamUtil.sleep(750);
+
+        if(path == 3){
+            drive.moveInchesBackward(0.35, 9, 3000); //TODO: this didn't work on path 3...? --> fixed it, awaiting next download 1/10/19 4:12 PM
+        } else if(path == 2){
+            drive.moveInchesBackward(0.35, 10, 3000);
+        }
+        drive.rotateToZero();
+        drive.accelerateToSpeedRight(0, 1);
+        while (!drive.bottomColor.isOnTape()) {
+            drive.driveRight(1);
+        }
+        drive.decelerateInchesRight(1, 6);
+        liftSystem.grabber.slightlyOpenGrabber();
+        drive.rotateToZero();
+        while (!drive.bottomColor.isOnTape()) {
+            drive.driveLeft(0.75);
+        }
+        drive.stopMotors();
+*/
+
+
+
+
+
     }
 
 

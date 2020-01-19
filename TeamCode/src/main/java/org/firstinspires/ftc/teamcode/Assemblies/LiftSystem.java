@@ -132,6 +132,26 @@ public class LiftSystem {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public void prepareToGrabNoWaitWithDelay(final long delayTimeBeforeStarting, final long timeOut) {
+        teamUtil.log("Launching Thread to Prepare to grab WITH DELAY");
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                teamUtil.sleep(delayTimeBeforeStarting);
+                if (!isMoving()) {
+                    state = LiftSystemState.PREPARE_TO_GRAB;
+                    prepareToGrab(timeOut);
+                } else {
+                    teamUtil.log("prepareToGrabNoWaitWithDelay Stopped due to lift still moving");
+                }
+            }
+        });
+        thread.start();
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // grab a stone and stow the lift for travel
     public void grabAndStow(long timeOut){
 //        if (!lift.liftBaseIsUp()) {
@@ -184,6 +204,10 @@ public class LiftSystem {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
     // dip down, grab a stone and then return to level 0
     public void grab(long timeOut){
         state = LiftSystemState.GRAB;
