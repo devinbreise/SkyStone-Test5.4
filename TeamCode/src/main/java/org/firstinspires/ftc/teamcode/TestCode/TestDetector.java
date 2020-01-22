@@ -5,10 +5,11 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.basicLibs.SkystoneDetector;
+import org.firstinspires.ftc.teamcode.basicLibs.runningVoteCount;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
 @Autonomous(name = "testDaDetector")
-@Disabled
+//@Disabled
 
 public class TestDetector extends LinearOpMode {
 
@@ -33,9 +34,16 @@ public class TestDetector extends LinearOpMode {
         telemetry.update();
         //sleep(5000);
 
+        runningVoteCount redCount = new runningVoteCount(3000);
+        runningVoteCount blueCount = new runningVoteCount(3000);
         while (!opModeIsActive() && !isStopRequested()) {
             sleep(200);
-            detector.detectRed();
+            redCount.vote(detector.detectRed());
+            blueCount.vote(detector.detectBlue());
+            int redTotals[] = redCount.getTotals();
+            int blueTotals[] = blueCount.getTotals();
+            teamUtil.log("RED PATH: "+redCount.getWinner()+ " Totals:"+redTotals[1]+"/"+redTotals[2]+"/"+redTotals[3]
+                          + "BLUE PATH: "+blueCount.getWinner()+ " Totals:"+blueTotals[1]+"/"+blueTotals[2]+"/"+blueTotals[3]);
         }
 
 
@@ -44,8 +52,11 @@ public class TestDetector extends LinearOpMode {
         while(opModeIsActive()){
             //detector.detectRed();
 //            telemetry.addData("path: ", detector.detectRed());
-            sleep(3000);
+            ///sleep(3000);
             detector.reportStoneInformation();
+            redCount.vote(detector.detectRed());
+            blueCount.vote(detector.detectBlue());
+
             telemetry.addData("path: ", detector.detectRed());
             telemetry.addData("path: ", detector.detectBlue());
 
