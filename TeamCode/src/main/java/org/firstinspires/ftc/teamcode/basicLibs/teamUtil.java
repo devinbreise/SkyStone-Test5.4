@@ -22,7 +22,7 @@ public class teamUtil {
     public static Telemetry telemetry;
     public enum Alliance {RED, BLUE}
 
-    public static Alliance alliance = Alliance.BLUE;
+    public static Alliance alliance = Alliance.RED;
 
 
     /**

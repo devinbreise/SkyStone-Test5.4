@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.CompetitionCode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
 import org.firstinspires.ftc.teamcode.Assemblies.Robot;
 import org.firstinspires.ftc.teamcode.basicLibs.Blinkin;
 import org.firstinspires.ftc.teamcode.basicLibs.SkystoneDetector;
@@ -55,7 +56,7 @@ public class AutoSkystonePathRedShort extends LinearOpMode {
         }
         detector.shutdownDector();
 
-        robot.liftSystem.prepareToGrabNoWait(4000);
+        robot.liftSystem.prepareToGrabNoWait(4000, Grabber.GrabberRotation.INSIDE);
         if (path == 3) {
         } else if (path == 2) {
             robot.drive.moveInchesLeft(0.35, 7, 2300);

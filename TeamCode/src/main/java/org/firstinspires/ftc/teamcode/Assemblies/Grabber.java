@@ -19,7 +19,7 @@ public class Grabber {
     public final double GRABBER_ONE_OPEN_POS = 0.29;
     public final double GRABBER_ONE_WIDE_CLOSED_POS = 0.135;
     public final double GRABBER_ONE_SLIGHTLY_OPEN = 0.19;
-    public final double GRABBER_ONE_SAFE_ROTATE_POS = 0.09;
+    public final double GRABBER_ONE_SAFE_ROTATE_POS = 0.075;
     //
     //    //close to the robot
     public final double GRABBER_TWO_CAPSTONE_RELEASE = 0.04-0.05;
@@ -142,9 +142,9 @@ public class Grabber {
 //    }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public void narrowDrop(){
-        grabberOne.setPosition(GRABBER_ONE_OPEN_POS);
-        grabberTwo.setPosition(GRABBER_TWO_WIDE_CLOSED_POS);
+    public void narrowOpen(){
+        grabberOne.setPosition(GRABBER_ONE_SLIGHTLY_OPEN);
+        grabberTwo.setPosition(GRABBER_TWO_OPEN_POS);
         grabberState = GrabberState.GRABBER_NARROW_DROP;
     }
 

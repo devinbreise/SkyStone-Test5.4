@@ -113,7 +113,7 @@ public class RobotTeleop extends OpMode {
             teamUtil.log("level: " + level);
         }
         if(gamepad2.left_bumper){
-            liftSystem.prepareToGrabNoWait(9000);
+            liftSystem.prepareToGrabNoWait(9000, Grabber.GrabberRotation.INSIDE);
         }
         if(gamepad2.right_trigger>0.5){
             liftSystem.grabAndStowNoWait(7000);

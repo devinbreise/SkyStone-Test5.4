@@ -18,6 +18,8 @@ public class AutoSkystonePathRed extends LinearOpMode {
 
     public void initialize() {
         teamUtil.init(this);
+        teamUtil.alliance = teamUtil.Alliance.RED;
+
         if(teamUtil.alliance == teamUtil.Alliance.RED){
             teamUtil.theBlinkin.setSignal(Blinkin.Signals.INIT_RED);
         } else {

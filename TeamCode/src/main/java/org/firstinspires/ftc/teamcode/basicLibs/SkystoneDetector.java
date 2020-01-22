@@ -74,6 +74,7 @@ public class SkystoneDetector {
         return object.getLabel() == "Skystone" && getCenter(object) > 130;
     }
 
+
     public int detectRed() {
         teamUtil.log("Detect");
 
@@ -156,6 +157,51 @@ public class SkystoneDetector {
 
     }
 
+    public void castVote(int vote) {
+        //        class voteWrapper {
+//            public int vote;
+//            public long sampleTime;
+//
+//            voteWrapper(int sVote, long t) {
+//                vote = sVote;
+//                sampleTime = t;
+//            }
+//        }
+
+//        LinkedList<voteWrapper> voteQueue = new LinkedList<>();
+//        teamUtil.sleep(200);
+//        long now = System.currentTimeMillis();
+//        long cutoff = now - 3000;
+//
+//        int votesForOne;
+//        int votesForTwo;
+//        int votesForThree;
+//
+//        int deletedVote;
+//
+//
+//        total += sample;
+//        voteQueue.add(new voteWrapper(sample, now));
+//
+//        // Start detecting but wait for start of match to move
+//        while (!teamUtil.theOpMode.opModeIsActive() && !teamUtil.theOpMode.isStopRequested()) {
+//
+//            while (voteQueue.getLast().sampleTime<cutoff) {
+//                deletedVote -= voteQueue.removeLast().vote;
+//                if (deletedVote == 1) {
+//                    votesForOne -= 1;
+//                } else if(deletedVote == 2){
+//                    votesForTwo -= 1;
+//                } else if(deletedVote == 3){
+//                    votesForThree -= 1;
+//                }
+//            }
+//
+
+        }
+    public int getElectionResults(){
+        return 1;
+    }
 
     public void reportPath() {
         teamUtil.telemetry.addData("path: ", detectRed());

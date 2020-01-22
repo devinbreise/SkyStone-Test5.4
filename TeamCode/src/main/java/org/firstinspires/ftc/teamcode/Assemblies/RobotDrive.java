@@ -528,7 +528,7 @@ public class RobotDrive {
     // Currently this assumes distance sensors are on the front of the robot and postive power moves the robot forward.
     // TODO: Enhance to work with distance sensors on front or back
     public void newMoveToDistance(DistanceSensors sensor, double distance, double initialTicsPerSecond, double heading, boolean moveBackIfNeeded, long timeOut) {
-        boolean details = false;
+        boolean details = true;
         teamUtil.log("Moving to Distance: "+ distance + " Velocity: "+ initialTicsPerSecond);
         long timeOutTime = System.currentTimeMillis() + timeOut;
         timedOut = false;
@@ -558,7 +558,7 @@ public class RobotDrive {
             }
             // Decelerate to min speed
             while (currentDistance > slowThreshold && teamUtil.keepGoing(timeOutTime)) {
-                velocity = (currentDistance - slowThreshold) * slope + minPower; // decelerate proportionally down to min
+                velocity = Math.min((currentDistance - slowThreshold) * slope + minPower,initialTicsPerSecond); // decelerate proportionally down to min - don't exceed initial speed
                 followHeading(heading, velocity);
                 if (details) teamUtil.log("SLOWING: Distance:" + currentDistance + " velocity: " + velocity);
                 currentDistance = sensor.getDistance();
@@ -1550,9 +1550,13 @@ public class RobotDrive {
     // Attempt to cover the specified distance at up to the specified speed using smooth acceleration at the start and deceleration at the end
     // this methods assumes the robot is at rest when it starts and will leave the robot at rest. Works for forward or backwards motion
     // This version uses setVelocity instead of setPower and also attempts to hold the specified heading
-    public void newAccelerateInchesFB(double maxVelocity, double inches, double heading, long timeOut) {
+    public void newAccelerateInchesBackward(double maxVelocity, double inches, double heading, long timeOut){
+        newAccelerateInchesForward(-maxVelocity, inches, heading, timeOut);
+    }
+
+    public void newAccelerateInchesForward(double maxVelocity, double inches, double heading, long timeOut) {
         boolean details = false;
-        teamUtil.log("newAccelerateInchesFB: velocity:"+ maxVelocity + " Inches:"+inches+" heading:"+heading);
+        teamUtil.log("newAccelerateInchesForward: velocity:"+ maxVelocity + " Inches:"+inches+" heading:"+heading);
         long timeOutTime = System.currentTimeMillis() + timeOut;
         timedOut = false;
 
@@ -2145,6 +2149,8 @@ public class RobotDrive {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void driveJoyStick(float leftJoyStickX, float leftJoyStickY, float rightJoyStickX, double scaleAmount) {
 
+        float leftX = leftJoyStickX;
+        float leftY = leftJoyStickY;
         //left joystick is for moving, right stick is for rotation
 
         //RN, for FORWARD motion
@@ -2155,8 +2161,31 @@ public class RobotDrive {
 
 //        float leftX = (float)(scalePowerJoystick(leftJoyStickX) * scaleAmount);
 //        float leftY = (float)(scalePowerJoystick(leftJoyStickY)*scaleAmount);
-        float leftX = (float)((leftJoyStickX) * scaleAmount);
-        float leftY = (float)((leftJoyStickY)*scaleAmount);
+
+//        float leftX = (float)((leftJoyStickX) * scaleAmount);
+//        float leftY = (float)((leftJoyStickY)*scaleAmount);
+
+
+        if((leftJoyStickX > -0.1 && leftJoyStickX < 0.1)){
+            leftX = 0;
+        } else if((leftJoyStickX > -0.9 && leftJoyStickX < 0.9)) {
+            leftX = (leftJoyStickX > 0 ? (float)(leftJoyStickX*0.1/0.8 + 0.18) : (float)(leftJoyStickX*4/8 - 0.155));
+        } else{
+            leftX = (float)(0.8*Math.pow(leftJoyStickX, 11)  + ((leftJoyStickX > 0) ? 0.2 : -0.2)); //0.2 is minimum driving power we intend\
+        }
+
+        if((leftJoyStickY> -0.1 && leftJoyStickY < 0.1)){
+            leftY = 0;
+        } else if((leftJoyStickY > -0.9 && leftJoyStickY < 0.9)) {
+            leftY = (leftJoyStickY > 0 ? (float)(leftJoyStickY*0.1/0.8 + 0.18) : (float)(leftJoyStickY*4/8 - 0.155));
+        } else{
+            leftY = (float)(0.8*Math.pow(leftJoyStickY, 11)  + ((leftJoyStickY > 0) ? 0.2 : -0.2)); //0.2 is minimum driving power we intend\
+        }
+
+
+
+//        teamUtil.log("LeftX: " + leftX + " LeftJoystickX: " + leftJoyStickX);
+//        teamUtil.log("LeftY: " + leftY + " LeftJoystickY: ");
 
         float rightX = (float)(rightJoyStickX*0.6*scaleAmount);
 
@@ -2174,8 +2203,8 @@ public class RobotDrive {
 //        teamUtil.telemetry.addData("joystickY:", leftJoyStickY);
 
         fLeftMotor.setPower(frontLeft);
-        fRightMotor.setPower(frontRight);
-        bRightMotor.setPower(backRight);
+        fRightMotor.setPower(frontRight * 0.9);
+        bRightMotor.setPower(backRight * 0.9);
         bLeftMotor.setPower(backLeft);
 
 

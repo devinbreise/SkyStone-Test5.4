@@ -31,15 +31,14 @@ public class TestGrabber extends LinearOpMode {
                 grabber.openGrabber();
             }
             if (gamepad2.b) { //close wide
-
-                grabber.grabberStow();
+                grabber.narrowOpen();
             }
             if (gamepad2.x) { //close narrow
                 grabber.closeGrabberWide();
             }
             if (gamepad2.a) {
-//            grabber.grabberRotatePos();
-                grabber.slightlyOpenGrabber();
+            grabber.grabberRotatePos();
+//                grabber.slightlyOpenGrabber();
             }
             if (gamepad2.dpad_up) {
                 grabber.rotate(Grabber.GrabberRotation.OUTSIDE);

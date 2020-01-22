@@ -136,9 +136,14 @@ public class RobotTeleopLinear extends LinearOpMode {
                 teamUtil.log("level: " + level);
             }
 
-            if (gamepad2.left_bumper && gamepad2.left_trigger > 0.5) {
-                robot.liftSystem.prepareToGrabNoWait(9000);
+            if (gamepad2.left_bumper && gamepad2.left_trigger > 0.5 && gamepad2.right_trigger < 0.5) {
+                robot.liftSystem.prepareToGrabNoWait(9000, Grabber.GrabberRotation.INSIDE);
             }
+
+            if(gamepad2.left_bumper && gamepad2.left_trigger > 0.5 && gamepad2.right_trigger > 0.5){
+                robot.liftSystem.prepareToGrabNoWait(9000, Grabber.GrabberRotation.MIDDLE);
+            }
+
             if (gamepad2.right_stick_button) {
                 robot.liftSystem.drop();
             }

@@ -129,7 +129,7 @@ public class TestLift extends LinearOpMode {
                 teamUtil.sleep(500);
             }
             if (gamepad2.a) {
-                liftSystem.prepareToGrabNoWait(7000);
+                liftSystem.prepareToGrabNoWait(7000, Grabber.GrabberRotation.INSIDE);
             }
             if (gamepad2.b) {
                 liftSystem.grabAndStowNoWait(7000);
