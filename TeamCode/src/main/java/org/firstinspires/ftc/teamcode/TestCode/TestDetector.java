@@ -50,13 +50,13 @@ public class TestDetector extends LinearOpMode {
             int[] totals = voteCount.getTotals();
             teamUtil.log("PATH: "+voteCount.getWinner(3)+ " Totals:"+totals[1]+"/"+totals[2]+"/"+totals[3]);
             if (totals[1] > 0 && totals[2]==0 && totals[3] == 0) {
-                teamUtil.theBlinkin.setSignal(Blinkin.Signals.PATH_1);
+                teamUtil.theBlinkin.setSignal(Blinkin.Signals.RED_PATH_1);
                 teamUtil.log( "PATH: "+1);
             } else if (totals[3] > totals[2]*2) {
-                teamUtil.theBlinkin.setSignal(Blinkin.Signals.PATH_3);
+                teamUtil.theBlinkin.setSignal(Blinkin.Signals.RED_PATH_3);
                 teamUtil.log( "PATH: "+3);
             } else {
-                teamUtil.theBlinkin.setSignal(Blinkin.Signals.PATH_2);
+                teamUtil.theBlinkin.setSignal(Blinkin.Signals.RED_PATH_2);
                 teamUtil.log( "PATH: "+2);
             }
         }

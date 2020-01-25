@@ -254,12 +254,26 @@ public class Robot {
             if (detected > 0) {
                 path = detected;
             }
-            switch (path) {
-                case 1 : teamUtil.theBlinkin.setSignal(Blinkin.Signals.PATH_1); break;
-                case 2 : teamUtil.theBlinkin.setSignal(Blinkin.Signals.PATH_2); break;
-                case 3 : teamUtil.theBlinkin.setSignal(Blinkin.Signals.PATH_3); break;
-            }
+            if (RED) {
+                switch (path) {
+                    case 1 : teamUtil.theBlinkin.setSignal(Blinkin.Signals.RED_PATH_1); break;
+                    case 2 : teamUtil.theBlinkin.setSignal(Blinkin.Signals.RED_PATH_2); break;
+                    case 3 : teamUtil.theBlinkin.setSignal(Blinkin.Signals.RED_PATH_3); break;
+                }
+            } else {
+                switch (path) {
+                    case 1:
+                        teamUtil.theBlinkin.setSignal(Blinkin.Signals.BLUE_PATH_1);
+                        break;
+                    case 2:
+                        teamUtil.theBlinkin.setSignal(Blinkin.Signals.BLUE_PATH_2);
+                        break;
+                    case 3:
+                        teamUtil.theBlinkin.setSignal(Blinkin.Signals.BLUE_PATH_3);
+                        break;
 
+                }
+            }
         }
         if(RED) {
             teamUtil.theBlinkin.setSignal(Blinkin.Signals.RED_AUTO);
