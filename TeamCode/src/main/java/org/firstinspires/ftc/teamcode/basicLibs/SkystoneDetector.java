@@ -135,7 +135,7 @@ public class SkystoneDetector {
                     if(recognition.getLabel()== LABEL_SKYSTONE){
                         teamUtil.log("Skystone: " + recognition.getLeft() + ":" + recognition.getRight() + ":" + getCenter(recognition));
                         if(getCenter(recognition)> 450){
-
+                        //if(recognition.getRight()> 600){
                             return 2;
                         }else {
                             return 3;

@@ -46,15 +46,15 @@ public class sampleStats {
             long now = System.currentTimeMillis();
             long cutoff = now - timeWindow;
             total += sample;
-            sampleQueue.add(new sampleWrapper(sample, now));
+            sampleQueue.addFirst(new sampleWrapper(sample, now));
             while (sampleQueue.getLast().sampleTime<cutoff) {
                 total -= sampleQueue.removeLast().sample;
             }
         } else { // keep a running list of the last numSamplesInWindow Samples (and their total)
             total += sample;
-            sampleQueue.add(new sampleWrapper(sample, System.currentTimeMillis()));
+            sampleQueue.addFirst(new sampleWrapper(sample, System.currentTimeMillis()));
             if (sampleQueue.size() > numSamplesInWindow) {
-                total -= sampleQueue.remove().sample; // this would be more efficient if we re-used the object being removed for the one being added...
+                total -= sampleQueue.getLast().sample; // this would be more efficient if we re-used the object being removed for the one being added...
             }
         }
         if (sample < low) {

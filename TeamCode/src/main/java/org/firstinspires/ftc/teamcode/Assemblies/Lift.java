@@ -504,7 +504,7 @@ public class Lift {
             teamUtil.log("ERROR: called moveElevatorUp while not safe to elevate");
             return;
         }
-        if (lSpindle.getCurrentPosition() > position || rSpindle.getCurrentPosition() > position) {
+        if (lSpindle.getCurrentPosition() > position) {
             teamUtil.log("ERROR: called moveElevatorUp with a target position below current position");
             return;
         }
@@ -576,7 +576,7 @@ public class Lift {
             return;
         }
 
-        if (lSpindle.getCurrentPosition() < position || rSpindle.getCurrentPosition() < position) {
+        if (lSpindle.getCurrentPosition() < position) {
             teamUtil.log("ERROR: called moveElevatorDown with a target position above current position");
             return;
         }

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.CompetitionCode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.Assemblies.Grabber;
@@ -9,9 +10,8 @@ import org.firstinspires.ftc.teamcode.basicLibs.Blinkin;
 import org.firstinspires.ftc.teamcode.basicLibs.SkystoneDetector;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
-@Autonomous(name = "AutoSkystonePathRedShort", group = "Red")
-
-
+@Autonomous(name = "RedSingleSkystone", group = "Red")
+@Disabled
 public class AutoSkystonePathRedShort extends LinearOpMode {
 
     Robot robot;

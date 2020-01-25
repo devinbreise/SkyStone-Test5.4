@@ -21,7 +21,8 @@ public class TestDriveSystem extends LinearOpMode {
     public static double MAX_POWER = 1;
     public double DRIVE_POWER = 0.5;
     Robot robot;
-
+    boolean wasTurning = false;
+    double storedHeading;
 
     public void initialize() {
         teamUtil.init(this);
@@ -39,6 +40,7 @@ public class TestDriveSystem extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         initialize();
+        storedHeading = robot.drive.getHeading();
         waitForStart();
 
         while (opModeIsActive()) {
@@ -47,11 +49,13 @@ public class TestDriveSystem extends LinearOpMode {
 
 //            teamUtil.telemetry.addData("Is Skystone?", colorSensor.isSkystone(colorSensor.getReading()));
 
-
+            if(Math.abs(gamepad1.right_stick_x) < 0.1 && wasTurning){
+                storedHeading = robot.drive.getHeading();
+            }
             robot.drive.universalJoystick(gamepad1.left_stick_x,
                     gamepad1.left_stick_y,
                     gamepad1.right_stick_x, 1,
-                    robot.drive.getHeading());
+                    robot.drive.getHeading(), storedHeading);
 
 
             if (gamepad1.dpad_up) {

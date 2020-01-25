@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.basicLibs.Blinkin;
 import org.firstinspires.ftc.teamcode.basicLibs.SkystoneDetector;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 
@@ -246,50 +247,24 @@ public class Robot {
         teamUtil.telemetry.addLine("Ready to Start");
         teamUtil.telemetry.update();
 
-//        class voteWrapper {
-//            public int vote;
-//            public long sampleTime;
-//
-//            voteWrapper(int sVote, long t) {
-//                vote = sVote;
-//                sampleTime = t;
-//            }
-//        }
-
-//        LinkedList<voteWrapper> voteQueue = new LinkedList<>();
-//        teamUtil.sleep(200);
-//        long now = System.currentTimeMillis();
-//        long cutoff = now - 3000;
-//
-//        int votesForOne;
-//        int votesForTwo;
-//        int votesForThree;
-//
-//        int deletedVote;
-//
-//
-//        total += sample;
-//        voteQueue.add(new voteWrapper(sample, now));
-//
-//        // Start detecting but wait for start of match to move
+        // Start detecting but wait for start of match to move
         while (!teamUtil.theOpMode.opModeIsActive() && !teamUtil.theOpMode.isStopRequested()) {
-//
-//            while (voteQueue.getLast().sampleTime<cutoff) {
-//                deletedVote -= voteQueue.removeLast().vote;
-//                if (deletedVote == 1) {
-//                    votesForOne -= 1;
-//                } else if(deletedVote == 2){
-//                    votesForTwo -= 1;
-//                } else if(deletedVote == 3){
-//                    votesForThree -= 1;
-//                }
-//            }
-//
 
             int detected = (RED ? detector.detectRed() : detector.detectBlue());
             if (detected > 0) {
                 path = detected;
             }
+            switch (path) {
+                case 1 : teamUtil.theBlinkin.setSignal(Blinkin.Signals.PATH_1); break;
+                case 2 : teamUtil.theBlinkin.setSignal(Blinkin.Signals.PATH_2); break;
+                case 3 : teamUtil.theBlinkin.setSignal(Blinkin.Signals.PATH_3); break;
+            }
+
+        }
+        if(RED) {
+            teamUtil.theBlinkin.setSignal(Blinkin.Signals.RED_AUTO);
+        } else {
+            teamUtil.theBlinkin.setSignal(Blinkin.Signals.BLUE_AUTO);
         }
 
         detector.shutdownDector();

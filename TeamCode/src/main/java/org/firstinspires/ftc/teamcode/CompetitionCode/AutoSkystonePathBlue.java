@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.Assemblies.Robot;
 import org.firstinspires.ftc.teamcode.basicLibs.Blinkin;
 import org.firstinspires.ftc.teamcode.basicLibs.SkystoneDetector;
 import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
-@Autonomous(name="AutoSkystonePathBlue", group ="Blue")
+@Autonomous(name="BlueDoubleSkystone", group ="Blue")
 
 
 public class AutoSkystonePathBlue extends LinearOpMode {

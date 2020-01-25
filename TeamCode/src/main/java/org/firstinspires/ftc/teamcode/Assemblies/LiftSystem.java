@@ -103,15 +103,23 @@ public class LiftSystem {
                 case INSIDE:
                     grabber.rotate(Grabber.GrabberRotation.INSIDE);
                     teamUtil.pause(500);
-                    grabber.openGrabber();
                     break;
                 case MIDDLE:
                     grabber.rotate(Grabber.GrabberRotation.MIDDLE);
                     teamUtil.pause(800);
-                    grabber.narrowOpen();
                     break;
             }
         }
+
+        switch (rotation) {
+            case INSIDE:
+                grabber.openGrabber();
+                break;
+            case MIDDLE:
+                grabber.narrowOpen();
+                break;
+        }
+
         // start the elevator when we can
         while (!lift.isSafeToElevate() && teamUtil.keepGoing(timeOutTime)) {
             teamUtil.sleep(100);

@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.basicLibs.teamUtil;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 @TeleOp(name = "TestLift")
-@Disabled
+//@Disabled
 public class TestLift extends LinearOpMode {
 
     private double LIFT_BASE_POWER = 1;

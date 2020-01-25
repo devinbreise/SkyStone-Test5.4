@@ -56,19 +56,19 @@ public class RobotTeleop extends OpMode {
 
 ///////////////////////////////////////////////////////////////////////
         //this code is for the drive
-        if(gamepad1.left_trigger > 0.5){
-            robot.universalJoystick(gamepad1.left_stick_x,
-                    gamepad1.left_stick_y,
-                    gamepad1.right_stick_x,SCALE_DOWN_CONSTANT,
-                    robot.getHeading());
-
-        } else {
-            robot.universalJoystick(gamepad1.left_stick_x,
-                    gamepad1.left_stick_y,
-                    gamepad1.right_stick_x,1,
-                    robot.getHeading());
-
-        }
+//        if(gamepad1.left_trigger > 0.5){
+//            robot.universalJoystick(gamepad1.left_stick_x,
+//                    gamepad1.left_stick_y,
+//                    gamepad1.right_stick_x,SCALE_DOWN_CONSTANT,
+//                    robot.getHeading());
+//
+//        } else {
+//            robot.universalJoystick(gamepad1.left_stick_x,
+//                    gamepad1.left_stick_y,
+//                    gamepad1.right_stick_x,1,
+//                    robot.getHeading());
+//
+//        }
 
 
         if(gamepad1.left_stick_button && gamepad1.right_stick_button){

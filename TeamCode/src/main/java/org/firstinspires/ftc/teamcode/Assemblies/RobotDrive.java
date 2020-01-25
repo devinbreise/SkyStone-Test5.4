@@ -1648,52 +1648,52 @@ public class RobotDrive {
     // proportionally.
     // However, since you have this method, I think you could refactor the implementation of 4 of your MoveInches
     // methods to rely on this instead...but maybe a little later...
-    public void driveToHeading(double speed, double inches, double desiredHeading, long timeOut) {
-        teamUtil.log("Moving Inches at Heading: Inches: " + inches + " Heading: " + desiredHeading);
-        long timeOutTime = System.currentTimeMillis() + timeOut;
-        timedOut = false;
-
-        //resets the motors
-        fRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-
-        setBrakeAllDriveMotors();
-        //sets the number of desired inches on both motors
-
-        int encoderCounts = (int) (COUNTS_PER_INCH * inches);
-        float driveSpeed = (float) (clip(speed));
-
-        do {
-//            double driveSpeed = Range.clip( Math.abs(fRightMotor.getCurrentPosition()-encoderCounts)/700, 0.2, 1);
-            universalJoystick(0, driveSpeed, 0, 1, desiredHeading);
-
-            teamUtil.log("difference: " + Math.abs(fRightMotor.getCurrentPosition() - encoderCounts));
-            teamUtil.log("rightMotorPower: " + fRightMotor.getPower());
-            teamUtil.log("fRightMotor: " + getBackLeftMotorPos());
-            encoderTelemetry();
-
-
-        } while ((Math.abs(fRightMotor.getCurrentPosition()) < encoderCounts) && teamUtil.keepGoing(timeOutTime));
-        //runs to the set number of inches at the desired speed
-
-
-        while (fLeftMotor.isBusy() && fRightMotor.isBusy() && teamUtil.keepGoing(timeOutTime)) {
-            encoderTelemetry();
-        }
-
-        //turns off both motors
-        stopMotors();
-
-        //sets it back to normal
-        setAllMotorsWithoutEncoder();
-
-        timedOut = (System.currentTimeMillis() > timeOutTime);
-        if (timedOut) {
-            teamUtil.log("Moving Inches at Heading - TIMED OUT!");
-        }
-        teamUtil.log("Moving Inches at Heading - Finished");
-    }
+//    public void driveToHeading(double speed, double inches, double desiredHeading, long timeOut) {
+//        teamUtil.log("Moving Inches at Heading: Inches: " + inches + " Heading: " + desiredHeading);
+//        long timeOutTime = System.currentTimeMillis() + timeOut;
+//        timedOut = false;
+//
+//        //resets the motors
+//        fRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        fRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//
+//
+//        setBrakeAllDriveMotors();
+//        //sets the number of desired inches on both motors
+//
+//        int encoderCounts = (int) (COUNTS_PER_INCH * inches);
+//        float driveSpeed = (float) (clip(speed));
+//
+//        do {
+////            double driveSpeed = Range.clip( Math.abs(fRightMotor.getCurrentPosition()-encoderCounts)/700, 0.2, 1);
+//            universalJoystick(0, driveSpeed, 0, 1, desiredHeading, );
+//
+//            teamUtil.log("difference: " + Math.abs(fRightMotor.getCurrentPosition() - encoderCounts));
+//            teamUtil.log("rightMotorPower: " + fRightMotor.getPower());
+//            teamUtil.log("fRightMotor: " + getBackLeftMotorPos());
+//            encoderTelemetry();
+//
+//
+//        } while ((Math.abs(fRightMotor.getCurrentPosition()) < encoderCounts) && teamUtil.keepGoing(timeOutTime));
+//        //runs to the set number of inches at the desired speed
+//
+//
+//        while (fLeftMotor.isBusy() && fRightMotor.isBusy() && teamUtil.keepGoing(timeOutTime)) {
+//            encoderTelemetry();
+//        }
+//
+//        //turns off both motors
+//        stopMotors();
+//
+//        //sets it back to normal
+//        setAllMotorsWithoutEncoder();
+//
+//        timedOut = (System.currentTimeMillis() > timeOutTime);
+//        if (timedOut) {
+//            teamUtil.log("Moving Inches at Heading - TIMED OUT!");
+//        }
+//        teamUtil.log("Moving Inches at Heading - Finished");
+//    }
 
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2132,8 +2132,8 @@ public class RobotDrive {
 
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public void universalJoystick(float leftJoyStickX, float leftJoyStickY, float rightJoyStickX, double scaleAmount, double robotHeading){
-        double angleInDegrees = robotHeading * Math.PI/180;
+    public void universalJoystick(float leftJoyStickX, float leftJoyStickY, float rightJoyStickX, double scaleAmount, double robotHeading, double heldHeading){
+        double angleInDegrees = robotHeading * Math.PI/180; // TODO: Isn't this converting TO Radians resulting in an 'angleInRadians'?
         float leftX = leftJoyStickX;
         float leftY = leftJoyStickY;
         float rightX = rightJoyStickX;
@@ -2143,14 +2143,16 @@ public class RobotDrive {
 
         //rotate to obtain new coordinates
 
-        driveJoyStick(rotatedLeftX, rotatedLeftY, rightX, scaleAmount);
+        driveJoyStick(rotatedLeftX, rotatedLeftY, rightX, scaleAmount, heldHeading);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public void driveJoyStick(float leftJoyStickX, float leftJoyStickY, float rightJoyStickX, double scaleAmount) {
+    public void driveJoyStick(float leftJoyStickX, float leftJoyStickY, float rightJoyStickX, double scaleAmount, double heldHeading) {
 
         float leftX = leftJoyStickX;
         float leftY = leftJoyStickY;
+        float rotationAdjustment = rightJoyStickX;
+
         //left joystick is for moving, right stick is for rotation
 
         //RN, for FORWARD motion
@@ -2183,17 +2185,33 @@ public class RobotDrive {
         }
 
 
+        rotationAdjustment = (float) (rightJoyStickX * 0.6 * scaleAmount);
+
+//HOLDING HEADING CODE:
+//        float frontLeft = -(leftY - leftX ); //leftY - leftX - rightX(original prior to reverse)
+//        float frontRight = (-leftY - leftX );
+//        float backRight = (-leftY + leftX );
+//        float backLeft = -(leftY + leftX ); //leftY + leftX - rightX(original prior to reverse)
 
 //        teamUtil.log("LeftX: " + leftX + " LeftJoystickX: " + leftJoyStickX);
 //        teamUtil.log("LeftY: " + leftY + " LeftJoystickY: ");
+//        if(Math.abs(rightJoyStickX) > 0.1) {
+//            rotationAdjustment = (float) (rightJoyStickX * 0.6 * scaleAmount); // TODO: if rightJoyStickX  is in the dead range, we could use a passed in heading to hold instead...
+//        } else {
+//            rotationAdjustment = getHeadingError(heldHeading) * .1 * Math.max(Math.max(frontLeft, frontRight), Math.max(backRight, backLeft));
+//        }
+//
+//        frontLeft-=rotationAdjustment;
+//        frontRight+=rotationAdjustment;
+//        backRight-=rotationAdjustment;
+//        backLeft+=rotationAdjustment;
 
-        float rightX = (float)(rightJoyStickX*0.6*scaleAmount);
 
 
-        float frontLeft = -(leftY - leftX - rightX); //leftY - leftX - rightX(original prior to reverse)
-        float frontRight = (-leftY - leftX - rightX);
-        float backRight = (-leftY + leftX - rightX);
-        float backLeft = -(leftY + leftX - rightX); //leftY + leftX - rightX(original prior to reverse)
+            float frontLeft = -(leftY - leftX - rotationAdjustment); //leftY - leftX - rightX(original prior to reverse)
+            float frontRight = (-leftY - leftX - rotationAdjustment);
+            float backRight = (-leftY + leftX - rotationAdjustment);
+            float backLeft = -(leftY + leftX - rotationAdjustment); //leftY + leftX - rightX(original prior to reverse)
 
 //        teamUtil.telemetry.addData("RIGHTX:", rightX);
 //        teamUtil.telemetry.addData("LEFTX:", leftX);

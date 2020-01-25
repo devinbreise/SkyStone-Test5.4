@@ -37,6 +37,10 @@ public class Blinkin {
         BLUE_AUTO,
 
         CURIOSITY,
+
+        PATH_1,
+        PATH_2,
+        PATH_3
     }
 
     public Blinkin(HardwareMap map, Telemetry aTelemetry ){
@@ -140,6 +144,19 @@ public class Blinkin {
 
             case CURIOSITY:
                 current = RevBlinkinLedDriver.BlinkinPattern.FIRE_LARGE;
+                blinkinLedDriver.setPattern(current);
+                break;
+
+            case PATH_1:
+                current = RevBlinkinLedDriver.BlinkinPattern.RED;
+                blinkinLedDriver.setPattern(current);
+                break;
+            case PATH_2:
+                current = RevBlinkinLedDriver.BlinkinPattern.WHITE;
+                blinkinLedDriver.setPattern(current);
+                break;
+            case PATH_3:
+                current = RevBlinkinLedDriver.BlinkinPattern.BLUE;
                 blinkinLedDriver.setPattern(current);
                 break;
 

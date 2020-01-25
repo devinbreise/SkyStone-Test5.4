@@ -19,6 +19,8 @@ public class RobotTeleopLinear extends LinearOpMode {
     TeamGamepad teamGamePad;
 
     Robot robot;
+    boolean wasTurning = false;
+    double storedHeading;
 
     public void initialize() {
 
@@ -42,6 +44,7 @@ public class RobotTeleopLinear extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         initialize();
+//        storedHeading = robot.drive.getHeading();
         grabberRotation = Grabber.GrabberRotation.INSIDE;
 
         teamUtil.telemetry.addLine("Ready to Stack :D");
@@ -59,17 +62,21 @@ public class RobotTeleopLinear extends LinearOpMode {
 
 ///////////////////////////////////////////////////////////////////////
             //this code is for the drive
+
+//            if(Math.abs(gamepad1.right_stick_x) < 0.1 && wasTurning){
+//                storedHeading = robot.drive.getHeading();
+//            }
             if (gamepad1.left_trigger > 0.5) {
                 robot.drive.universalJoystick(gamepad1.left_stick_x,
                         gamepad1.left_stick_y,
                         gamepad1.right_stick_x, 1,
-                        robot.drive.getHeading());
+                        robot.drive.getHeading(), storedHeading);
 
             } else {
                 robot.drive.universalJoystick(gamepad1.left_stick_x,
                         gamepad1.left_stick_y,
                         gamepad1.right_stick_x, SCALE_DOWN_CONSTANT,
-                        robot.drive.getHeading());
+                        robot.drive.getHeading(), storedHeading);
 
             }
 

@@ -15,6 +15,8 @@ public class newTestDrive extends LinearOpMode{
         public static double MAX_POWER = 1;
         public double MAX_VELOCITY = 2200; // encoder tics per second
         RobotDrive drive;
+    boolean wasTurning = false;
+    double storedHeading;
         double targetDistance = 1;
         double travelDistance = 12;
         boolean leftSensor = true;
@@ -40,10 +42,13 @@ public class newTestDrive extends LinearOpMode{
 
             while (opModeIsActive()) {
 
+                if(Math.abs(gamepad1.right_stick_x) < 0.1 && wasTurning){
+                    storedHeading = drive.getHeading();
+                }
                 drive.universalJoystick(gamepad1.left_stick_x,
                         gamepad1.left_stick_y,
                         gamepad1.right_stick_x, 1,
-                        drive.getHeading());
+                        drive.getHeading(), storedHeading);
 
 
                 if (gamepad1.a) {
