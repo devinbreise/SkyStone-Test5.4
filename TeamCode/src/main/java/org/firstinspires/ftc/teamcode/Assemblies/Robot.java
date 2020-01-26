@@ -366,7 +366,7 @@ public class Robot {
         }
         //if RED, move backward a little to avoid collision with skybridge
         if (RED) {
-            drive.newAccelerateInchesForward(-2200, 3, 0, 5000);
+            drive.newAccelerateInchesForward(-2200, 1, 0, 5000);
         }
 
         drive.newRotateTo(RobotDrive.RobotRotation.TOWARDS_DEPOT);
