@@ -394,7 +394,7 @@ public class Robot {
             if (RED) {
                 drive.moveInchesLeft(0.35, 7, 2300);
             } else {
-                drive.moveInchesRight(0.35, 7, 2300);
+                drive.moveInchesRight(0.35, 5, 2300);
             }
         }
 
@@ -412,7 +412,7 @@ public class Robot {
             drive.newAccelerateInchesForward(2200, 11, 0, 5000);
             liftSystem.grabAndStowNoWait(4500);
             teamUtil.sleep(750);
-            drive.newAccelerateInchesForward(-2200, (RED ? 7 : 9/*TODO*/), 0, 5000);
+            drive.newAccelerateInchesForward(-2200, (RED ? 7 : 10/*TODO*/), 0, 5000);
         }
 
         //strafe a tad to avoid collision with the wall when rotating towards building site
@@ -424,6 +424,7 @@ public class Robot {
             }
         }
         drive.newRotateTo(RobotDrive.RobotRotation.TOWARDS_BUILDING);
+
 
         /////////////////////////////////////////////////////////
         // Deliver the second stone
