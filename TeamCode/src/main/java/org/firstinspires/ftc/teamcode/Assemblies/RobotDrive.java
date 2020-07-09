@@ -545,6 +545,8 @@ public class RobotDrive {
             teamUtil.log("Already There!  Not Moving...");
 
         } else if (currentDistance > distance) { // moving forward to target distance
+            teamUtil.log("Moving Forward");
+
             final double preDriftTarget = distance+.5;
             final double slowThreshold = distance+5;
             final double decelThreshold = slowThreshold+10;
@@ -570,10 +572,12 @@ public class RobotDrive {
                 currentDistance = sensor.getDistance();
             }
         } else if (moveBackIfNeeded){ // Moving Backwards to a target distance
+            teamUtil.log("Moving Backwards");
             final double preDriftTarget = distance-.5;
             final double slowThreshold = distance-5;
             final double decelThreshold = slowThreshold-10;
-            final double slope = (maxPower-minPower)/(decelThreshold-slowThreshold); // slope for the decel phase
+//            final double slope = (maxPower-minPower)/(decelThreshold-slowThreshold); // slope for the decel phase
+            final double slope = (minPower-maxPower)/(slowThreshold-decelThreshold); // slope for the decel phase
             // Cruise at max speed
             while (currentDistance < decelThreshold && teamUtil.keepGoing(timeOutTime)) {
                 followHeading(heading, -maxPower);
@@ -582,7 +586,8 @@ public class RobotDrive {
             }
             // Decelerate to min speed
             while (currentDistance < slowThreshold && teamUtil.keepGoing(timeOutTime)) {
-                velocity = (slowThreshold - currentDistance) * slope + minPower; // decelerate proportionally down to min
+//                velocity = (slowThreshold - currentDistance) * slope + minPower; // decelerate proportionally down to min
+                velocity = (currentDistance - decelThreshold) * slope + maxPower; // decelerate proportionally down to min
                 followHeading(heading, -velocity);
                 if (details) teamUtil.log("SLOWING: Distance:" + currentDistance + " velocity: " + -velocity);
                 currentDistance = sensor.getDistance();

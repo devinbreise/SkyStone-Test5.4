@@ -34,6 +34,24 @@ public class newTestDrive extends LinearOpMode{
             drive.initSensors(false);
             drive.resetHeading();
         }
+
+        public void stressTestDistanceSensors() {
+            drive.newMoveToDistance(drive.frontLeftDistance, 5, 2200, 0, false, 5000);
+            drive.newMoveToDistance(drive.frontLeftDistance, 10, 2200, 0, true, 5000);
+            drive.newRotateTo(270);
+            drive.newAccelerateInchesForward(2200,90,268,5000);
+            drive.newMoveToDistance(drive.frontLeftDistance, 5, 2200, 270, false, 5000);
+            drive.newMoveToDistance(drive.frontLeftDistance, 10, 2200, 270, true, 5000);
+            drive.newRotateTo(0);
+            drive.newMoveToDistance(drive.frontLeftDistance, 5, 2200, 0, false, 5000);
+            drive.newMoveToDistance(drive.frontLeftDistance, 10, 2200, 0, true, 5000);
+            drive.newRotateTo(90);
+            drive.newAccelerateInchesForward(2200,100,88,5000);
+            drive.newMoveToDistance(drive.frontLeftDistance, 5, 2200, 90, false, 5000);
+            drive.newMoveToDistance(drive.frontLeftDistance, 10, 2200, 90, true, 5000);
+            drive.newRotateTo(0);
+        }
+
         @Override
         public void runOpMode() throws InterruptedException {
             initialize();
@@ -142,6 +160,9 @@ public class newTestDrive extends LinearOpMode{
                     }
                     long seconds = (System.currentTimeMillis()-start)/1000;
                     teamUtil.log("Num Readings:" + readings + " Seconds:" + seconds +" Readings/Sec:" + (readings/seconds));
+                }
+                if (gamepad2.x) {
+                    stressTestDistanceSensors();
                 }
 
                 teamUtil.telemetry.addData("heading:", drive.getHeading());
