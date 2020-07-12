@@ -41,7 +41,7 @@ public class roboticArm extends LinearOpMode {
         elbowLimit = hardwareMap.get(DigitalChannel.class, "elbowLimit");
 
         baseMotor.setDirection(DcMotorSimple.Direction.REVERSE); // positive leans forward
-        //elbowMotor.setDirection(DcMotorSimple.Direction.REVERSE); // postive extends
+        elbowMotor.setDirection(DcMotorSimple.Direction.REVERSE); // postive extends
 
         //baseMotor.setVelocityPIDFCoefficients(1.5, 0.15,0,14.9); // these numbers were from a drive test...not calibrated for this arm!
         //elbowMotor.setVelocityPIDFCoefficients(1.5, 0.15,0,14.9); // these numbers were from a drive test...not calibrated for this arm!
@@ -57,12 +57,6 @@ public class roboticArm extends LinearOpMode {
         wristServo.setPosition(WRIST_STRAIGHT);
         grabberServo.setPosition(GRABBER_READY);
 
-        // Get the elbow motor to hold the forearm in place
-        elbowMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        elbowMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        elbowMotor.setTargetPosition(0);
-        elbowMotor.setVelocity(1500);
-
         // Calibrate and reset Arm Base
         if (!baseLimit.getState()) { // if the limit switch is already triggered...
             // move arm base forward until limit switch is no longer triggered, then go a bit more
@@ -76,34 +70,22 @@ public class roboticArm extends LinearOpMode {
         while (baseLimit.getState()) ;
         baseMotor.setVelocity(0);
         baseMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        baseMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        baseMotor.setTargetPosition(0);
-        baseMotor.setVelocity(1500);
+        baseMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Calibrate and reset forearm
         if (!elbowLimit.getState()) {  // if the limit switch is already triggered...
             // extend elbow until limit switch is no longer triggered, then go a bit more
-            elbowMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             elbowMotor.setVelocity(1000);
             while (!elbowLimit.getState()) ;
             teamUtil.pause(500);
-            elbowMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            elbowMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            elbowMotor.setTargetPosition(0);
-            elbowMotor.setVelocity(1500);
+            elbowMotor.setVelocity(0);
         }
         // retract forearm until it triggers the limit switch
-        elbowMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        elbowMotor.setVelocity(1000);
-        while (elbowLimit.getState()) {
-            elbowMotor.setTargetPosition(elbowMotor.getTargetPosition() - 10);
-            teamUtil.pause(100);
-        }
+        elbowMotor.setVelocity(-1000);
+        while (elbowLimit.getState()) ;
         elbowMotor.setVelocity(0);
         elbowMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        elbowMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        elbowMotor.setTargetPosition(0);
-        elbowMotor.setVelocity(1000);
+        elbowMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
 
@@ -152,9 +134,9 @@ public class roboticArm extends LinearOpMode {
                 baseMotor.setVelocity(0);
             }
             if (gamepad1.dpad_up) {
-                elbowMotor.setVelocity(500);
+                elbowMotor.setVelocity(1000);
             } else if (gamepad1.dpad_down)
-                elbowMotor.setVelocity(-500);
+                elbowMotor.setVelocity(-1000);
             else {
                 elbowMotor.setVelocity(0);
             }
