@@ -43,14 +43,14 @@ public class roboticArm extends LinearOpMode {
     public final double WRIST_STRAIGHT = 0.46; //Servo setting for a straight wrist
     public final double WRIST_DEGREES = 270; // Number of degrees the servo will rotate between position 0 and 1
 
-    public final double BASE_LENGTH = 25; //length of base arm joint to joint
-    public final double UPPER_LENGTH = 25; //length of forearm arm joint to joint
+    public final double BASE_LENGTH = 25; //TODO: length of base arm joint to joint
+    public final double UPPER_LENGTH = 25; //TODO: length of forearm arm joint to joint
     public final double ELBOW_DEGREES = 0.0131; // Number of degrees per encoder click
     public final double BASE_DEGREES = 0.0134; // Number of degrees per encoder click
     public final double ELBOW_LIMIT_ANGLE = 15; // Number of degrees between elbow limit base arm
     public final double BASE_LIMIT_ANGLE = 140; // Number of degrees between base limit and forward horizontal
-    public final double ELBOW_MAX_VELOCITY = 1500;
-    public final double BASE_MAX_VELOCITY = 1500;
+    public final double ELBOW_MAX_VELOCITY = 1500; // TODO  find under load
+    public final double BASE_MAX_VELOCITY = 1500;  // TODO find under load
 
 
     public void initialize() {
@@ -176,18 +176,20 @@ public class roboticArm extends LinearOpMode {
             stickX = 0;
         else
             if (stickX > 0 )
-                stickX = (float) (stickX * 1.25 - 0.2);
+                stickX = (float) ((stickX - 0.2)* 1.25);
             else
-                stickX = (float) (stickX * 1.25 + 0.2);
+                stickX = (float) ((stickX + 0.2)* 1.25);
         if (Math.abs(stickY) < 0.2)
             stickY = 0;
         else
             if (stickY > 0 )
-                stickY = (float) (stickY * 1.25 - 0.2);
+                stickY = (float) ((stickY - 0.2)* 1.25);
             else
-                stickY = (float) (stickY * 1.25 + 0.2);
+                stickY = (float) ((stickY + 0.2)* 1.25);
 
         if ((Math.abs(stickX) == 0) && (Math.abs(stickY) == 0))    { // stop the arm
+            telemetry.addData("eV:", 0);
+            telemetry.addData("bV:", 0);
             baseMotor.setVelocity(0);
             elbowMotor.setVelocity(0);
         } else { // get/keep the arm moving in the right direction
@@ -198,6 +200,8 @@ public class roboticArm extends LinearOpMode {
 
             // Determine the target x and y position for the wrist joint based on current position and joy stick input
             Point wristLocation = getWristLocation();
+            telemetry.addLine("Wrist:"+wristLocation.x+","+ wristLocation.y);
+
             double targetX = wristLocation.x + stickX;
             double targetY = wristLocation.y + stickY;
 
@@ -208,8 +212,7 @@ public class roboticArm extends LinearOpMode {
             double elbowDiff = (targetAngles.elbow-currentElbowAngle) * ELBOW_DEGREES;
             double baseDiff = (targetAngles.base-currentBaseAngle) * BASE_DEGREES;
 
-            // Set the motors to their new velocities and targets
-            // TODO: use pure velocity or RUN_TO_POSITION?  Velocity I think...
+            // Set the motors to their new velocities to move straight towards the target wrist position
             double elbowVelocity, baseVelocity;
             double velocityScale = Math.sqrt(stickX*stickX + stickY*stickY);
             if (Math.abs(elbowDiff) > Math.abs(baseDiff)) {
@@ -241,22 +244,34 @@ public class roboticArm extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-
+            double maxVelocityE = 0;
+            double maxVelocityB = 0;
             if (gamepad1.right_trigger > .8 && gamepad1.left_trigger > .8) {
                 if (gamepad1.y) {
                     baseMotor.setVelocity(1000);
                 } else if (gamepad1.a)
                     baseMotor.setVelocity(-1000);
-                else {
+                else if (gamepad1.dpad_right) {
+                    baseMotor.setVelocity(10000);
+                    if (baseMotor.getVelocity()> maxVelocityB)
+                        maxVelocityB = baseMotor.getVelocity();
+                    teamUtil.log("base: "+ maxVelocityB);
+                } else {
                     baseMotor.setVelocity(0);
                 }
                 if (gamepad1.dpad_up) {
                     elbowMotor.setVelocity(1000);
                 } else if (gamepad1.dpad_down)
                     elbowMotor.setVelocity(-1000);
-                else {
+                else if (gamepad1.dpad_left) {
+                    elbowMotor.setVelocity(10000);
+                    if (elbowMotor.getVelocity()> maxVelocityE)
+                        maxVelocityE = elbowMotor.getVelocity();
+                    teamUtil.log("elbow: "+ maxVelocityE);
+                } else  {
                     elbowMotor.setVelocity(0);
                 }
+
             } else {
                 moveArm();
             }
