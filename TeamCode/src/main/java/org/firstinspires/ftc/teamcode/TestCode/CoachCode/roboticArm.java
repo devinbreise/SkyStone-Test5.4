@@ -45,10 +45,10 @@ public class roboticArm extends LinearOpMode {
 
     public final double BASE_LENGTH = 25; //length of base arm joint to joint
     public final double UPPER_LENGTH = 25; //length of forearm arm joint to joint
-    public final double ELBOW_DEGREES = 0.1557; // Number of degrees per encoder click
-    public final double BASE_DEGREES = 0.011652; // Number of degrees per encoder click
-    public final double ELBOW_LIMIT_ANGLE = 60; // TODO Number of degrees between elbow limit and straight
-    public final double BASE_LIMIT_ANGLE = 140; // TODO Number of degrees between base limit and forward horizontal
+    public final double ELBOW_DEGREES = 0.0131; // Number of degrees per encoder click
+    public final double BASE_DEGREES = 0.0134; // Number of degrees per encoder click
+    public final double ELBOW_LIMIT_ANGLE = 15; // Number of degrees between elbow limit base arm
+    public final double BASE_LIMIT_ANGLE = 140; // Number of degrees between base limit and forward horizontal
     public final double ELBOW_MAX_VELOCITY = 1500;
     public final double BASE_MAX_VELOCITY = 1500;
 
@@ -168,8 +168,8 @@ public class roboticArm extends LinearOpMode {
 
     void moveArm() {
         // Get the desired movement vector
-        float stickX = gamepad1.left_stick_x;
-        float stickY = -gamepad1.left_stick_y;
+        float stickX = gamepad1.right_stick_x;
+        float stickY = -gamepad1.right_stick_y;
 
         // Provide a generous dead zone to avoid unwanted movement and scale the rest
         if (Math.abs(stickX) < 0.2)
@@ -242,26 +242,30 @@ public class roboticArm extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            if (gamepad1.y) {
-                baseMotor.setVelocity(1000);
-            } else if (gamepad1.a)
-                baseMotor.setVelocity(-1000);
-            else {
-                baseMotor.setVelocity(0);
+            if (gamepad1.right_trigger > .8 && gamepad1.left_trigger > .8) {
+                if (gamepad1.y) {
+                    baseMotor.setVelocity(1000);
+                } else if (gamepad1.a)
+                    baseMotor.setVelocity(-1000);
+                else {
+                    baseMotor.setVelocity(0);
+                }
+                if (gamepad1.dpad_up) {
+                    elbowMotor.setVelocity(1000);
+                } else if (gamepad1.dpad_down)
+                    elbowMotor.setVelocity(-1000);
+                else {
+                    elbowMotor.setVelocity(0);
+                }
+            } else {
+                moveArm();
             }
-            if (gamepad1.dpad_up) {
-                elbowMotor.setVelocity(1000);
-            } else if (gamepad1.dpad_down)
-                elbowMotor.setVelocity(-1000);
-            else {
-                elbowMotor.setVelocity(0);
-            }
+
             if (gamepad1.right_bumper) {
                 grabberServo.setPosition(GRABBER_GRAB);
             } else if (gamepad1.left_bumper) {
                 grabberServo.setPosition(GRABBER_OPEN);
             }
-            moveArm();
             telemetry.addLine("base/elbow degrees: "+getCurrentBaseAngle()+"/"+getCurrentElbowAngle());
             telemetry.addLine("base/elbow encoder: "+baseMotor.getCurrentPosition()+"/"+elbowMotor.getCurrentPosition());
             telemetry.addLine("wrist/grabber: "+wristServo.getPosition()+"/"+grabberServo.getPosition());
