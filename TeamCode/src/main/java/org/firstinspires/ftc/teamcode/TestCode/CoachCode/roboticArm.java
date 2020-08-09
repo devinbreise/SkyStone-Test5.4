@@ -49,8 +49,8 @@ public class roboticArm extends LinearOpMode {
     public final double BASE_DEGREES = 0.0134; // Number of degrees per encoder click
     public final double ELBOW_LIMIT_ANGLE = 15; // Number of degrees between elbow limit base arm
     public final double BASE_LIMIT_ANGLE = 140; // Number of degrees between base limit and forward horizontal
-    public final double ELBOW_MAX_VELOCITY = 2500; // TODO  find under load
-    public final double BASE_MAX_VELOCITY = 2600;  // TODO find under load
+    public final double ELBOW_MAX_VELOCITY = 2500; //  under load
+    public final double BASE_MAX_VELOCITY = 2600;  //  under load
 
 
     public void initialize() {
