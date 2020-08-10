@@ -51,7 +51,7 @@ public class roboticArm extends LinearOpMode {
     public final double BASE_LIMIT_ANGLE = 140; // Number of degrees between base limit and forward horizontal
     public final double ELBOW_MAX_VELOCITY = 2500; //  under load
     public final double BASE_MAX_VELOCITY = 2600;  //  under load
-    public final double MAX_VELOCITY = 2500;  //  under load
+    public final double MAX_VELOCITY = 1500;  //  under load
 
 
     public void initialize() {
@@ -169,8 +169,8 @@ public class roboticArm extends LinearOpMode {
 
     void moveArm() {
         // Get the desired movement vector
-        float stickX = gamepad1.right_stick_x;
-        float stickY = -gamepad1.right_stick_y;
+        float stickX = gamepad1.left_stick_x;
+        float stickY = -gamepad1.left_stick_y;
 
         // Provide a generous dead zone to avoid unwanted movement and scale the rest
         if (Math.abs(stickX) < 0.2)
@@ -187,13 +187,16 @@ public class roboticArm extends LinearOpMode {
                 stickY = (float) ((stickY - 0.2)* 1.25);
             else
                 stickY = (float) ((stickY + 0.2)* 1.25);
+        //teamUtil.log("stick:"+stickX+","+ stickY);
 
-        if ((Math.abs(stickX) == 0) && (Math.abs(stickY) == 0))    { // stop the arm
+        if (stickX == 0 && stickY == 0)    { // stop the arm
             telemetry.addData("eV:", 0);
             telemetry.addData("bV:", 0);
             baseMotor.setVelocity(0);
             elbowMotor.setVelocity(0);
         } else { // get/keep the arm moving in the right direction
+            teamUtil.log("-------------------------------");
+            teamUtil.log("stick:"+stickX+","+ stickY);
             // Given the wrist joint's current position in space,
             // determine the ratio of base to elbow movement and the signs on each
             double currentBaseAngle = getCurrentBaseAngle();
@@ -201,31 +204,34 @@ public class roboticArm extends LinearOpMode {
 
             // Determine the target x and y position for the wrist joint based on current position and joy stick input
             Point wristLocation = getWristLocation(currentBaseAngle, currentElbowAngle);
-            telemetry.addLine("Wrist:"+wristLocation.x+","+ wristLocation.y);
-            teamUtil.log("Wrist:"+wristLocation.x+","+ wristLocation.y);
+            //telemetry.addLine("Wrist:"+wristLocation.x+","+ wristLocation.y);
+            teamUtil.log("current Angles:"+currentBaseAngle+","+ currentElbowAngle);
+            teamUtil.log("current Wrist:"+wristLocation.x+","+ wristLocation.y);
 
             double targetX = wristLocation.x + stickX;
             double targetY = wristLocation.y + stickY;
-            teamUtil.log("Target:"+targetX+","+ targetY);
+            teamUtil.log("Target Wrist:"+targetX+","+ targetY);
 
             // Determine the target angles for the two joints given the target position
             Angles targetAngles = computeAngles(targetX, targetY);
-            teamUtil.log("targetAngles:"+targetAngles.base+"/"+targetAngles.elbow+"/"+targetAngles.wrist);
+            teamUtil.log("target Angles:"+targetAngles.base+"/"+targetAngles.elbow+"/"+targetAngles.wrist);
 
             // Determine how many encoder clicks each motor needs to change and in what direction
-            double elbowDiff = (targetAngles.elbow-currentElbowAngle) * ELBOW_DEGREES;
-            double baseDiff = (targetAngles.base-currentBaseAngle) * BASE_DEGREES;
-            teamUtil.log("Diffs: base,elbow:"+baseDiff+","+ elbowDiff);
+            double elbowDiff = Math.abs((targetAngles.elbow - currentElbowAngle) / ELBOW_DEGREES);
+            double elbowSign = targetAngles.elbow > currentElbowAngle ? 1 : -1;
+            double baseDiff = Math.abs((targetAngles.base-currentBaseAngle) / BASE_DEGREES);
+            double baseSign = targetAngles.base > currentBaseAngle ? 1 : -1;
+            teamUtil.log("Diffs: base,elbow:"+baseDiff+","+baseSign+","+ elbowDiff+"," +elbowSign);
 
             // Set the motors to their new velocities to move straight towards the target wrist position
             double elbowVelocity, baseVelocity;
             double velocityScale = Math.min(1,Math.sqrt(stickX*stickX + stickY*stickY));
-            if (Math.abs(elbowDiff) > Math.abs(baseDiff)) {
-                elbowVelocity = velocityScale * ELBOW_MAX_VELOCITY;
-                baseVelocity = (baseDiff / elbowDiff) * velocityScale * MAX_VELOCITY;
+            if (Math.abs(elbowDiff) > Math.abs(baseDiff)) { // move elbow joint faster
+                elbowVelocity = velocityScale * MAX_VELOCITY * elbowSign;  //
+                baseVelocity = (baseDiff / elbowDiff) * velocityScale * MAX_VELOCITY * baseSign;
             } else {
-                baseVelocity = velocityScale * BASE_MAX_VELOCITY;
-                elbowVelocity = (elbowDiff / baseDiff) * velocityScale * MAX_VELOCITY;
+                baseVelocity = velocityScale * MAX_VELOCITY * baseSign;
+                elbowVelocity = (elbowDiff / baseDiff) * velocityScale * MAX_VELOCITY * elbowSign;
             }
 
             // TODO: Need code here to impose limits on movement in both directions
