@@ -51,6 +51,7 @@ public class roboticArm extends LinearOpMode {
     public final double BASE_LIMIT_ANGLE = 140; // Number of degrees between base limit and forward horizontal
     public final double ELBOW_MAX_VELOCITY = 2500; //  under load
     public final double BASE_MAX_VELOCITY = 2600;  //  under load
+    public final double MAX_VELOCITY = 2500;  //  under load
 
 
     public void initialize() {
@@ -109,75 +110,52 @@ public class roboticArm extends LinearOpMode {
         elbowMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    Point getWristLocation() {
+    Point getWristLocation(double B1, double E) {
         Point wristLocation = new Point(0,0);
-        double B1 = getCurrentBaseAngle();
-        double E = getCurrentElbowAngle();
 
         // compute the length of the missing side of the triangle formed by the arms
         double c = Math.sqrt(BASE_LENGTH*BASE_LENGTH + UPPER_LENGTH*UPPER_LENGTH - 2*BASE_LENGTH*UPPER_LENGTH * Math.cos(Math.toRadians(E)));
 
         // compute the angle between this 3rd side and the base arm
-        double B = Math.asin(Math.sin(Math.toRadians(E)*BASE_LENGTH/c)); // B is in radians!
+        double B = Math.asin(Math.sin(Math.toRadians(E))*UPPER_LENGTH/c); // B is in radians!
 
         // compute the angle between the 3rd side and horizontal
         double B2 = B1-Math.toDegrees(B);
-        //teamUtil.log("wrist:"+c+"/"+B+"/"+B2);
+        //teamUtil.log("wrist:"+c+"/"+Math.toDegrees(B)+"/"+B2);
+        //System.out.println("wrist:"+c+"/"+Math.toDegrees(B)+"/"+B2);
+
         // Find the X and Y using a right triangle with  the "3rd side" as the hypotenuse
         wristLocation.x = Math.cos(Math.toRadians(B2)) * c;
         wristLocation.y = Math.sin(Math.toRadians(B2)) * c;
         return wristLocation;
     }
 
-    Point getWristLocationOLD() {
-        Point elbowLocation = new Point(0,0);
-        Point wristLocation = new Point(0,0);
-        double B = getCurrentBaseAngle();
-        double E = getCurrentElbowAngle();
-        if (B > 90) {
-            elbowLocation.x = Math.sin(Math.toRadians(B-90)) * BASE_LENGTH * -1;
-            elbowLocation.y = Math.cos(Math.toRadians(B-90)) * BASE_LENGTH;
-        } else  {
-            elbowLocation.x = Math.cos(Math.toRadians(B)) * BASE_LENGTH;
-            elbowLocation.y = Math.sin(Math.toRadians(B)) * BASE_LENGTH;
-        }
-        if (E > 90) {
-            wristLocation.x = Math.sin(Math.toRadians(B-90)) * UPPER_LENGTH * -1 + elbowLocation.x ;
-            wristLocation.y = Math.cos(Math.toRadians(B-90)) * UPPER_LENGTH + elbowLocation.y;
-        } else  {
-            wristLocation.x = Math.cos(Math.toRadians(B)) * UPPER_LENGTH + elbowLocation.x;
-            wristLocation.y = Math.sin(Math.toRadians(B)) * UPPER_LENGTH + elbowLocation.y;
-        }
-        return wristLocation;
-    }
-
     Angles computeAngles(double x, double y) {
-        double bl, al, ra, rl, a0, a1,a2,a3;
+        double B, B1, B2, c, E, W;
 
-        bl = BASE_LENGTH; // length of arm base
-        al = UPPER_LENGTH; // length of forearm
+        // find angle between ground and wrist joint position in radians
         if (x > 0)
-            ra = Math.atan(y/x);  // angle between ground and wrist joint position in radians
+            B2 = Math.atan(y / x);
         else
-            ra = Math.atan(y/-x)+ Math.PI/2;  // angle between ground and wrist joint position in radians
-        rl = Math.sqrt(x*x+y*y); // distance between arm base pivot point and wrist joint
-        a0 = Math.acos((rl*rl+bl*bl-al*al)/(2.0*bl*rl));
-        a1 = ra+a0; // angle between ground and front of arm base in radians
-        a2 = Math.acos((al*al+bl*bl-rl*rl)/(2.0*bl*al)); // angle between arm base and upper arm in radians
-        a3 = 2.0*Math.PI - ra - a0 - a2; // angle between upper arm and grabber assuming grabber level with ground in radians
-        return new Angles(Math.toDegrees(a1), Math.toDegrees(a2), Math.toDegrees(a3));
-        /*
-        System.out.println("x="+x);
-        System.out.println("y="+y);
-        System.out.println("ra="+Math.toDegrees(ra));
-        System.out.println("bl="+bl);
-        System.out.println("al="+al);
-        System.out.println("rl="+rl);
-        System.out.println("a0="+Math.toDegrees(a0));
-        System.out.println("a1="+Math.toDegrees(a1));
-        System.out.println("a2="+Math.toDegrees(a2));
-        System.out.println("a3="+Math.toDegrees(a3));
-*/
+            B2 = Math.atan(y / -x) + Math.PI / 2;
+
+        // Find the distance between the arm base pivot point and wrist joint
+        c = Math.sqrt(x * x + y * y);
+
+        // Find the angle between the base arm and the "3rd" side of the triangle formed by the arms in radians
+        B = Math.acos((c * c + BASE_LENGTH * BASE_LENGTH - UPPER_LENGTH * UPPER_LENGTH) / (2.0 * c * BASE_LENGTH));
+
+        // angle between ground and front of arm base in radians
+        B1 = B + B2;
+
+        // angle between arm base and upper arm in radians
+        E = Math.acos((BASE_LENGTH * BASE_LENGTH + UPPER_LENGTH * UPPER_LENGTH - c * c) / (2.0 * BASE_LENGTH * UPPER_LENGTH));
+
+        // angle between upper arm and grabber assuming grabber level with ground in radians
+        W = 2.0 * Math.PI - B2 - B - E;
+        //System.out.println("Angles:"+c+"/"+Math.toDegrees(B)+"/"+Math.toDegrees(B1)+"/"+Math.toDegrees(E)+"/"+Math.toDegrees(W));
+
+        return new Angles(Math.toDegrees(B1), Math.toDegrees(E), Math.toDegrees(W));
     }
 
     // returns the current angle between the base arm segment and horizontal (in front)
@@ -222,7 +200,7 @@ public class roboticArm extends LinearOpMode {
             double currentElbowAngle = getCurrentElbowAngle();
 
             // Determine the target x and y position for the wrist joint based on current position and joy stick input
-            Point wristLocation = getWristLocation();
+            Point wristLocation = getWristLocation(currentBaseAngle, currentElbowAngle);
             telemetry.addLine("Wrist:"+wristLocation.x+","+ wristLocation.y);
             teamUtil.log("Wrist:"+wristLocation.x+","+ wristLocation.y);
 
@@ -237,17 +215,17 @@ public class roboticArm extends LinearOpMode {
             // Determine how many encoder clicks each motor needs to change and in what direction
             double elbowDiff = (targetAngles.elbow-currentElbowAngle) * ELBOW_DEGREES;
             double baseDiff = (targetAngles.base-currentBaseAngle) * BASE_DEGREES;
-            teamUtil.log("Diffs:"+baseDiff+","+ elbowDiff);
+            teamUtil.log("Diffs: base,elbow:"+baseDiff+","+ elbowDiff);
 
             // Set the motors to their new velocities to move straight towards the target wrist position
             double elbowVelocity, baseVelocity;
-            double velocityScale = Math.sqrt(stickX*stickX + stickY*stickY);
+            double velocityScale = Math.min(1,Math.sqrt(stickX*stickX + stickY*stickY));
             if (Math.abs(elbowDiff) > Math.abs(baseDiff)) {
                 elbowVelocity = velocityScale * ELBOW_MAX_VELOCITY;
-                baseVelocity = (baseDiff / elbowDiff) * velocityScale * BASE_MAX_VELOCITY;
+                baseVelocity = (baseDiff / elbowDiff) * velocityScale * MAX_VELOCITY;
             } else {
                 baseVelocity = velocityScale * BASE_MAX_VELOCITY;
-                elbowVelocity = (elbowDiff / baseDiff) * velocityScale * ELBOW_MAX_VELOCITY;
+                elbowVelocity = (elbowDiff / baseDiff) * velocityScale * MAX_VELOCITY;
             }
 
             // TODO: Need code here to impose limits on movement in both directions
@@ -309,7 +287,7 @@ public class roboticArm extends LinearOpMode {
             } else if (gamepad1.left_bumper) {
                 grabberServo.setPosition(GRABBER_OPEN);
             }
-            Point wristLocation = getWristLocation();
+            Point wristLocation = getWristLocation(getCurrentBaseAngle(),getCurrentElbowAngle());
             telemetry.addLine("base/elbow encoder: "+baseMotor.getCurrentPosition()+"/"+elbowMotor.getCurrentPosition());
             telemetry.addLine("base/elbow degrees: "+getCurrentBaseAngle()+"/"+getCurrentElbowAngle());
             telemetry.addLine("wrist location: "+wristLocation.x + "," + wristLocation.y);
