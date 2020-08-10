@@ -135,9 +135,9 @@ public class roboticArm extends LinearOpMode {
 
         // find angle between ground and wrist joint position in radians
         if (x > 0)
-            B2 = Math.atan(x / y);
+            B2 = Math.atan(y/x);
         else
-            B2 = Math.atan(-x / y) + Math.PI / 2;
+            B2 = Math.PI - Math.atan(y/-x) ;
 
         // Find the distance between the arm base pivot point and wrist joint
         c = Math.sqrt(x * x + y * y);
